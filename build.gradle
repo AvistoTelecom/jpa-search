@@ -1,0 +1,19 @@
+plugins {
+    id 'java'
+}
+
+group 'com.avisto'
+version '0.0.1-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation("javax.persistence:javax.persistence-api:2.2")
+    implementation("org.springframework.data:spring-data-commons:2.6.9")
+}
+
+test {
+    useJUnitPlatform()
+}

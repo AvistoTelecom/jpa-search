@@ -1,6 +1,11 @@
 # Generic-Spring-Search
 
 
+TODO : Add JavaDoc and clean code
+TODO : remove spring dependency by implementing Pageables
+TODO : add Unit Tests
+
+
 
 ## Getting started
 
