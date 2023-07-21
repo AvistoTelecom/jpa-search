@@ -7,6 +7,10 @@ import java.util.stream.Stream;
 
 public record Page<T>(List<T> elements, int pageNumber, int pageSize, long totalElements) {
 
+    public static Page<?> empty() {
+        return new Page<>(List.of(), 0, 0, 0L);
+    }
+
     public Stream<T> stream() {
         return elements.stream();
     }
