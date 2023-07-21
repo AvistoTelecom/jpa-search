@@ -337,17 +337,17 @@ public class SearchCriteriaRepository<T extends SearchableEntity, E extends Enum
         return entityPath;
     }
 
-    Join<T, ?> getJoin(From<T, ?> from, String toPath) {
-        return getJoin((Join<T, ?>) from, toPath);
-    }
-
-    private Join<T, ?> getJoin(Join<T, ?> join, String toPath) {
+    private Join<T, ?> getJoin(From<T, ?> from, String toPath) {
         int firstIndex = toPath.indexOf(DOT);
         if (firstIndex == -1) {
-            return join.join(toPath, JoinType.LEFT);
+            return from.join(toPath, JoinType.LEFT);
         }
         String joinFromKey = toPath.substring(0, firstIndex);
         String joinToKey = toPath.substring(firstIndex + 1);
-        return getJoin(join.join(joinFromKey, JoinType.LEFT), joinToKey);
+        return getJoin(from.join(joinFromKey, JoinType.LEFT), joinToKey);
+    }
+
+    private Join<T, ?> getJoin(Join<T, ?> join, String toPath) {
+        return getJoin((From<T, ?>) join, toPath);
     }
 }
