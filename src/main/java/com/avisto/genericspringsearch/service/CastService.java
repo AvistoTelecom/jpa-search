@@ -37,21 +37,50 @@ import static com.avisto.genericspringsearch.service.SearchConstants.Strings.DOT
 import static com.avisto.genericspringsearch.service.SearchConstants.Strings.EMPTY_STRING;
 import static com.avisto.genericspringsearch.service.SearchConstants.Strings.SPACE;
 
+/**
+ * Utility class for casting string values to different types based on the target class.
+ * @author Gabriel Revelli
+ * @version 1.0
+ */
 public class CastService {
+
+    /**
+     * Private constructor to prevent instantiation of the utility class.
+     * Throws an {@link IllegalStateException} if called.
+     */
     private CastService() {
         throw new IllegalStateException("Utility class");
     }
 
     private static final Pattern TEMPORAL_REGEX = Pattern.compile(GENERIC_ISO_DATETIME_REGEX);
 
+    /**
+     * Casts the given string value to the specified class using the default date pattern.
+     *
+     * @param value The string value to be cast.
+     * @param clazz The target class to cast the value to.
+     * @param <X> The generic type representing the target class.
+     * @return The casted value of type {@code X}.
+     * @throws ValueNotFoundInEnumException If the value is not found in the specified enum class.
+     * @throws TypeNotHandledException If the target class is not handled in the casting logic.
+     * @throws WrongDateFormatException If the provided date does not match the ISO DateTime format.
+     */
     public static <X> X cast(String value, Class<X> clazz) {
         return cast(value, clazz, null);
     }
 
-    public static Double castToDouble(String value) {
-        return cast(value, Double.class);
-    }
-
+    /**
+     * Casts the given string value to the specified class.
+     *
+     * @param value The string value to be cast.
+     * @param clazz The target class to cast the value to.
+     * @param datePattern The optional date pattern to parse date values (if applicable).
+     * @param <X> The generic type representing the target class.
+     * @return The casted value of type {@code X}.
+     * @throws ValueNotFoundInEnumException If the value is not found in the specified enum class.
+     * @throws TypeNotHandledException If the target class is not handled in the casting logic.
+     * @throws WrongDateFormatException If the provided date does not match the ISO DateTime format.
+     */
     @SuppressWarnings("unchecked")
     public static <X> X cast(String value, Class<X> clazz, String datePattern) {
         DateTimeFormatter formatter = null;
@@ -83,6 +112,17 @@ public class CastService {
         };
     }
 
+    /**
+     * Converts a string value to a {@link Temporal} object based on the provided class.
+     * Used internally for date/time casting.
+     *
+     * @param value The string value representing the date/time.
+     * @param clazz The target class to convert the value to (LocalDateTime, LocalDate, or ZonedDateTime).
+     * @param <X> The generic type representing the target class.
+     * @return The converted {@link Temporal} object.
+     * @throws WrongDateFormatException If the provided date does not match the ISO DateTime format.
+     * @throws TypeNotHandledException If the target class is not handled in the conversion logic.
+     */
     private static <X> Temporal convertTo(String value, Class<X> clazz) {
         Matcher m = TEMPORAL_REGEX.matcher(value);
         if (!m.matches()) {

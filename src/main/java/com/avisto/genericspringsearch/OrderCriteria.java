@@ -1,14 +1,13 @@
 package com.avisto.genericspringsearch;
 
-import org.springframework.data.domain.Sort;
-
 import com.avisto.genericspringsearch.config.AbstractCriteria;
+import com.avisto.genericspringsearch.model.SortDirection;
 
 public class OrderCriteria extends AbstractCriteria {
 
-    private final Sort.Direction sortDirection;
+    private final SortDirection sortDirection;
 
-    public OrderCriteria(String key, Sort.Direction sortDirection) {
+    public OrderCriteria(String key, SortDirection sortDirection) {
         this.key = key;
         this.sortDirection = sortDirection;
     }
@@ -23,7 +22,7 @@ public class OrderCriteria extends AbstractCriteria {
         return super.hashCode();
     }
 
-    public Sort.Direction getSortDirection() {
+    public SortDirection getSortDirection() {
         return sortDirection;
     }
 }

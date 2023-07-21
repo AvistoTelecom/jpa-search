@@ -20,6 +20,10 @@ public interface SearchConfigInterface {
         return getFilterConfig().getPaths();
     }
 
+    default String getSortPath() {
+        return getFilterConfig().getPaths().get(0);
+    }
+
     default boolean needsJoin() {
         return getFilterPaths().stream().anyMatch(path -> path != null && path.contains("["));
     }

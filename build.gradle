@@ -10,8 +10,21 @@ repositories {
 }
 
 dependencies {
-    implementation("javax.persistence:javax.persistence-api:2.2")
-    implementation("org.springframework.data:spring-data-commons:2.6.9")
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.9.3'
+    testImplementation 'org.mockito:mockito-core:5.4.0'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    implementation 'javax.persistence:javax.persistence-api:2.2'
+    implementation 'javax.inject:javax.inject:1'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
 }
 
 test {
