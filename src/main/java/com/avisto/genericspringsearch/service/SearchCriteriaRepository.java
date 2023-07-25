@@ -37,6 +37,7 @@ import com.avisto.genericspringsearch.SearchableEntity;
 import com.avisto.genericspringsearch.config.SearchConfigInterface;
 import com.avisto.genericspringsearch.exception.CannotSortException;
 import com.avisto.genericspringsearch.exception.FieldNotInCriteriaException;
+import com.avisto.genericspringsearch.exception.WrongDataTypeException;
 import com.avisto.genericspringsearch.exception.WrongElementNumberException;
 import com.avisto.genericspringsearch.model.Page;
 import com.avisto.genericspringsearch.model.SortDirection;
@@ -93,16 +94,10 @@ public class SearchCriteriaRepository<T extends SearchableEntity, E extends Enum
      *
      * @param searchCriteria   The SearchCriteria object containing filtering, sorting, and pagination details.
      * @param needsGroupBy  A boolean indicating whether the search result needs to be grouped by any field.
-     * @return A Page<T> object containing the search results with pagination information.
+     * @param <D> The type of the object that will be returned in the Page object.
+     * @return A Page object containing the search results with pagination information.
      */
     public <D> Page<D> search(Class<T> clazz, Class<E> enumClazz, SearchCriteria searchCriteria, Function<T, D> mapper, boolean needsGroupBy) {
-        int limit = searchCriteria.getSize();
-
-        // Check if the "limit" is set to zero (size is zero)
-        if (limit == 0) {
-            // Do not get data, return an empty page
-            return new Page<>(Collections.emptyList(), 0, 0, 0L);
-        }
 
         // Create CriteriaBuilder and CriteriaQuery
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
@@ -114,21 +109,31 @@ public class SearchCriteriaRepository<T extends SearchableEntity, E extends Enum
         Predicate predicate = getPredicate(enumClazz.getEnumConstants(), searchCriteria.getFilters(), root, cb, joins);
         criteriaQuery.where(predicate);
 
-        // Set sorting and grouping (if needed) in the CriteriaQuery
-        List<OrderCriteria> sorts = searchCriteria.getSorts();
-        setGroupBy(clazz, enumClazz, needsGroupBy, joins, sorts, criteriaQuery, root);
-        setOrders(enumClazz.getEnumConstants(), sorts, criteriaQuery, root, cb);
-
-        // Execute the query with pagination settings
-        TypedQuery<T> typedQuery = entityManager.createQuery(criteriaQuery);
-        typedQuery.setFirstResult(searchCriteria.getPageNumber() * limit);
-        typedQuery.setMaxResults(limit);
+        int limit = searchCriteria.getSize();
 
         // Get the total count of results to create the Page object
         Long count = getCount(predicate, cb, clazz, enumClazz, searchCriteria);
 
-        // Return the Page object with the search results and pagination information
-        return new Page<>(typedQuery.getResultList().stream().map(mapper).collect(Collectors.toList()), searchCriteria.getPageNumber(), limit, count);
+        // Check if the "limit" is set to zero (size is zero)
+        if (limit > 0) {
+            // Set sorting and grouping (if needed) in the CriteriaQuery
+            List<OrderCriteria> sorts = searchCriteria.getSorts();
+            setGroupBy(clazz, enumClazz, needsGroupBy, joins, sorts, criteriaQuery, root);
+            setOrders(enumClazz.getEnumConstants(), sorts, criteriaQuery, root, cb);
+
+            // Execute the query with pagination settings
+            TypedQuery<T> typedQuery = entityManager.createQuery(criteriaQuery);
+            typedQuery.setFirstResult(searchCriteria.getPageNumber() * limit);
+            typedQuery.setMaxResults(limit);
+
+            // Return the Page object with the search results and pagination information
+            return new Page<>(typedQuery.getResultList().stream().map(mapper).collect(Collectors.toList()), searchCriteria.getPageNumber(), limit, count);
+        } else if (limit == 0) {
+            // Return the Page object with the search results and pagination information
+            return new Page<>(Collections.emptyList(), searchCriteria.getPageNumber(), limit, count);
+        } else {
+            throw new WrongDataTypeException("Limit cannot be negative");
+        }
     }
 
     /*
