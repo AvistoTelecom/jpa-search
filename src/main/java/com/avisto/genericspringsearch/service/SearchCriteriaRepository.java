@@ -9,6 +9,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.persistence.EmbeddedId;
@@ -71,11 +73,19 @@ public class SearchCriteriaRepository<T extends SearchableEntity, E extends Enum
     }
 
     public Page<T> search(Class<T> clazz, Class<E> enumClazz, Map<String, String> rawValues, List<String> sorts) {
-        return search(clazz, enumClazz, format(clazz, enumClazz, rawValues, sorts), false);
+        return search(clazz, enumClazz, format(clazz, enumClazz, rawValues, sorts), Function.identity(), false);
+    }
+
+    public <D> Page<D> search(Class<T> clazz, Class<E> enumClazz, Map<String, String> rawValues, List<String> sorts, Function<T, D> mapper) {
+        return search(clazz, enumClazz, format(clazz, enumClazz, rawValues, sorts), mapper, false);
     }
 
     public Page<T> search(Class<T> clazz, Class<E> enumClazz, Map<String, String> rawValues, List<String> sorts, boolean needsGroupBy) {
-        return search(clazz, enumClazz, format(clazz, enumClazz, rawValues, sorts), needsGroupBy);
+        return search(clazz, enumClazz, format(clazz, enumClazz, rawValues, sorts), Function.identity(), needsGroupBy);
+    }
+
+    public <D> Page<D> search(Class<T> clazz, Class<E> enumClazz, Map<String, String> rawValues, List<String> sorts, Function<T, D> mapper, boolean needsGroupBy) {
+        return search(clazz, enumClazz, format(clazz, enumClazz, rawValues, sorts), mapper, needsGroupBy);
     }
 
     /**
@@ -85,7 +95,7 @@ public class SearchCriteriaRepository<T extends SearchableEntity, E extends Enum
      * @param needsGroupBy  A boolean indicating whether the search result needs to be grouped by any field.
      * @return A Page<T> object containing the search results with pagination information.
      */
-    public Page<T> search(Class<T> clazz, Class<E> enumClazz, SearchCriteria searchCriteria, boolean needsGroupBy) {
+    public <D> Page<D> search(Class<T> clazz, Class<E> enumClazz, SearchCriteria searchCriteria, Function<T, D> mapper, boolean needsGroupBy) {
         int limit = searchCriteria.getSize();
 
         // Check if the "limit" is set to zero (size is zero)
@@ -118,7 +128,7 @@ public class SearchCriteriaRepository<T extends SearchableEntity, E extends Enum
         Long count = getCount(predicate, cb, clazz, enumClazz, searchCriteria);
 
         // Return the Page object with the search results and pagination information
-        return new Page<>(typedQuery.getResultList(), searchCriteria.getPageNumber(), limit, count);
+        return new Page<>(typedQuery.getResultList().stream().map(mapper).collect(Collectors.toList()), searchCriteria.getPageNumber(), limit, count);
     }
 
     /*

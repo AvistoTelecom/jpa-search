@@ -23,6 +23,10 @@ java {
     targetCompatibility = JavaVersion.VERSION_17
 }
 
+javadoc {
+    destinationDir = file("${buildDir}/docs/javadoc")
+}
+
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
 }
