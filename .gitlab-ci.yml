@@ -25,6 +25,9 @@ build:
     paths:
       - build
       - .gradle
+  artifacts:
+    paths:
+      - build/libs/*.jar
 
 test:
   stage: test
