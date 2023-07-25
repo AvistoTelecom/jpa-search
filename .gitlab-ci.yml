@@ -12,6 +12,11 @@
 
 image: gradle:alpine
 
+stages:
+  - build
+  - test
+  - deploy
+
 before_script:
   - GRADLE_USER_HOME="$(pwd)/.gradle"
   - export GRADLE_USER_HOME
@@ -28,6 +33,13 @@ build:
   artifacts:
     paths:
       - build/libs/*.jar
+
+generate-doc:
+  stage: build
+  script: gradle javadoc
+  artifacts:
+    paths:
+      - build/docs/
 
 test:
   stage: test
