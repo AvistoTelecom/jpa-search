@@ -112,7 +112,7 @@ public class SearchCriteriaRepository<T extends SearchableEntity, E extends Enum
         int limit = searchCriteria.getSize();
 
         // Get the total count of results to create the Page object
-        Long count = getCount(predicate, cb, clazz, enumClazz, searchCriteria);
+        Long count = getCount(cb, clazz, enumClazz, searchCriteria);
 
         // Check if the "limit" is set to zero (size is zero)
         if (limit > 0) {
@@ -127,7 +127,7 @@ public class SearchCriteriaRepository<T extends SearchableEntity, E extends Enum
             typedQuery.setMaxResults(limit);
 
             // Return the Page object with the search results and pagination information
-            return new Page<>(typedQuery.getResultList().stream().map(mapper).collect(Collectors.toList()), searchCriteria.getPageNumber(), limit, count);
+            return new Page<>(typedQuery.getResultStream().map(mapper).collect(Collectors.toList()), searchCriteria.getPageNumber(), limit, count);
         } else if (limit == 0) {
             // Return the Page object with the search results and pagination information
             return new Page<>(Collections.emptyList(), searchCriteria.getPageNumber(), limit, count);
@@ -250,10 +250,10 @@ public class SearchCriteriaRepository<T extends SearchableEntity, E extends Enum
         return ordersCriteria;
     }
 
-    private Long getCount(Predicate predicate, CriteriaBuilder cb, Class<T> clazz, Class<E> enumClazz, SearchCriteria searchCriteria) {
+    private Long getCount(CriteriaBuilder cb, Class<T> clazz, Class<E> enumClazz, SearchCriteria searchCriteria) {
         CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
         Root<T> root = countQuery.from(clazz);
-        getJoins(root, enumClazz, searchCriteria);
+        Predicate predicate = getPredicate(enumClazz.getEnumConstants(), searchCriteria.getFilters(), root, cb, getJoins(root, enumClazz, searchCriteria));
         countQuery.select(cb.count(root)).where(predicate);
         return entityManager.createQuery(countQuery).getSingleResult();
     }

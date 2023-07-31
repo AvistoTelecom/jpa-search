@@ -60,7 +60,7 @@ public class CastService {
      * @param value The string value to be cast.
      * @param clazz The target class to cast the value to.
      * @param <X> The generic type representing the target class.
-     * @return The casted value of type {@code X}.
+     * @return The cast value of type {@code X}.
      * @throws ValueNotFoundInEnumException If the value is not found in the specified enum class.
      * @throws TypeNotHandledException If the target class is not handled in the casting logic.
      * @throws WrongDateFormatException If the provided date does not match the ISO DateTime format.
