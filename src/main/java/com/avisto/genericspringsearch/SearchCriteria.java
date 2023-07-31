@@ -17,10 +17,6 @@ public class SearchCriteria {
         return sorts.stream().anyMatch(filterCriteria -> filterCriteria.getKey().equals(key));
     }
 
-    public boolean searchContainsKey(String key) {
-        return sortsContainsKey(key) || filtersContainsKey(key);
-    }
-
     public int getPageNumber() {
         return pageNumber;
     }

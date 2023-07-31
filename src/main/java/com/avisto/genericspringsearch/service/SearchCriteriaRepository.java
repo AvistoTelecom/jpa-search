@@ -126,8 +126,10 @@ public class SearchCriteriaRepository<T extends SearchableEntity, E extends Enum
             typedQuery.setFirstResult(searchCriteria.getPageNumber() * limit);
             typedQuery.setMaxResults(limit);
 
+            List<T> results = typedQuery.getResultList();
+
             // Return the Page object with the search results and pagination information
-            return new Page<>(typedQuery.getResultStream().map(mapper).collect(Collectors.toList()), searchCriteria.getPageNumber(), limit, count);
+            return new Page<>(results.stream().map(mapper).collect(Collectors.toList()), searchCriteria.getPageNumber(), limit, count);
         } else if (limit == 0) {
             // Return the Page object with the search results and pagination information
             return new Page<>(Collections.emptyList(), searchCriteria.getPageNumber(), limit, count);
@@ -260,7 +262,7 @@ public class SearchCriteriaRepository<T extends SearchableEntity, E extends Enum
 
     private void setOrders(E[] enums, List<OrderCriteria> sorts, CriteriaQuery<T> criteriaQuery, Root<T> root, CriteriaBuilder cb) {
         List<Order> orders = new ArrayList<>();
-        sorts.forEach(sort -> orders.add(sort.getSortDirection().getOrder(cb, getPath(root, getSearchConfigInterfaceBySearchField(enums, sort.getKey()).getFilterPaths().get(0)))));
+        sorts.forEach(sort -> orders.add(sort.getSortDirection().getOrder(cb, getPath(root, getSearchConfigInterfaceBySearchField(enums, sort.getKey()).getFirstFilterPath()))));
         criteriaQuery.orderBy(orders);
     }
 
@@ -268,7 +270,7 @@ public class SearchCriteriaRepository<T extends SearchableEntity, E extends Enum
         if (needsGroupBy && !joins.isEmpty()) {
             List<Expression<?>> groupByList = new ArrayList<>(getGroupByFieldName(root, clazz));
             groupByList.addAll(sorts.stream()
-                                       .map(orderCriteria -> getPath(root, getSearchConfigInterfaceBySearchField(enumClazz.getEnumConstants(), orderCriteria.getKey()).getFilterPaths().get(0)))
+                                       .map(orderCriteria -> getPath(root, getSearchConfigInterfaceBySearchField(enumClazz.getEnumConstants(), orderCriteria.getKey()).getFirstFilterPath()))
                                        .toList());
             criteriaQuery.groupBy(groupByList);
         }
