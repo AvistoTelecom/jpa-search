@@ -1,46 +1,20 @@
 package com.avisto.genericspringsearch.service;
 
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
-import com.avisto.genericspringsearch.FilterOperation;
-import com.avisto.genericspringsearch.config.FilterConfig;
-import com.avisto.genericspringsearch.config.SearchConfigInterface;
 import com.avisto.genericspringsearch.model.CriteriaTestEnum;
 
-import com.avisto.genericspringsearch.FilterCriteria;
-import com.avisto.genericspringsearch.OrderCriteria;
-import com.avisto.genericspringsearch.SearchCriteria;
 import com.avisto.genericspringsearch.SearchableEntity;
-import com.avisto.genericspringsearch.exception.CannotSortException;
-import com.avisto.genericspringsearch.exception.FieldNotInCriteriaException;
-import com.avisto.genericspringsearch.exception.WrongElementNumberException;
-import com.avisto.genericspringsearch.model.Page;
-import com.avisto.genericspringsearch.model.Pair;
-import com.avisto.genericspringsearch.model.SortDirection;
-import com.avisto.genericspringsearch.model.TestEntity;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 public class SearchCriteriaRepositoryTest {
 

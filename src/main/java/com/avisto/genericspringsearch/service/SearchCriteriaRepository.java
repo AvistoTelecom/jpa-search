@@ -191,13 +191,13 @@ public class SearchCriteriaRepository<T extends SearchableEntity, E extends Enum
                     throw new CannotSortException(String.format("Cannot sort by %s : multiple field paths are specified", e.getFilterKey()));
                 }
             }
-            if (searchCriteria.filtersContainsKey(e.getFilterKey()) && e.needsJoin()) {
-                e.splitFieldListPath().forEach(path -> {
-                    if (path.length > 1) {
-                        tmpFieldPaths.add(path[0]);
+            e.getDefaultFieldPath().forEach(
+                    path -> {
+                        if (searchCriteria.filtersContainsKey(e.getFilterKey()) && path.needsJoin()) {
+                            tmpFieldPaths.add(path.getLeft());
+                        }
                     }
-                });
-            }
+            );
         });
         Map<String, Join<T, ?>> res = new HashMap<>();
         tmpFieldPaths.forEach(path -> res.put(path, getJoin(root, path)));
