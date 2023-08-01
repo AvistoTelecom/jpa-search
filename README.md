@@ -57,10 +57,86 @@ When you're ready to make this README your own, just edit this file and use the 
 Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
 
 ## Name
-Choose a self-explaining name for your project.
+Generic JPA Search
 
 ## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+Generic search simplifies specific entity searches with JPA, including :
+- Modular filters
+- Multiple filters
+- Modular sorts
+- Multiple sorts (following each other)
+- Various operations (you can add yours)
+- Complete pagination
+
+
+This search is designed to be efficient, since it operates at a low level, as close as possible to SQL, thanks to the CriteriaBuilder provided by javax.persistence.
+
+A search works with a configuration file where you define each possible filter, its associated operation (e.g.: name equals value) and where to fetch the field in DB. Once a filter has been defined, it is possible to filter by this ascending or descending field.
+
+The search function takes as input a list of query params in the form of a `Map<String, String>` (also containing a `page` and `size` field for pagination), a `List<String>` sort list, the type of entity searched for `Class<T>` and the type of search configuration enumeration `Class<E>`. In return, this function returns a `Page<T>` containing the number of elements requested and the number of total elements.
+
+### How to use it ?
+
+To configure a search, you need to create a configuration criteria `enum` described like below:
+
+```java
+@Getter
+@AllArgsConstructor
+@SearchEntity(target = ApiKey.class)
+public enum ApiKeyCriteria implements SearchConfigInterface {
+    ACCOUNT_TYPE(FilterConfig.of(FilterOperation.EQUAL, "accountType", "account.accountType.key")),
+    PROFILE_TYPE(FilterConfig.of(FilterOperation.EQUAL, "profileType", "account.accountType.profile.key")),
+    ACCOUNT_FILES_NAME(FilterConfig.of(FilterOperation.EQUAL, "accountFilesName", "account.files[name]")),
+    ACCOUNT_LABEL(FilterConfig.of(FilterOperation.EQUAL, "accountLabel", "account.label")),
+    TYPE(FilterConfig.of(FilterOperation.EQUAL, "type", "type")),
+    EXTERNAL_ID(FilterConfig.of(FilterOperation.LIKE_IGNORE_CASE, "externalId", "externalId")),
+    CREATION_DATE(FilterConfig.of(FilterOperation.BETWEEN, "creationDate", "creationDate")),
+    END_DATE(FilterConfig.of(FilterOperation.BETWEEN, "endDate", "endDate")),
+    EXPIRATION_DATE(FilterConfig.of(FilterOperation.BETWEEN, "expirationDate", "expirationDate")),
+    LABEL(FilterConfig.of(FilterOperation.LIKE_IGNORE_CASE_IGNORE_ACCENT, "label", "label", "account.label"));
+
+    FilterConfig filterConfig;
+
+    @Override
+    public OrderCriteria getDefaultOrderCriteria() {
+        return new OrderCriteria(ACCOUNT_LABEL.getFilterKey(), SortDirection.ASC);
+    }
+
+}
+```
+The idea here is to associate in `FilterConfig.of(...)` an operation, a query param name and an entity field name.
+
+Taking `ACCOUNT_TYPE` as an example, we're looking for an `ApiKey` that is associated with a particular account type, in this case equality.
+
+The `FilterOperation` is used to describe the operation to be performed on the filter, many of which are already available and applicable to different types:
+
+| Operator Name | Description | Filter Type |
+| ------------- | ----------- | ---- |
+| `LIKE_IGNORE_CASE` | Checks that the `field` contains part of the `filter`, case ignored | `String` |
+| `START_WITH` | Checks that the `field` begins with the `filter` | `String` |
+| `START_WITH_IGNORE_CASE` | Check that the `field` begins with the `filter`, case ignored | `String` |
+| `START_WITH_IGNORE_CASE_IGNORE_ACCENT` | Check that the `field` starts with the `filter`, case and accents ignored | `String` |
+| `EQUAL` | Checks for equality between `field` and `filter` | `Object` |
+| `EQUAL_IGNORE_CASE_IGNORE_ACCENT` | Checks for equality between `field` and `filter`, case and accents ignored | `String` |
+| `NOT_NULL` | Checks for `field` nullity | `Object` |
+| `IN_EQUAL` | Checks the equality of `field` with one of the `fields` in the filter lis | `Object[]` |
+| `IN_LIKE` | Checks that `field` contains one of the fields in the `filter` list | `String[]` |
+| `IN_EQUAL_IGNORE_CASE_IGNORE_ACCENT` | Checks that `field` is equal to one of the fields in the `filter` list, case and accents ignored | `String[]` |
+| `BETWEEN` | Checks that `field` is between the two `filter` fields | `Comparable[2]` |
+| `GREATER_THAN_OR_EQUAL` | Checks that `field` is greater than or equal to `filter` | `Comparable` |
+| `LESS_THAN_OR_EQUAL` | Checks that `field` is smaller than or equal to `filter` | `Comparable` |
+
+You can easily create an other `enum` file like `FilterOperation.java`.
+
+### Known limitations
+
+- The generic search doesn't yet offer the option of navigating through several levels of ManyToMany dependencies, for example: Companies → Employees → Pets (the generic search doesn't allow you to filter on the pets owned by the employees of each company).
+- Sorting on elements requiring a join is not possible (How to sort on a list of linked elements)
+- Autogenerated swaggers can't identify fields in queryparams, since a `Map<String, String>` is passed.
+- Types actually handled:
+    - Comparable: Float, float, Integer, int, Long, long, Double, double, BigDecimal, LocalDate, LocalDateTime, ZonedDateTime;
+    - String: String;
+    - Object: Boolean, boolean, UUID;
 
 ## Badges
 On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
