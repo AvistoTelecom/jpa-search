@@ -15,6 +15,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
+import javax.persistence.EntityGraph;
 import javax.persistence.EntityManager;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
@@ -74,19 +75,27 @@ public class SearchCriteriaRepository<T extends SearchableEntity, E extends Enum
     }
 
     public Page<T> search(Class<T> clazz, Class<E> enumClazz, Map<String, String> rawValues, List<String> sorts) {
-        return search(clazz, enumClazz, format(clazz, enumClazz, rawValues, sorts), Function.identity(), false);
+        return search(clazz, enumClazz, format(clazz, enumClazz, rawValues, sorts), Function.identity(), false, null);
     }
 
     public <D> Page<D> search(Class<T> clazz, Class<E> enumClazz, Map<String, String> rawValues, List<String> sorts, Function<T, D> mapper) {
-        return search(clazz, enumClazz, format(clazz, enumClazz, rawValues, sorts), mapper, false);
+        return search(clazz, enumClazz, format(clazz, enumClazz, rawValues, sorts), mapper, false, null);
     }
 
     public Page<T> search(Class<T> clazz, Class<E> enumClazz, Map<String, String> rawValues, List<String> sorts, boolean needsGroupBy) {
-        return search(clazz, enumClazz, format(clazz, enumClazz, rawValues, sorts), Function.identity(), needsGroupBy);
+        return search(clazz, enumClazz, format(clazz, enumClazz, rawValues, sorts), Function.identity(), needsGroupBy, null);
     }
 
     public <D> Page<D> search(Class<T> clazz, Class<E> enumClazz, Map<String, String> rawValues, List<String> sorts, Function<T, D> mapper, boolean needsGroupBy) {
-        return search(clazz, enumClazz, format(clazz, enumClazz, rawValues, sorts), mapper, needsGroupBy);
+        return search(clazz, enumClazz, format(clazz, enumClazz, rawValues, sorts), mapper, needsGroupBy, null);
+    }
+
+    public Page<T> search(Class<T> clazz, Class<E> enumClazz, Map<String, String> rawValues, List<String> sorts, String entityGraphName) {
+        return search(clazz, enumClazz, format(clazz, enumClazz, rawValues, sorts), Function.identity(), false, entityGraphName);
+    }
+
+    public <D> Page<D> search(Class<T> clazz, Class<E> enumClazz, Map<String, String> rawValues, List<String> sorts, Function<T, D> mapper, String entityGraphName) {
+        return search(clazz, enumClazz, format(clazz, enumClazz, rawValues, sorts), mapper, false, entityGraphName);
     }
 
     /**
@@ -97,7 +106,7 @@ public class SearchCriteriaRepository<T extends SearchableEntity, E extends Enum
      * @param <D> The type of the object that will be returned in the Page object.
      * @return A Page object containing the search results with pagination information.
      */
-    public <D> Page<D> search(Class<T> clazz, Class<E> enumClazz, SearchCriteria searchCriteria, Function<T, D> mapper, boolean needsGroupBy) {
+    public <D> Page<D> search(Class<T> clazz, Class<E> enumClazz, SearchCriteria searchCriteria, Function<T, D> mapper, boolean needsGroupBy, String entityGraphName) {
 
         // Create CriteriaBuilder and CriteriaQuery
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
@@ -125,6 +134,9 @@ public class SearchCriteriaRepository<T extends SearchableEntity, E extends Enum
             TypedQuery<T> typedQuery = entityManager.createQuery(criteriaQuery);
             typedQuery.setFirstResult(searchCriteria.getPageNumber() * limit);
             typedQuery.setMaxResults(limit);
+            if (entityGraphName != null) {
+                typedQuery.setHint("javax.persistence.fetchgraph", entityManager.getEntityGraph(entityGraphName));
+            }
 
             List<T> results = typedQuery.getResultList();
 
