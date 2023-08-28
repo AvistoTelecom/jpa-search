@@ -8,8 +8,6 @@ import java.util.Locale;
 import java.util.regex.Pattern;
 
 import com.avisto.genericspringsearch.exception.FieldPathNotFoundException;
-import com.avisto.genericspringsearch.exception.WrongDataTypeException;
-import com.avisto.genericspringsearch.exception.WrongFieldException;
 
 import static com.avisto.genericspringsearch.service.SearchConstants.Strings.EMPTY_STRING;
 
@@ -88,17 +86,8 @@ public final class SearchUtils {
         if (clazz == null) {
             throw new FieldPathNotFoundException(String.format("Field path %s not found", value));
         }
-        try {
-            ParameterizedType stringListType = (ParameterizedType) clazz.getDeclaredField(value).getGenericType();
-            return (Class<?>) stringListType.getActualTypeArguments()[0];
-        } catch (NoSuchFieldException e) {
-            try {
-                ParameterizedType stringListType = (ParameterizedType) clazz.getSuperclass().getDeclaredField(value).getGenericType();
-                return (Class<?>) stringListType.getActualTypeArguments()[0];
-            } catch (NoSuchFieldException ex) {
-                throw new WrongFieldException(String.format("The field {%s} is not present in {%s}",value,clazz.getSuperclass().getName()));
-            }
-        }
+        ParameterizedType stringListType = (ParameterizedType) getField(clazz, value).getGenericType();
+        return (Class<?>) stringListType.getActualTypeArguments()[0];
     }
 
     /**
