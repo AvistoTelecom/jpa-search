@@ -86,12 +86,8 @@ public final class SearchUtils {
         if (clazz == null) {
             throw new FieldPathNotFoundException(String.format("Field path %s not found", value));
         }
-        try {
-            ParameterizedType stringListType = (ParameterizedType) clazz.getDeclaredField(value).getGenericType();
-            return (Class<?>) stringListType.getActualTypeArguments()[0];
-        } catch (NoSuchFieldException e) {
-            return getFieldClass(clazz.getSuperclass(), value);
-        }
+        ParameterizedType stringListType = (ParameterizedType) getField(clazz, value).getGenericType();
+        return (Class<?>) stringListType.getActualTypeArguments()[0];
     }
 
     /**
