@@ -13,23 +13,22 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.persistence.EmbeddedId;
-import javax.persistence.Entity;
-import javax.persistence.EntityGraph;
-import javax.persistence.EntityManager;
-import javax.persistence.Id;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Order;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Id;
+import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Order;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 
 import com.avisto.genericspringsearch.FilterCriteria;
 import com.avisto.genericspringsearch.OrderCriteria;
@@ -135,7 +134,7 @@ public class SearchCriteriaRepository<T extends SearchableEntity, E extends Enum
             typedQuery.setFirstResult(searchCriteria.getPageNumber() * limit);
             typedQuery.setMaxResults(limit);
             if (entityGraphName != null) {
-                typedQuery.setHint("javax.persistence.fetchgraph", entityManager.getEntityGraph(entityGraphName));
+                typedQuery.setHint("jakarta.persistence.fetchgraph", entityManager.getEntityGraph(entityGraphName));
             }
 
             List<T> results = typedQuery.getResultList();
