@@ -15,6 +15,8 @@ import static com.avisto.genericspringsearch.service.SearchConstants.Strings.DOT
 public interface IFilterConfig<R extends SearchableEntity, T,S> extends ISearchConfig<R> {
     Predicate getPredicate(Root<R> root, CriteriaBuilder criteriaBuilder, Map<String, Join<R,?>> joins, T... values);
 
+    Class<?> getFieldClass(Class<R> rootClazz);
+
     default Join<R, ?> getJoin(From<R, ?> from, String toPath) {
         int firstIndex = toPath.indexOf(DOT);
         if (firstIndex == -1) {

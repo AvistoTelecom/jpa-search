@@ -6,7 +6,7 @@ import java.util.Set;
 public class SearchCriteria {
     private int pageNumber = 0;
     private int size = Integer.MAX_VALUE;
-    private Set<FilterCriteria<?>> filters;
+    private Set<FilterCriteria> filters;
     private List<OrderCriteria> sorts;
 
     public boolean filtersContainsKey(String key) {
@@ -25,7 +25,7 @@ public class SearchCriteria {
         return size;
     }
 
-    public Set<FilterCriteria<?>> getFilters() {
+    public Set<FilterCriteria> getFilters() {
         return filters;
     }
 
@@ -41,7 +41,7 @@ public class SearchCriteria {
         this.size = size;
     }
 
-    public void setFilters(Set<FilterCriteria<?>> filters) {
+    public void setFilters(Set<FilterCriteria> filters) {
         this.filters = filters;
     }
 

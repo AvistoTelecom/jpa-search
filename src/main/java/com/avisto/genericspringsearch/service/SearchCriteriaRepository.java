@@ -125,9 +125,11 @@ public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum
         // Get the predicate for filtering the search results
         List<Predicate> predicates = searchCriteria.getFilters()
                 .stream()
-                .map(filter ->
-                        SearchUtils.getSearchConfig(configClazz, filter.getKey(), IFilterConfig.class).
-                                getPredicate(root, cb, joins, filter.getValues()))
+                .map(filter -> {
+                    IFilterConfig filterConfig = SearchUtils.getSearchConfig(configClazz, filter.getKey(), IFilterConfig.class);
+                    Class<?> filterClazz = filterConfig.getFieldClass(rootClazz);
+                    return filterConfig.getPredicate(root, cb, joins, Arrays.stream(filter.getValues()).map(value -> CastService.cast(value, filterClazz)).toArray());
+                })
                 .toList();
         criteriaQuery.where(cb.and(predicates.toArray(new Predicate[0])));
 
@@ -202,8 +204,8 @@ public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum
     }
 
 
-    private Set<FilterCriteria<?>> getFilters(E[] enums, Map<String, String> rawValues) {
-        Set<FilterCriteria<?>> filters = new HashSet<>();
+    private Set<FilterCriteria> getFilters(E[] enums, Map<String, String> rawValues) {
+        Set<FilterCriteria> filters = new HashSet<>();
         for (ISearchCriteriaConfig e : enums) {
             String key = e.getKey();
             if (rawValues.isEmpty()) {
@@ -217,7 +219,7 @@ public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum
                 } else {
                     values = new String[]{value};
                 }
-                filters.add(new FilterCriteria<>(key, values, rootClazz));
+                filters.add(new FilterCriteria(key, values));
             }
         }
         if (!rawValues.isEmpty()) {

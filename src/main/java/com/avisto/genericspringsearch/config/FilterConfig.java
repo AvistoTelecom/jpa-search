@@ -87,6 +87,11 @@ public class FilterConfig<R extends SearchableEntity, T> implements IFilterConfi
     }
 
     @Override
+    public Class<?> getFieldClass(Class<R> rootClazz) {
+        return SearchUtils.getEntityClass(rootClazz, paths.get(0).split(REGEX_DOT));
+    }
+
+    @Override
     public Order getOrder(Root<R> root, CriteriaBuilder criteriaBuilder, SortDirection sortDirection) {
         return sortDirection.getOrder(criteriaBuilder, getPath(root, getFirstFilterPath()));
     }
