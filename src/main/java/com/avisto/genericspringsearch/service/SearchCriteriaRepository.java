@@ -62,7 +62,6 @@ import static com.avisto.genericspringsearch.service.SearchConstants.Strings.REG
  * @author Gabriel Revelli
  * @version 1.0
  */
-@Named
 public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum<E> & ISearchCriteriaConfig<R>> {
 
     @Inject
