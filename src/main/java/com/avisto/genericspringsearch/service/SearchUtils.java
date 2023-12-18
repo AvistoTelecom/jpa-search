@@ -5,8 +5,12 @@ import java.lang.reflect.ParameterizedType;
 import java.text.Normalizer;
 import java.util.Arrays;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
+import com.avisto.genericspringsearch.config.ISearchConfig;
+import com.avisto.genericspringsearch.config.ISearchCriteriaConfig;
+import com.avisto.genericspringsearch.exception.FieldNotInCriteriaException;
 import com.avisto.genericspringsearch.exception.FieldPathNotFoundException;
 
 import static com.avisto.genericspringsearch.service.SearchConstants.Strings.EMPTY_STRING;
@@ -162,5 +166,17 @@ public final class SearchUtils {
             }
         }
         return true;
+    }
+
+
+    /**
+     * TODO: fill
+     */
+    public static <E extends Enum<?> & ISearchCriteriaConfig<?>, T extends ISearchConfig<?>> T getSearchConfig(Class<E> enumClazz, String key, Class<T> castClass) {
+        return Arrays.stream(enumClazz.getEnumConstants()).
+                filter(e -> e.getSearchConfig().getClass().isAssignableFrom(castClass) && Objects.equals(key,e.getKey())).
+                map(e -> (T) e).
+                findFirst().
+                orElseThrow(() -> new FieldNotInCriteriaException(String.format("Field %s is not specified in criteria", key)));
     }
 }
