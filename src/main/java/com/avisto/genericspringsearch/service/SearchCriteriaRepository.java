@@ -65,7 +65,8 @@ import static com.avisto.genericspringsearch.service.SearchConstants.Strings.REG
 @Named
 public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum<E> & ISearchCriteriaConfig<R>> {
 
-    private final EntityManager entityManager;
+    @Inject
+    private EntityManager entityManager;
 
     private final Class<R> rootClazz;
 
@@ -74,15 +75,12 @@ public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum
     /**
      * Constructs a new SearchCriteriaRepository with the given entity manager, entity class, and enum class.
      *
-     * @param entityManager The entity manager to be used for executing queries.
+     * @param rootClazz The entity root class searched.
+     * @param configClazz The enum config class for the search.
      */
-    @Inject
-    public SearchCriteriaRepository(EntityManager entityManager) {
-        this.entityManager = entityManager;
-        this.rootClazz = (Class<R>) ((ParameterizedType) getClass()
-                .getGenericSuperclass()).getActualTypeArguments()[0];
-        this.configClazz = (Class<E>) ((ParameterizedType) getClass()
-                .getGenericSuperclass()).getActualTypeArguments()[1];
+    public SearchCriteriaRepository(Class<R> rootClazz, Class<E> configClazz) {
+        this.rootClazz = rootClazz;
+        this.configClazz = configClazz;
     }
 
     public Page<R> search(Map<String, String> rawValues, List<String> sorts) {
