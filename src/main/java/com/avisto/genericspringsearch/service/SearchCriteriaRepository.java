@@ -19,6 +19,7 @@ import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
+import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -62,48 +63,43 @@ import static com.avisto.genericspringsearch.service.SearchConstants.Strings.REG
  * @author Gabriel Revelli
  * @version 1.0
  */
+@Named
 public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum<E> & ISearchCriteriaConfig<R>> {
 
-    @Inject
-    private EntityManager entityManager;
-
-    private final Class<R> rootClazz;
-
-    private final Class<E> configClazz;
+    private final EntityManager entityManager;
 
     /**
      * Constructs a new SearchCriteriaRepository with the given entity manager, entity class, and enum class.
      *
-     * @param rootClazz The entity root class searched.
-     * @param configClazz The enum config class for the search.
+     * @param entityManager The entity manager to be used for executing queries.
      */
-    public SearchCriteriaRepository(Class<R> rootClazz, Class<E> configClazz) {
-        this.rootClazz = rootClazz;
-        this.configClazz = configClazz;
+    @Inject
+    public SearchCriteriaRepository(EntityManager entityManager) {
+        this.entityManager = entityManager;
     }
 
-    public Page<R> search(Map<String, String> rawValues, List<String> sorts) {
-        return search(format(rawValues, sorts), Function.identity(), false, null);
+    public Page<R> search(Class<E> configClazz, Map<String, String> rawValues, List<String> sorts) {
+        return search(configClazz, format(configClazz, rawValues, sorts), Function.identity(), false, null);
     }
 
-    public <D> Page<D> search(Map<String, String> rawValues, List<String> sorts, Function<R, D> mapper) {
-        return search(format(rawValues, sorts), mapper, false, null);
+    public <D> Page<D> search(Class<E> configClazz, Map<String, String> rawValues, List<String> sorts, Function<R, D> mapper) {
+        return search(configClazz, format(configClazz, rawValues, sorts), mapper, false, null);
     }
 
-    public Page<R> search(Map<String, String> rawValues, List<String> sorts, boolean needsGroupBy) {
-        return search(format(rawValues, sorts), Function.identity(), needsGroupBy, null);
+    public Page<R> search(Class<E> configClazz, Map<String, String> rawValues, List<String> sorts, boolean needsGroupBy) {
+        return search(configClazz, format(configClazz, rawValues, sorts), Function.identity(), needsGroupBy, null);
     }
 
-    public <D> Page<D> search(Map<String, String> rawValues, List<String> sorts, Function<R, D> mapper, boolean needsGroupBy) {
-        return search(format(rawValues, sorts), mapper, needsGroupBy, null);
+    public <D> Page<D> search(Class<E> configClazz, Map<String, String> rawValues, List<String> sorts, Function<R, D> mapper, boolean needsGroupBy) {
+        return search(configClazz, format(configClazz, rawValues, sorts), mapper, needsGroupBy, null);
     }
 
-    public Page<R> search(Map<String, String> rawValues, List<String> sorts, String entityGraphName) {
-        return search(format(rawValues, sorts), Function.identity(), false, entityGraphName);
+    public Page<R> search(Class<E> configClazz, Map<String, String> rawValues, List<String> sorts, String entityGraphName) {
+        return search(configClazz, format(configClazz, rawValues, sorts), Function.identity(), false, entityGraphName);
     }
 
-    public <D> Page<D> search(Map<String, String> rawValues, List<String> sorts, Function<R, D> mapper, String entityGraphName) {
-        return search(format(rawValues, sorts), mapper, false, entityGraphName);
+    public <D> Page<D> search(Class<E> configClazz, Map<String, String> rawValues, List<String> sorts, Function<R, D> mapper, String entityGraphName) {
+        return search(configClazz, format(configClazz, rawValues, sorts), mapper, false, entityGraphName);
     }
 
     /**
@@ -114,9 +110,10 @@ public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum
      * @param <D> The type of the object that will be returned in the Page object.
      * @return A Page object containing the search results with pagination information.
      */
-    public <D> Page<D> search(SearchCriteria searchCriteria, Function<R, D> mapper, boolean needsGroupBy, String entityGraphName) {
+    public <D> Page<D> search(Class<E> configClazz, SearchCriteria searchCriteria, Function<R, D> mapper, boolean needsGroupBy, String entityGraphName) {
 
         // Create CriteriaBuilder and CriteriaQuery
+        Class<R> rootClazz = configClazz.getEnumConstants()[0].getSearchedClass();
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<R> criteriaQuery = cb.createQuery(rootClazz);
         Root<R> root = criteriaQuery.from(rootClazz);
@@ -181,7 +178,7 @@ public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum
      * @param sorts The sorting criteria for the search.
      * @return The formatted search criteria.
      */
-    private SearchCriteria format(Map<String, String> rawValues, List<String> sorts) {
+    private SearchCriteria format(Class<E> configClazz, Map<String, String> rawValues, List<String> sorts) {
         final SearchCriteria searchCriteria = new SearchCriteria();
         if (rawValues.containsKey(PAGE)) {
             searchCriteria.setPageNumber(getOneElement(PAGE, Integer.class, rawValues.remove(PAGE)));

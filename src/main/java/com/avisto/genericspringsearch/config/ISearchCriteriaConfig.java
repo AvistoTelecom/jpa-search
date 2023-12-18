@@ -9,6 +9,8 @@ public interface ISearchCriteriaConfig<R extends SearchableEntity> {
 
     OrderCriteria getDefaultOrderCriteria();
 
+    Class<R> getSearchedClass();
+
     default String getKey() {
         return getSearchConfig().getKey();
     }
