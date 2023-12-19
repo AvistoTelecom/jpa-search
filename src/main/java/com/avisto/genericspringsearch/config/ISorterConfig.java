@@ -9,4 +9,6 @@ import javax.persistence.criteria.Root;
 
 public interface ISorterConfig<R extends SearchableEntity> extends ISearchConfig<R> {
     Order getOrder(Root<R> root, CriteriaBuilder criteriaBuilder, SortDirection sortDirection);
+
+    String getSortPath();
 }

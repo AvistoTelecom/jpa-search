@@ -1,7 +1,6 @@
 package com.avisto.genericspringsearch.service;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -19,14 +18,11 @@ import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
-import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.From;
 import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
@@ -37,10 +33,8 @@ import com.avisto.genericspringsearch.OrderCriteria;
 import com.avisto.genericspringsearch.SearchCriteria;
 import com.avisto.genericspringsearch.SearchableEntity;
 import com.avisto.genericspringsearch.config.IFilterConfig;
-import com.avisto.genericspringsearch.config.ISearchConfig;
 import com.avisto.genericspringsearch.config.ISearchCriteriaConfig;
 import com.avisto.genericspringsearch.config.ISorterConfig;
-import com.avisto.genericspringsearch.exception.CannotSortException;
 import com.avisto.genericspringsearch.exception.FieldNotInCriteriaException;
 import com.avisto.genericspringsearch.exception.WrongDataTypeException;
 import com.avisto.genericspringsearch.exception.WrongElementNumberException;
@@ -51,8 +45,6 @@ import static com.avisto.genericspringsearch.service.SearchConstants.KeyWords.PA
 import static com.avisto.genericspringsearch.service.SearchConstants.KeyWords.SIZE;
 import static com.avisto.genericspringsearch.service.SearchConstants.KeyWords.SORTS;
 import static com.avisto.genericspringsearch.service.SearchConstants.Strings.COMMA;
-import static com.avisto.genericspringsearch.service.SearchConstants.Strings.DOT;
-import static com.avisto.genericspringsearch.service.SearchConstants.Strings.REGEX_DOT;
 
 /**
  * This class provides a generic search criteria repository to perform search operations on JPA entities. It supports filtering,
@@ -120,25 +112,17 @@ public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum
         Map<String, Join<R, ?>> joins = new HashMap<>();
 
         // Get the predicate for filtering the search results
-        List<Predicate> predicates = searchCriteria.getFilters()
-                .stream()
-                .map(filter -> {
-                    IFilterConfig filterConfig = SearchUtils.getSearchConfig(configClazz, filter.getKey(), IFilterConfig.class);
-                    Class<?> filterClazz = filterConfig.getFieldClass(rootClazz);
-                    return filterConfig.getPredicate(root, cb, joins, Arrays.stream(filter.getValues()).map(value -> CastService.cast(value, filterClazz)).toArray());
-                })
-                .toList();
-        criteriaQuery.where(cb.and(predicates.toArray(new Predicate[0])));
+        criteriaQuery.where(getPredicates(searchCriteria, rootClazz, configClazz, root, cb, joins));
 
         int limit = searchCriteria.getSize();
 
         // Get the total count of results to create the Page object
-        //Long count = getCount(cb, clazz, enumClazz, searchCriteria);
+        Long count = getCount(cb, rootClazz, configClazz, searchCriteria);
 
         // Check if the "limit" is set to zero (size is zero)
         if (limit > 0) {
             // Set sorting and grouping (if needed) in the CriteriaQuery
-            //setGroupBy(clazz, enumClazz, needsGroupBy, joins, sorts, criteriaQuery, root);
+            setGroupBy(rootClazz, configClazz, needsGroupBy, joins, searchCriteria.getSorts(), criteriaQuery, root);
             List<Order> orders = searchCriteria.getSorts()
                     .stream()
                     .map(sort ->
@@ -158,10 +142,10 @@ public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum
             List<R> results = typedQuery.getResultList();
 
             // Return the Page object with the search results and pagination information
-            return new Page<>(results.stream().map(mapper).collect(Collectors.toList()), searchCriteria.getPageNumber(), limit, 30L);
+            return new Page<>(results.stream().map(mapper).collect(Collectors.toList()), searchCriteria.getPageNumber(), limit, count);
         } else if (limit == 0) {
             // Return the Page object with the search results and pagination information
-            return new Page<>(Collections.emptyList(), searchCriteria.getPageNumber(), limit, 30L);
+            return new Page<>(Collections.emptyList(), searchCriteria.getPageNumber(), limit, count);
         } else {
             throw new WrongDataTypeException("Limit cannot be negative");
         }
@@ -170,6 +154,18 @@ public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum
     /*
         PRIVATE
      */
+
+    private Predicate getPredicates(SearchCriteria searchCriteria, Class<R> rootClazz, Class<E> configClazz, Root<R> root, CriteriaBuilder cb, Map<String, Join<R, ?>> joins) {
+        List<Predicate> predicates = searchCriteria.getFilters()
+                .stream()
+                .map(filter -> {
+                    IFilterConfig filterConfig = SearchUtils.getSearchConfig(configClazz, filter.getKey(), IFilterConfig.class);
+                    Class<?> filterClazz = filterConfig.getFieldClass(rootClazz);
+                    return filterConfig.getPredicate(root, cb, joins, Arrays.stream(filter.getValues()).map(value -> CastService.cast(value, filterClazz)).toArray());
+                })
+                .toList();
+        return cb.and(predicates.toArray(new Predicate[0]));
+    }
 
     /**
      * Formats the search criteria based on the provided class, enum class, raw values, and sorts.
@@ -247,34 +243,36 @@ public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum
         return ordersCriteria;
     }
 
-/*    private Long getCount(CriteriaBuilder cb, Class<T> clazz, Class<E> enumClazz, SearchCriteria searchCriteria) {
+    private Long getCount(CriteriaBuilder cb, Class<R> rootClazz, Class<E> configClazz, SearchCriteria searchCriteria) {
         CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
-        Root<T> root = countQuery.from(clazz);
-        Predicate predicate = getPredicate(enumClazz.getEnumConstants(), searchCriteria.getFilters(), root, cb, getJoins(root, enumClazz, searchCriteria));
-        countQuery.select(cb.count(root)).where(predicate);
+        Root<R> root = countQuery.from(rootClazz);
+        countQuery.select(cb.count(root)).where(getPredicates(searchCriteria, rootClazz, configClazz, root, cb, new HashMap<>()));
         return entityManager.createQuery(countQuery).getSingleResult();
-    }*/
+    }
 
-/*    private void setGroupBy(Class<T> clazz, Class<E> enumClazz, boolean needsGroupBy, Map<String, Join<T, ?>> joins, List<OrderCriteria> sorts, CriteriaQuery<T> criteriaQuery, Root<T> root) {
+    private void setGroupBy(Class<R> clazz, Class<E> enumClazz, boolean needsGroupBy, Map<String, Join<R, ?>> joins, List<OrderCriteria> sorts, CriteriaQuery<R> criteriaQuery, Root<R> root) {
         if (needsGroupBy && !joins.isEmpty()) {
             List<Expression<?>> groupByList = new ArrayList<>(getGroupByFieldName(root, clazz));
             groupByList.addAll(sorts.stream()
-                                       .map(orderCriteria -> getPath(root, getSearchConfigInterfaceBySearchField(enumClazz.getEnumConstants(), orderCriteria.getKey()).getFirstFilterPath()))
+                                       .map(orderCriteria -> {
+                                           ISorterConfig sorterConfig = SearchUtils.getSearchConfig(enumClazz, orderCriteria.getKey(), ISorterConfig.class);
+                                           return (Expression<?>) sorterConfig.getPath(root, sorterConfig.getSortPath());
+                                       })
                                        .toList());
             criteriaQuery.groupBy(groupByList);
         }
-    }*/
+    }
 
-/*    private ISearchCriteriaConfig getSearchConfigInterfaceBySearchField(E[] enums, String key) {
+    private ISearchCriteriaConfig getSearchConfigInterfaceBySearchField(E[] enums, String key) {
         return Arrays.stream(enums)
                 .filter(
                         (ISearchCriteriaConfig searchConfig)
                                 -> searchConfig.getKey().equals(key))
                 .findFirst()
                 .orElseThrow(() -> new FieldNotInCriteriaException(String.format("Field %s is not specified in criteria", key)));
-    }*/
+    }
 
-/*    private List<Expression<?>> getGroupByFieldName(Root<T> root, Class<?> clazz) {
+    private List<Expression<?>> getGroupByFieldName(Root<R> root, Class<?> clazz) {
         List<Expression<?>> groupBy = new ArrayList<>();
         if (clazz != null && (clazz.isAnnotationPresent(Entity.class) || clazz.isAnnotationPresent(MappedSuperclass.class))) {
             for (Field field : clazz.getDeclaredFields()) {
@@ -289,7 +287,7 @@ public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum
             groupBy.addAll(getGroupByFieldName(root, clazz.getSuperclass()));
         }
         return groupBy;
-    }*/
+    }
 
     private List<Expression<?>> getGroupByFieldNameEmbeddedId(Path<String> path, Class<?> clazz) {
         List<Expression<?>> groupBy = new ArrayList<>();

@@ -19,4 +19,9 @@ public enum CriteriaTestEnum implements ISearchCriteriaConfig<SearchableEntity> 
     public OrderCriteria getDefaultOrderCriteria() {
         return new OrderCriteria("field1", SortDirection.ASC);
     }
+
+    @Override
+    public Class<SearchableEntity> getSearchedClass() {
+        return SearchableEntity.class;
+    }
 }

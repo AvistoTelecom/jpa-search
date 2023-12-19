@@ -1,6 +1,5 @@
 package com.avisto.genericspringsearch.config;
 
-import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -94,5 +93,10 @@ public class FilterConfig<R extends SearchableEntity, T> implements IFilterConfi
     @Override
     public Order getOrder(Root<R> root, CriteriaBuilder criteriaBuilder, SortDirection sortDirection) {
         return sortDirection.getOrder(criteriaBuilder, getPath(root, getFirstFilterPath()));
+    }
+
+    @Override
+    public String getSortPath() {
+        return paths.get(0);
     }
 }

@@ -170,7 +170,12 @@ public final class SearchUtils {
 
 
     /**
-     * TODO: fill
+     * Get specific SearchConfig by its key and cast it to Filter or Sort
+     *
+     * @param enumClazz Config class to search in.
+     * @param key The key of search config.
+     * @param castClass The class of cast needed.
+     * @return The search config with the key mentioned in params.
      */
     public static <E extends Enum<?> & ISearchCriteriaConfig<?>, T extends ISearchConfig<?>> T getSearchConfig(Class<E> enumClazz, String key, Class<T> castClass) {
         return Arrays.stream(enumClazz.getEnumConstants()).
