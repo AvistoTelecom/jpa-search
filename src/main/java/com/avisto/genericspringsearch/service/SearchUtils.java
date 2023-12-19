@@ -174,8 +174,8 @@ public final class SearchUtils {
      */
     public static <E extends Enum<?> & ISearchCriteriaConfig<?>, T extends ISearchConfig<?>> T getSearchConfig(Class<E> enumClazz, String key, Class<T> castClass) {
         return Arrays.stream(enumClazz.getEnumConstants()).
-                filter(e -> e.getSearchConfig().getClass().isAssignableFrom(castClass) && Objects.equals(key,e.getKey())).
-                map(e -> (T) e).
+                filter(e -> castClass.isAssignableFrom(e.getSearchConfig().getClass()) && Objects.equals(key,e.getKey())).
+                map(e -> (T) e.getSearchConfig()).
                 findFirst().
                 orElseThrow(() -> new FieldNotInCriteriaException(String.format("Field %s is not specified in criteria", key)));
     }
