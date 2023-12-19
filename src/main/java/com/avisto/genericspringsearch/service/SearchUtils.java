@@ -5,11 +5,20 @@ import java.lang.reflect.ParameterizedType;
 import java.text.Normalizer;
 import java.util.Arrays;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
+import com.avisto.genericspringsearch.SearchableEntity;
+import com.avisto.genericspringsearch.config.ISearchConfig;
+import com.avisto.genericspringsearch.config.ISearchCriteriaConfig;
+import com.avisto.genericspringsearch.exception.FieldNotInCriteriaException;
 import com.avisto.genericspringsearch.exception.FieldPathNotFoundException;
 
+import javax.persistence.criteria.From;
+import javax.persistence.criteria.Path;
+
 import static com.avisto.genericspringsearch.service.SearchConstants.Strings.EMPTY_STRING;
+import static com.avisto.genericspringsearch.service.SearchConstants.Strings.REGEX_DOT;
 
 /**
  * Utility class containing helper methods for generic Spring search functionality.
@@ -162,5 +171,45 @@ public final class SearchUtils {
             }
         }
         return true;
+    }
+
+
+    /**
+     * Get specific SearchConfig by its key and cast it to Filter or Sort
+     *
+     * @param configurations Config elements to search in.
+     * @param key The key of search config.
+     * @param castClass The class of cast needed.
+     * @return The search config with the key mentioned in params.
+     */
+    public static <E extends Enum<?> & ISearchCriteriaConfig<?>, T extends ISearchConfig<?>> T getSearchConfig(E[] configurations, String key, Class<T> castClass) {
+        return Arrays.stream(configurations).
+                filter(e -> Objects.equals(key,e.getKey()) && castClass.isAssignableFrom(e.getSearchConfig().getClass())).
+                map(e -> (T) e.getSearchConfig()).
+                findFirst().
+                orElseThrow(() -> new FieldNotInCriteriaException(String.format("Field %s is not specified in criteria", key)));
+    }
+
+    /**
+     * Get path from Root with String path
+     *
+     * @param from Root or From.
+     * @param fieldPath String field path.
+     * @return The Path of a field from Root.
+     */
+    public static <R extends SearchableEntity> Path<String> getPath(From<R, ?> from, String fieldPath) {
+        if (SearchUtils.isBlank(fieldPath)) {
+            return (From<R, String>) from;
+        }
+        String[] paths = fieldPath.split(REGEX_DOT);
+        Path<String> entityPath = null;
+        for (String path : paths) {
+            if (entityPath == null) {
+                entityPath = from.get(path);
+            } else {
+                entityPath = entityPath.get(path);
+            }
+        }
+        return entityPath;
     }
 }

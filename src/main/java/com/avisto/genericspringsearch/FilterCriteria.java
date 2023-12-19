@@ -1,17 +1,14 @@
 package com.avisto.genericspringsearch;
 
-import java.util.Arrays;
-
 import com.avisto.genericspringsearch.config.AbstractCriteria;
-import com.avisto.genericspringsearch.service.CastService;
 
-public class FilterCriteria<X> extends AbstractCriteria {
+public class FilterCriteria extends AbstractCriteria {
 
-    private final X[] values;
+    private final String[] values;
 
-    public FilterCriteria(String key, String[] values, Class<X> clazz) {
+    public FilterCriteria(String key, String[] values) {
         this.key = key;
-        this.values = values != null ? (X[]) Arrays.stream(values).map(str -> CastService.cast(str, clazz)).toArray() : null;
+        this.values = values;
     }
 
     @Override
@@ -24,7 +21,7 @@ public class FilterCriteria<X> extends AbstractCriteria {
         return super.hashCode();
     }
 
-    public X[] getValues() {
+    public String[] getValues() {
         return values;
     }
 }
