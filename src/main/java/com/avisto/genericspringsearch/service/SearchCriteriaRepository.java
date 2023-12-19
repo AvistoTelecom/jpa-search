@@ -161,14 +161,14 @@ public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum
      */
 
     private Predicate getPredicates(SearchCriteria searchCriteria, Class<R> rootClazz, E[] configurations, Root<R> root, CriteriaBuilder cb, Map<String, Join<R, ?>> joins) {
-        return cb.and((Predicate[]) searchCriteria.getFilters()
+        return cb.and(searchCriteria.getFilters()
                 .stream()
                 .map(filter -> {
                     IFilterConfig filterConfig = SearchUtils.getSearchConfig(configurations, filter.getKey(), IFilterConfig.class);
                     Class<?> filterClazz = filterConfig.getFieldClass(rootClazz);
                     return filterConfig.getPredicate(root, cb, joins, Arrays.stream(filter.getValues()).map(value -> CastService.cast(value, filterClazz)).toArray());
                 })
-                .toArray());
+                .toArray(Predicate[]::new));
     }
 
     /**
