@@ -70,10 +70,10 @@ public class FilterConfig<R extends SearchableEntity, T> implements IFilterConfi
                         if (!joins.containsKey(stringBasePath)) {
                             joins.put(stringBasePath, getJoin(root, stringBasePath));
                         }
-                        path = getPath(joins.get(stringBasePath), fieldPath.getRight());
+                        path = SearchUtils.getPath(joins.get(stringBasePath), fieldPath.getRight());
                     }
                     else {
-                        path = getPath(root, stringBasePath);
+                        path = SearchUtils.getPath(root, stringBasePath);
                     }
                     orPredicates.add(filterOperation.calculate(
                             criteriaBuilder,
@@ -92,7 +92,7 @@ public class FilterConfig<R extends SearchableEntity, T> implements IFilterConfi
 
     @Override
     public Order getOrder(Root<R> root, CriteriaBuilder criteriaBuilder, SortDirection sortDirection) {
-        return sortDirection.getOrder(criteriaBuilder, getPath(root, getFirstFilterPath()));
+        return sortDirection.getOrder(criteriaBuilder, SearchUtils.getPath(root, getFirstFilterPath()));
     }
 
     @Override
