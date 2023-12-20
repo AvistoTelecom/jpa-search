@@ -3,7 +3,7 @@ package com.avisto.genericspringsearch.model;
 import com.avisto.genericspringsearch.FilterOperation;
 import com.avisto.genericspringsearch.OrderCriteria;
 import com.avisto.genericspringsearch.SearchableEntity;
-import com.avisto.genericspringsearch.config.FilterConfig;
+import com.avisto.genericspringsearch.config.FilterSorterConfig;
 import com.avisto.genericspringsearch.config.ISearchConfig;
 import com.avisto.genericspringsearch.config.ISearchCriteriaConfig;
 
@@ -12,7 +12,7 @@ public enum CriteriaTestEnum implements ISearchCriteriaConfig<SearchableEntity> 
 
     @Override
     public ISearchConfig getSearchConfig() {
-        return FilterConfig.of(FilterOperation.EQUAL, "field1", "field1");
+        return FilterSorterConfig.of(FilterOperation.EQUAL, "field1", "field1");
     }
 
     @Override

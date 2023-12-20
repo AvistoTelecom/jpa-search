@@ -12,7 +12,7 @@ import java.util.Map;
 
 import static com.avisto.genericspringsearch.service.SearchConstants.Strings.DOT;
 
-public non-sealed interface IFilterConfig<R extends SearchableEntity, T,S> extends ISearchConfig<R> {
+public non-sealed interface IFilterConfig<R extends SearchableEntity, T> extends ISearchConfig<R> {
     Predicate getPredicate(Root<R> root, CriteriaBuilder criteriaBuilder, Map<String, Join<R,?>> joins, T... values);
 
     Class<?> getEntryClass(Class<R> rootClazz);
