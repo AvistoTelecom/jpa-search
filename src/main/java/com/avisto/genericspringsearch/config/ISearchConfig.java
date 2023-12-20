@@ -6,4 +6,6 @@ public sealed interface ISearchConfig<R extends SearchableEntity> permits IFilte
     String getKey();
 
     boolean needMultipleValues();
+
+    void checkConfig(Class<R> rootClazz);
 }
