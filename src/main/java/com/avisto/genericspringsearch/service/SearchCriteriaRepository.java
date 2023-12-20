@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.persistence.EmbeddedId;
@@ -110,7 +109,7 @@ public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum
         if (configurations.length == 0) {
             throw new EmptyCriteriaException(String.format("%s is empty : Cannot declare an empty criteria", configClazz.getName()));
         }
-        Class<R> rootClazz = configurations[0].getSearchedClass();
+        Class<R> rootClazz = configurations[0].getRootClass();
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<R> criteriaQuery = cb.createQuery(rootClazz);
         Root<R> root = criteriaQuery.from(rootClazz);
@@ -147,7 +146,7 @@ public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum
             List<R> results = typedQuery.getResultList();
 
             // Return the Page object with the search results and pagination information
-            return new Page<>(results.stream().map(mapper).collect(Collectors.toList()), searchCriteria.getPageNumber(), limit, count);
+            return new Page<>(results.stream().map(mapper).toList(), searchCriteria.getPageNumber(), limit, count);
         } else if (limit == 0) {
             // Return the Page object with the search results and pagination information
             return new Page<>(Collections.emptyList(), searchCriteria.getPageNumber(), limit, count);
@@ -165,7 +164,7 @@ public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum
                 .stream()
                 .map(filter -> {
                     IFilterConfig filterConfig = SearchUtils.getSearchConfig(configurations, filter.getKey(), IFilterConfig.class);
-                    Class<?> filterClazz = filterConfig.getFieldClass(rootClazz);
+                    Class<?> filterClazz = filterConfig.getEntryClass(rootClazz);
                     return filterConfig.getPredicate(root, cb, joins, Arrays.stream(filter.getValues()).map(value -> CastService.cast(value, filterClazz)).toArray());
                 })
                 .toArray(Predicate[]::new));
@@ -204,7 +203,7 @@ public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum
     private Set<FilterCriteria> getFilters(E[] enums, Map<String, String> rawValues) {
         Set<FilterCriteria> filters = new HashSet<>();
         if (!rawValues.isEmpty()) {
-            for (ISearchCriteriaConfig e : enums) {
+            for (ISearchCriteriaConfig<R> e : enums) {
                 String key = e.getKey();
                 if (rawValues.containsKey(key)) {
                     String value = rawValues.remove(key);
@@ -258,21 +257,12 @@ public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum
             List<Expression<?>> groupByList = new ArrayList<>(getGroupByFieldName(root, clazz));
             groupByList.addAll(sorts.stream()
                                        .map(orderCriteria -> {
-                                           ISorterConfig sorterConfig = SearchUtils.getSearchConfig(configurations, orderCriteria.getKey(), ISorterConfig.class);
+                                           ISorterConfig<R> sorterConfig = SearchUtils.getSearchConfig(configurations, orderCriteria.getKey(), ISorterConfig.class);
                                            return (Expression<?>) SearchUtils.getPath(root, sorterConfig.getSortPath());
                                        })
                                        .toList());
             criteriaQuery.groupBy(groupByList);
         }
-    }
-
-    private ISearchCriteriaConfig getSearchConfigInterfaceBySearchField(E[] enums, String key) {
-        return Arrays.stream(enums)
-                .filter(
-                        (ISearchCriteriaConfig searchConfig)
-                                -> searchConfig.getKey().equals(key))
-                .findFirst()
-                .orElseThrow(() -> new FieldNotInCriteriaException(String.format("Field %s is not specified in criteria", key)));
     }
 
     private List<Expression<?>> getGroupByFieldName(Root<R> root, Class<?> clazz) {

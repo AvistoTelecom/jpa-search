@@ -2,17 +2,25 @@ package com.avisto.genericspringsearch.service;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
+import java.security.Key;
 import java.text.Normalizer;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import com.avisto.genericspringsearch.SearchableEntity;
+import com.avisto.genericspringsearch.config.IFilterConfig;
 import com.avisto.genericspringsearch.config.ISearchConfig;
 import com.avisto.genericspringsearch.config.ISearchCriteriaConfig;
+import com.avisto.genericspringsearch.config.ISorterConfig;
+import com.avisto.genericspringsearch.exception.CannotSortException;
+import com.avisto.genericspringsearch.exception.EmptyCriteriaException;
 import com.avisto.genericspringsearch.exception.FieldNotInCriteriaException;
 import com.avisto.genericspringsearch.exception.FieldPathNotFoundException;
+import com.avisto.genericspringsearch.exception.KeyDuplicateException;
 
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Path;
@@ -211,5 +219,36 @@ public final class SearchUtils {
             }
         }
         return entityPath;
+    }
+
+    /**
+     * Check if the configuration criteria is well declared
+     *
+     * @param configClazz criteria config to check.
+     */
+    public static <R extends SearchableEntity, E extends Enum<E> & ISearchCriteriaConfig<R>> void checkCriteriaConfig(Class<E> configClazz) {
+        E[] configurations = configClazz.getEnumConstants();
+        if (configurations.length == 0) {
+            throw new EmptyCriteriaException("Criteria needs at least one configuration");
+        }
+        E firstConfiguration = configurations[0];
+        Class<R> rootClazz = firstConfiguration.getRootClass();
+        Set<String> filterKeys = new HashSet<>();
+        Set<String> sorterKeys = new HashSet<>();
+        Arrays.stream(configurations).forEach(configuration -> {
+            ISearchConfig<R> searchConfig = configuration.getSearchConfig();
+            if (IFilterConfig.class.isAssignableFrom(searchConfig.getClass())
+                    && !filterKeys.add(searchConfig.getKey())) {
+                throw new KeyDuplicateException("Cannot have multiple filters with the same key");
+            }
+            if (ISorterConfig.class.isAssignableFrom(searchConfig.getClass())
+                    && !sorterKeys.add(searchConfig.getKey())) {
+                throw new KeyDuplicateException("Cannot have multiple sorters with the same key");
+            }
+            configuration.getSearchConfig().checkConfig(rootClazz);
+        });
+        if (!sorterKeys.contains(firstConfiguration.getDefaultOrderCriteria().getKey())){
+            throw new CannotSortException("Default sort key is not defined as a sorter in ISearchCriteriaConfig");
+        }
     }
 }

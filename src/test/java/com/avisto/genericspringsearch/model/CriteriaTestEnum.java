@@ -21,7 +21,7 @@ public enum CriteriaTestEnum implements ISearchCriteriaConfig<SearchableEntity> 
     }
 
     @Override
-    public Class<SearchableEntity> getSearchedClass() {
+    public Class<SearchableEntity> getRootClass() {
         return SearchableEntity.class;
     }
 }

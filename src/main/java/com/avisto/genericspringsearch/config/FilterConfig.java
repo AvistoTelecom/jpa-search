@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import com.avisto.genericspringsearch.FilterOperation;
 import com.avisto.genericspringsearch.SearchableEntity;
+import com.avisto.genericspringsearch.exception.CannotSortException;
 import com.avisto.genericspringsearch.model.FieldPathObject;
 import com.avisto.genericspringsearch.model.SortDirection;
 import com.avisto.genericspringsearch.service.SearchUtils;
@@ -31,13 +32,13 @@ public class FilterConfig<R extends SearchableEntity, T> implements IFilterConfi
         this.paths = paths;
     }
 
-    public static FilterConfig of(FilterOperation filterOperation, String key, String pathFirst, String... paths) {
+    public static <R extends SearchableEntity, T> FilterConfig<R, T> of(FilterOperation filterOperation, String key, String pathFirst, String... paths) {
         List<String> result = new ArrayList<>();
         result.add(pathFirst);
         if (paths != null) {
             result.addAll(List.of(paths));
         }
-        return new FilterConfig(filterOperation, key, result);
+        return new FilterConfig<>(filterOperation, key, result);
     }
 
     @Override
@@ -50,8 +51,16 @@ public class FilterConfig<R extends SearchableEntity, T> implements IFilterConfi
         return filterOperation.needsMultipleValues();
     }
 
+    @Override
+    public void checkConfig(Class<R> rootClazz) {
+        paths.forEach(path -> SearchUtils.getEntityClass(rootClazz, path.split(REGEX_DOT)));
+        if (getSortPath().contains("[")) {
+            throw new CannotSortException("Cannot sort on a Collection");
+        }
+    }
+
     private List<FieldPathObject> getDefaultFieldPath() {
-        return this.paths.stream().map(FieldPathObject::of).collect(Collectors.toList());
+        return this.paths.stream().map(FieldPathObject::of).toList();
     }
 
     private String getFirstFilterPath() {
@@ -86,7 +95,7 @@ public class FilterConfig<R extends SearchableEntity, T> implements IFilterConfi
     }
 
     @Override
-    public Class<?> getFieldClass(Class<R> rootClazz) {
+    public Class<?> getEntryClass(Class<R> rootClazz) {
         return SearchUtils.getEntityClass(rootClazz, paths.get(0).split(REGEX_DOT));
     }
 
