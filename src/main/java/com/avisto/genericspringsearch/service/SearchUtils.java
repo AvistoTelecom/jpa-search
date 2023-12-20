@@ -221,6 +221,11 @@ public final class SearchUtils {
         return entityPath;
     }
 
+    /**
+     * Check if the configuration criteria is well declared
+     *
+     * @param configClazz criteria config to check.
+     */
     public static <R extends SearchableEntity, E extends Enum<E> & ISearchCriteriaConfig<R>> void checkCriteriaConfig(Class<E> configClazz) {
         E[] configurations = configClazz.getEnumConstants();
         if (configurations.length == 0) {
