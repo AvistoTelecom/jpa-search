@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.persistence.EmbeddedId;
@@ -164,7 +163,7 @@ public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum
         return cb.and(searchCriteria.getFilters()
                 .stream()
                 .map(filter -> {
-                    IFilterConfig<R,?,?> filterConfig = SearchUtils.getSearchConfig(configurations, filter.getKey(), IFilterConfig.class);
+                    IFilterConfig filterConfig = SearchUtils.getSearchConfig(configurations, filter.getKey(), IFilterConfig.class);
                     Class<?> filterClazz = filterConfig.getEntryClass(rootClazz);
                     return filterConfig.getPredicate(root, cb, joins, Arrays.stream(filter.getValues()).map(value -> CastService.cast(value, filterClazz)).toArray());
                 })
