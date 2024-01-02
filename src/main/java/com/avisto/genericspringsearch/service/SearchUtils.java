@@ -181,6 +181,16 @@ public final class SearchUtils {
         return true;
     }
 
+    /**
+     * Check if a given string array is empty.
+     *
+     * @param source The input string to check.
+     * @return {@code true} if the string array is empty, {@code false} otherwise.
+     */
+    public static boolean isEmpty(final String[] source) {
+        return source == null || source.length == 0;
+    }
+
 
     /**
      * Get specific SearchConfig by its key and cast it to Filter or Sort
