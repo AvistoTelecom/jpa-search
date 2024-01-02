@@ -25,13 +25,19 @@ public class MultiFilterConfig<R extends SearchableEntity, X> implements IFilter
         return new MultiFilterConfig<>(key, filter, joinPath);
     }
 
+    public static <R extends SearchableEntity, X> MultiFilterConfig<R, X> of(String key, IFilterConfig<R, X> filter) {
+        return new MultiFilterConfig<>(key, filter, null);
+    }
+
     @Override
     public Predicate getPredicate(Class<R> rootClazz, Root<R> root, CriteriaBuilder cb, Map<String, Join<R, ?>> joins, List<String> value) {
         Class<X> filterClazz = filter.getEntryClass(rootClazz);
-
         return cb.and(value
                 .stream()
                 .map(v -> {
+                    if (joinPath != null) {
+                        joins.put(joinPath, getJoin(root, joinPath));
+                    }
                     return filter.getPredicate(rootClazz, root, cb, joins, CastService.cast(v, filterClazz));
                 })
                 .toArray(Predicate[]::new));

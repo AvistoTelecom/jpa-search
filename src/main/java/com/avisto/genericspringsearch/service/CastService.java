@@ -213,31 +213,29 @@ public class CastService {
         // Check if the JSON string starts with '{' and ends with '}'
         if (jsonString.startsWith("[") && jsonString.endsWith("]")) {
             jsonString = jsonString.substring(1, jsonString.length() - 1);
+        }
 
-            // Split the JSON string into individual entries
-            String[] entryStrings = jsonString.split(",");
-            List<String> valueAggregator = new ArrayList<>();
-            boolean insideObject = false;
+        // Split the JSON string into individual entries
+        String[] entryStrings = jsonString.split(",");
+        List<String> valueAggregator = new ArrayList<>();
+        boolean insideObject = false;
 
-            for (String entryString : entryStrings) {
-                if (insideObject) {
+        for (String entryString : entryStrings) {
+            if (insideObject) {
+                valueAggregator.add(entryString);
+                if (entryString.endsWith("}")) {
+                    resultList.add(String.join(",", valueAggregator));
+                    valueAggregator.clear();
+                    insideObject = false;
+                }
+            } else {
+                if (entryString.startsWith("{")) {
+                    insideObject = true;
                     valueAggregator.add(entryString);
-                    if (entryString.endsWith("}")) {
-                        resultList.add(String.join(",", valueAggregator));
-                        valueAggregator.clear();
-                        insideObject = false;
-                    }
                 } else {
-                    if (entryString.startsWith("{")) {
-                        insideObject = true;
-                        valueAggregator.add(entryString);
-                    } else {
-                        resultList.add(entryString.replaceAll("\"", ""));
-                    }
+                    resultList.add(entryString.replaceAll("\"", ""));
                 }
             }
-        } else {
-            // TODO : error in this case
         }
         return resultList;
     }
