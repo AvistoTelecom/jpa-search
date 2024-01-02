@@ -7,7 +7,11 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.Temporal;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -20,9 +24,11 @@ import static com.avisto.genericspringsearch.service.SearchConstants.ClassNames.
 import static com.avisto.genericspringsearch.service.SearchConstants.ClassNames.DOUBLE;
 import static com.avisto.genericspringsearch.service.SearchConstants.ClassNames.FLOAT;
 import static com.avisto.genericspringsearch.service.SearchConstants.ClassNames.INTEGER;
+import static com.avisto.genericspringsearch.service.SearchConstants.ClassNames.LIST;
 import static com.avisto.genericspringsearch.service.SearchConstants.ClassNames.LOCAL_DATE;
 import static com.avisto.genericspringsearch.service.SearchConstants.ClassNames.LOCAL_DATE_TIME;
 import static com.avisto.genericspringsearch.service.SearchConstants.ClassNames.LONG;
+import static com.avisto.genericspringsearch.service.SearchConstants.ClassNames.MAP;
 import static com.avisto.genericspringsearch.service.SearchConstants.ClassNames.PRIMITIVE_BOOLEAN;
 import static com.avisto.genericspringsearch.service.SearchConstants.ClassNames.PRIMITIVE_DOUBLE;
 import static com.avisto.genericspringsearch.service.SearchConstants.ClassNames.PRIMITIVE_FLOAT;
@@ -108,6 +114,8 @@ public class CastService {
             case LOCAL_DATE -> formatter == null ? convertTo(value, LocalDate.class) : LocalDate.parse(value, formatter);
             case LOCAL_DATE_TIME -> formatter == null ? convertTo(value, LocalDateTime.class) : LocalDate.parse(value, formatter).atStartOfDay();
             case ZONED_DATE_TIME -> formatter == null ? convertTo(value, ZonedDateTime.class) : LocalDate.parse(value, formatter).atStartOfDay().atZone(ZoneOffset.UTC);
+            case MAP -> parseJsonToMap(value);
+            case LIST -> parseJsonToList(value);
             default -> throw new TypeNotHandledException(String.format("Cannot cast String to type %s : Type not handled", clazz.getSimpleName()));
         };
     }
@@ -148,5 +156,91 @@ public class CastService {
         }
         throw new TypeNotHandledException(String.format("Cannot cast String to type %s : Type not handled", clazz.getSimpleName()));
     }
+
+    public static Map<String, String> parseJsonToMap(String jsonString) {
+        Map<String, String> resultMap = new HashMap<>();
+        jsonString = jsonString.trim();
+
+        // Check if the JSON string starts with '{' and ends with '}'
+        if (jsonString.startsWith("{") && jsonString.endsWith("}")) {
+            jsonString = jsonString.substring(1, jsonString.length() - 1);
+
+            // Split the JSON string into individual entries
+            String[] entryStrings = jsonString.split(",");
+            List<String> valueAggregator = new ArrayList<>();
+            String lastEntry = null;
+
+            for (String entryString : entryStrings) {
+                if (lastEntry != null) {
+                    valueAggregator.add(entryString);
+                    if (entryString.endsWith("}") || entryString.endsWith("]")) {
+                        resultMap.put(lastEntry, String.join(",", valueAggregator));
+                        valueAggregator.clear();
+                        lastEntry = null;
+                    }
+                } else {
+                    // Split each entry into key and value
+                    String[] entryParts = entryString.split(":");
+                    if (entryParts.length == 2) {
+                        String entryKey = entryParts[0].replaceAll("\"", "");
+                        String entryValue = entryParts[1];
+
+                        if (entryParts[1].startsWith("[")) {
+                            lastEntry = entryKey;
+                            valueAggregator.add(entryValue);
+                        } else {
+                            resultMap.put(entryKey, entryValue.replaceAll("\"", ""));
+                        }
+                    }
+                    else if (entryParts.length > 2) {
+                        List<String> partList = Arrays.asList(entryParts);
+                        lastEntry = partList.remove(0).replaceAll("\"", "");
+                        valueAggregator.add(String.join(":", partList));
+                        // TODO : error if [1] doesn't start with "{"
+                    }
+                }
+            }
+        } else {
+            // TODO : error in this case
+        }
+        return resultMap;
+    }
+
+    public static List<String> parseJsonToList(String jsonString) {
+        List<String> resultList = new ArrayList<>();
+        jsonString = jsonString.trim();
+
+        // Check if the JSON string starts with '{' and ends with '}'
+        if (jsonString.startsWith("[") && jsonString.endsWith("]")) {
+            jsonString = jsonString.substring(1, jsonString.length() - 1);
+
+            // Split the JSON string into individual entries
+            String[] entryStrings = jsonString.split(",");
+            List<String> valueAggregator = new ArrayList<>();
+            boolean insideObject = false;
+
+            for (String entryString : entryStrings) {
+                if (insideObject) {
+                    valueAggregator.add(entryString);
+                    if (entryString.endsWith("}")) {
+                        resultList.add(String.join(",", valueAggregator));
+                        valueAggregator.clear();
+                        insideObject = false;
+                    }
+                } else {
+                    if (entryString.startsWith("{")) {
+                        insideObject = true;
+                        valueAggregator.add(entryString);
+                    } else {
+                        resultList.add(entryString.replaceAll("\"", ""));
+                    }
+                }
+            }
+        } else {
+            // TODO : error in this case
+        }
+        return resultList;
+    }
+
 }
 
