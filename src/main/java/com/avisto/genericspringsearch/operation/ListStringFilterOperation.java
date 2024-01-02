@@ -6,12 +6,6 @@ import javax.persistence.criteria.Predicate;
 import java.util.List;
 
 public enum ListStringFilterOperation implements IFilterOperation<List<String>> {
-    IN_EQUAL {
-        @Override
-        public Predicate calculate(CriteriaBuilder cb, Expression<?> expression, List<String> value) {
-            return cb.or(value.stream().map(v -> ObjectFilterOperation.EQUAL.calculate(cb, expression, v)).toArray(Predicate[]::new));
-        }
-    },
 
     IN_LIKE {
         @Override
