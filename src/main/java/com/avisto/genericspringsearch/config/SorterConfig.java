@@ -1,23 +1,13 @@
 package com.avisto.genericspringsearch.config;
 
-import com.avisto.genericspringsearch.FilterOperation;
 import com.avisto.genericspringsearch.SearchableEntity;
 import com.avisto.genericspringsearch.exception.CannotSortException;
-import com.avisto.genericspringsearch.model.FieldPathObject;
 import com.avisto.genericspringsearch.model.SortDirection;
 import com.avisto.genericspringsearch.service.SearchUtils;
 
 import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Order;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import static com.avisto.genericspringsearch.service.SearchConstants.Strings.REGEX_DOT;
 
 public class SorterConfig<R extends SearchableEntity> implements ISorterConfig<R> {
 

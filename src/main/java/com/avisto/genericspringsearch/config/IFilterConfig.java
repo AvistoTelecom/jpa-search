@@ -13,9 +13,11 @@ import java.util.Map;
 import static com.avisto.genericspringsearch.service.SearchConstants.Strings.DOT;
 
 public non-sealed interface IFilterConfig<R extends SearchableEntity, T> extends ISearchConfig<R> {
-    Predicate getPredicate(Root<R> root, CriteriaBuilder criteriaBuilder, Map<String, Join<R,?>> joins, T... values);
+    Predicate getPredicate(Class<R> rootClazz, Root<R> root, CriteriaBuilder cb, Map<String, Join<R,?>> joins, T value);
 
-    Class<?> getEntryClass(Class<R> rootClazz);
+    Class<T> getEntryClass(Class<R> rootClazz);
+
+    boolean needJoin();
 
     default Join<R, ?> getJoin(From<R, ?> from, String toPath) {
         int firstIndex = toPath.indexOf(DOT);

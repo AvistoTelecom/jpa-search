@@ -1,6 +1,6 @@
 package com.avisto.genericspringsearch.model;
 
-import com.avisto.genericspringsearch.FilterOperation;
+import com.avisto.genericspringsearch.operation.ObjectFilterOperation;
 import com.avisto.genericspringsearch.OrderCriteria;
 import com.avisto.genericspringsearch.SearchableEntity;
 import com.avisto.genericspringsearch.config.FilterSorterConfig;
@@ -11,8 +11,8 @@ public enum CriteriaTestEnum implements ISearchCriteriaConfig<SearchableEntity> 
     TEST;
 
     @Override
-    public ISearchConfig getSearchConfig() {
-        return FilterSorterConfig.of(FilterOperation.EQUAL, "field1", "field1");
+    public ISearchConfig<SearchableEntity> getSearchConfig() {
+        return FilterSorterConfig.of(ObjectFilterOperation.EQUAL, "field1", "field1");
     }
 
     @Override
