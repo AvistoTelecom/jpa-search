@@ -12,7 +12,7 @@ public enum CriteriaTestEnum implements ISearchCriteriaConfig<SearchableEntity> 
 
     @Override
     public ISearchConfig<SearchableEntity> getSearchConfig() {
-        return FilterSorterConfig.of(ObjectFilterOperation.EQUAL, "field1", "field1");
+        return FilterSorterConfig.of("field1", ObjectFilterOperation.EQUAL, "field1");
     }
 
     @Override
