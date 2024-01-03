@@ -8,4 +8,6 @@ public interface IFilterOperation<T> {
     Predicate calculate(CriteriaBuilder cb, Expression<?> expression, T value);
 
     boolean needsMultipleValues();
+
+    Class<T> getOperationType();
 }

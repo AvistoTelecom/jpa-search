@@ -17,6 +17,8 @@ public non-sealed interface IFilterConfig<R extends SearchableEntity, T> extends
 
     Class<T> getEntryClass(Class<R> rootClazz);
 
+    boolean needMultipleValues();
+
     boolean needJoin();
 
     default Join<R, ?> getJoin(From<R, ?> from, String toPath) {

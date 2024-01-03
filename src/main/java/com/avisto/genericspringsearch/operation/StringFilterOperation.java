@@ -71,4 +71,9 @@ public enum StringFilterOperation implements IFilterOperation<String> {
     public boolean needsMultipleValues() {
         return false;
     }
+
+    @Override
+    public Class<String> getOperationType() {
+        return String.class;
+    }
 }

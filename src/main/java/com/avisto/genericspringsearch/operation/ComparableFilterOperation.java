@@ -36,4 +36,9 @@ public enum ComparableFilterOperation implements IFilterOperation<Comparable> {
     public boolean needsMultipleValues() {
         return false;
     }
+
+    @Override
+    public Class<Comparable> getOperationType() {
+        return Comparable.class;
+    }
 }

@@ -21,4 +21,9 @@ public enum ObjectFilterOperation implements IFilterOperation<Object> {
     public boolean needsMultipleValues() {
         return false;
     }
+
+    @Override
+    public Class<Object> getOperationType() {
+        return Object.class;
+    }
 }

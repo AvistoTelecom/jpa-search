@@ -29,12 +29,6 @@ public class SorterConfig<R extends SearchableEntity> implements ISorterConfig<R
     }
 
     @Override
-    public boolean needMultipleValues() {
-        // TODO PUT IN FILTER CONFIG INSTEAD OF SEARCH CONFIG
-        return false;
-    }
-
-    @Override
     public void checkConfig(Class<R> rootClazz) {
         if (getSortPath().contains("[")) {
             throw new CannotSortException("Cannot sort on a Collection");

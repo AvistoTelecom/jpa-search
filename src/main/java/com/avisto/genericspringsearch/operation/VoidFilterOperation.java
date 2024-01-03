@@ -33,4 +33,9 @@ public enum VoidFilterOperation implements IFilterOperation<Void> {
     public boolean needsMultipleValues() {
         return false;
     }
+
+    @Override
+    public Class<Void> getOperationType() {
+        return Void.class;
+    }
 }

@@ -18,4 +18,9 @@ public enum ListObjectFilterOperation implements IFilterOperation<List<Object>> 
     public boolean needsMultipleValues() {
         return true;
     }
+
+    @Override
+    public Class<List<Object>> getOperationType() {
+        return (Class<List<Object>>) (Class)List.class;
+    }
 }

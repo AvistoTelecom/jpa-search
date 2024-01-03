@@ -1,5 +1,7 @@
 package com.avisto.genericspringsearch.config;
 
+import com.avisto.genericspringsearch.exception.FilterOperationException;
+import com.avisto.genericspringsearch.exception.WrongDataTypeException;
 import com.avisto.genericspringsearch.operation.IFilterOperation;
 import com.avisto.genericspringsearch.SearchableEntity;
 import com.avisto.genericspringsearch.model.FieldPathObject;
@@ -22,7 +24,7 @@ public class FilterConfig<R extends SearchableEntity, T> implements IFilterConfi
     private final String key;
     private final List<String> paths;
 
-    private FilterConfig(IFilterOperation<T> filterOperation, String key, List<String> paths) {
+    protected FilterConfig(IFilterOperation<T> filterOperation, String key, List<String> paths) {
         this.filterOperation = filterOperation;
         this.key = key;
         this.paths = paths;
@@ -49,14 +51,22 @@ public class FilterConfig<R extends SearchableEntity, T> implements IFilterConfi
 
     @Override
     public void checkConfig(Class<R> rootClazz) {
-        paths.forEach(path -> SearchUtils.getEntityClass(rootClazz, path.split(REGEX_DOT)));
+        Class<?> targetClazz = getTargetClass(rootClazz);
+        if (!filterOperation.getOperationType().isAssignableFrom(targetClazz)) {
+            throw new FilterOperationException(String.format("Filter Operation with operation type %s cannot be assigned to %s", filterOperation.getOperationType(), targetClazz));
+        }
+        if (paths.stream().anyMatch(path -> SearchUtils.getEntityClass(rootClazz, path.split(REGEX_DOT)) != targetClazz)) {
+            throw new WrongDataTypeException("Filter config cannot filter on 2 different object types");
+        }
     }
 
     private List<FieldPathObject> getDefaultFieldPath() {
         return this.paths.stream().map(FieldPathObject::of).toList();
     }
 
-
+    public String getFirstPath() {
+        return this.paths.get(0);
+    }
 
     @Override
     public Predicate getPredicate(Class<R> rootClazz, Root<R> root, CriteriaBuilder cb, Map<String, Join<R, ?>> joins, T value) {
@@ -102,7 +112,7 @@ public class FilterConfig<R extends SearchableEntity, T> implements IFilterConfi
     }
 
     private Class<?> getTargetClass(Class<R> rootClazz) {
-        return SearchUtils.getEntityClass(rootClazz, paths.get(0).split(REGEX_DOT));
+        return SearchUtils.getEntityClass(rootClazz, getFirstPath().split(REGEX_DOT));
     }
 
     @Override
