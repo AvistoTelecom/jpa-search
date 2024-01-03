@@ -203,7 +203,7 @@ public class CastService {
     public static List<String> parseJsonToList(String jsonString) {
         List<String> resultList = new ArrayList<>();
         jsonString = jsonString.trim();
-        jsonString = SearchUtils.trimBoth(jsonString, '{', '}');
+        jsonString = SearchUtils.trimBoth(jsonString, '[', ']');
 
         // Split the JSON string into individual entries
         String[] entryStrings = jsonString.split(",");
