@@ -38,6 +38,8 @@ public final class SearchConstants {
         public static final String PRIMITIVE_DOUBLE = "double";
         public static final String LONG = "Long";
         public static final String PRIMITIVE_LONG = "long";
+        public static final String LIST = "List";
+        public static final String MAP = "Map";
     }
 
     public static final class Patterns {
