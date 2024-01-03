@@ -55,7 +55,7 @@ public class FilterConfig<R extends SearchableEntity, T> implements IFilterConfi
         if (!filterOperation.getOperationType().isAssignableFrom(entryClazz)) {
             throw new FilterOperationException(String.format("Filter Operation with operation type %s cannot be assigned to %s", filterOperation.getOperationType(), entryClazz));
         }
-        if (paths.stream().anyMatch(path -> SearchUtils.getEntityClass(rootClazz, path.split(REGEX_DOT)) != entryClazz)) {
+        if (paths.stream().anyMatch(path -> SearchUtils.getEntityClass(rootClazz, path.split(REGEX_DOT)).isAssignableFrom(entryClazz))) {
             throw new WrongDataTypeException("Filter config cannot filter on 2 different object types");
         }
     }
