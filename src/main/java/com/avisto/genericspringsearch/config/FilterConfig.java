@@ -30,7 +30,7 @@ public class FilterConfig<R extends SearchableEntity, T> implements IFilterConfi
         this.paths = paths;
     }
 
-    public static <R extends SearchableEntity, T> FilterConfig<R, T> of(IFilterOperation<T> filterOperation, String key, String pathFirst, String... paths) {
+    public static <R extends SearchableEntity, T> FilterConfig<R, T> of(String key, IFilterOperation<T> filterOperation, String pathFirst, String... paths) {
         List<String> result = new ArrayList<>();
         result.add(pathFirst);
         if (paths != null) {
