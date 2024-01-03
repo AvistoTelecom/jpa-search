@@ -2,7 +2,6 @@ package com.avisto.genericspringsearch.config;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import com.avisto.genericspringsearch.operation.IFilterOperation;
 import com.avisto.genericspringsearch.SearchableEntity;
@@ -17,10 +16,10 @@ import javax.persistence.criteria.Root;
 public class FilterSorterConfig<R extends SearchableEntity, T> extends FilterConfig<R, T> implements ISorterConfig<R> {
 
     private FilterSorterConfig(IFilterOperation<T> filterOperation, String key, List<String> paths) {
-        super(filterOperation, key, paths);
+        super(key, filterOperation, paths);
     }
 
-    public static <R extends SearchableEntity, T> FilterSorterConfig<R, T> of(IFilterOperation<T> filterOperation, String key, String pathFirst, String... paths) {
+    public static <R extends SearchableEntity, T> FilterSorterConfig<R, T> of(String key, IFilterOperation<T> filterOperation, String pathFirst, String... paths) {
         List<String> result = new ArrayList<>();
         result.add(pathFirst);
         if (paths != null) {

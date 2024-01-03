@@ -24,7 +24,7 @@ public class FilterConfig<R extends SearchableEntity, T> implements IFilterConfi
     private final String key;
     private final List<String> paths;
 
-    protected FilterConfig(IFilterOperation<T> filterOperation, String key, List<String> paths) {
+    protected FilterConfig(String key, IFilterOperation<T> filterOperation, List<String> paths) {
         this.filterOperation = filterOperation;
         this.key = key;
         this.paths = paths;
@@ -36,7 +36,7 @@ public class FilterConfig<R extends SearchableEntity, T> implements IFilterConfi
         if (paths != null) {
             result.addAll(List.of(paths));
         }
-        return new FilterConfig<>(filterOperation, key, result);
+        return new FilterConfig<>(key, filterOperation, result);
     }
 
     @Override
