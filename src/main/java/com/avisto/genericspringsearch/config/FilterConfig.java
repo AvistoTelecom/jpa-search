@@ -58,7 +58,7 @@ public class FilterConfig<R extends SearchableEntity, T> implements IFilterConfi
         if (SearchUtils.isPrimitiveType(entryClazz)) {
             sanitizeEntryClazz = SearchUtils.getObjectTypeFromPrimitiveType(entryClazz);
         }
-        if (!filterOperation.getOperationType().isAssignableFrom(sanitizeEntryClazz)) {
+        if (sanitizeEntryClazz != Void.class && !filterOperation.getOperationType().isAssignableFrom(sanitizeEntryClazz)) {
             throw new FilterOperationException(String.format("Filter Operation with operation type %s cannot be assigned to %s", filterOperation.getOperationType(), entryClazz));
         }
         if (paths.stream().anyMatch(path -> SearchUtils.getEntityClass(rootClazz, path.split(REGEX_DOT)) != targetClazz)) {
