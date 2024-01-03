@@ -160,48 +160,42 @@ public class CastService {
     public static Map<String, String> parseJsonToMap(String jsonString) {
         Map<String, String> resultMap = new HashMap<>();
         jsonString = jsonString.trim();
+        jsonString = SearchUtils.trimBoth(jsonString, '{', '}');
 
-        // Check if the JSON string starts with '{' and ends with '}'
-        if (jsonString.startsWith("{") && jsonString.endsWith("}")) {
-            jsonString = jsonString.substring(1, jsonString.length() - 1);
+        // Split the JSON string into individual entries
+        String[] entryStrings = jsonString.split(",");
+        List<String> valueAggregator = new ArrayList<>();
+        String lastEntry = null;
 
-            // Split the JSON string into individual entries
-            String[] entryStrings = jsonString.split(",");
-            List<String> valueAggregator = new ArrayList<>();
-            String lastEntry = null;
+        for (String entryString : entryStrings) {
+            if (lastEntry != null) {
+                valueAggregator.add(entryString);
+            } else {
+                // Split each entry into key and value
+                String[] entryParts = entryString.split(":");
+                if (entryParts.length == 2) {
+                    String entryKey = SearchUtils.trimBoth(entryParts[0], '"', '"');
+                    String entryValue = entryParts[1];
 
-            for (String entryString : entryStrings) {
-                if (lastEntry != null) {
-                    valueAggregator.add(entryString);
-                    if (entryString.endsWith("}") || entryString.endsWith("]")) {
-                        resultMap.put(lastEntry, String.join(",", valueAggregator));
-                        valueAggregator.clear();
-                        lastEntry = null;
-                    }
-                } else {
-                    // Split each entry into key and value
-                    String[] entryParts = entryString.split(":");
-                    if (entryParts.length == 2) {
-                        String entryKey = entryParts[0].replaceAll("\"", "");
-                        String entryValue = entryParts[1];
-
-                        if (entryParts[1].startsWith("[")) {
-                            lastEntry = entryKey;
-                            valueAggregator.add(entryValue);
-                        } else {
-                            resultMap.put(entryKey, entryValue.replaceAll("\"", ""));
-                        }
-                    }
-                    else if (entryParts.length > 2) {
-                        List<String> partList = Arrays.asList(entryParts);
-                        lastEntry = partList.remove(0).replaceAll("\"", "");
-                        valueAggregator.add(String.join(":", partList));
-                        // TODO : error if [1] doesn't start with "{"
+                    if (entryValue.startsWith("[")) {
+                        lastEntry = entryKey;
+                        valueAggregator.add(entryValue);
+                    } else {
+                        resultMap.put(entryKey, SearchUtils.trimBoth(entryValue, '"', '"'));
                     }
                 }
+                else if (entryParts.length > 2) {
+                    List<String> partList = Arrays.asList(entryParts);
+                    lastEntry = SearchUtils.trimBoth(partList.remove(0), '"', '"');
+                    valueAggregator.add(String.join(":", partList));
+                    // TODO : error if [1] doesn't start with "{" or backed "\:"
+                }
             }
-        } else {
-            // TODO : error in this case
+            if (lastEntry != null && (entryString.endsWith("}") || entryString.endsWith("]"))) {
+                resultMap.put(lastEntry, String.join(",", valueAggregator));
+                valueAggregator.clear();
+                lastEntry = null;
+            }
         }
         return resultMap;
     }
@@ -209,11 +203,7 @@ public class CastService {
     public static List<String> parseJsonToList(String jsonString) {
         List<String> resultList = new ArrayList<>();
         jsonString = jsonString.trim();
-
-        // Check if the JSON string starts with '{' and ends with '}'
-        if (jsonString.startsWith("[") && jsonString.endsWith("]")) {
-            jsonString = jsonString.substring(1, jsonString.length() - 1);
-        }
+        jsonString = SearchUtils.trimBoth(jsonString, '{', '}');
 
         // Split the JSON string into individual entries
         String[] entryStrings = jsonString.split(",");
@@ -233,7 +223,7 @@ public class CastService {
                     insideObject = true;
                     valueAggregator.add(entryString);
                 } else {
-                    resultList.add(entryString.replaceAll("\"", ""));
+                    resultList.add(SearchUtils.trimBoth(entryString, '"', '"'));
                 }
             }
         }

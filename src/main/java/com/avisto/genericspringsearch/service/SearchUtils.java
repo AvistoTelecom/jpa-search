@@ -2,7 +2,6 @@ package com.avisto.genericspringsearch.service;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
-import java.security.Key;
 import java.text.Normalizer;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -189,6 +188,20 @@ public final class SearchUtils {
      */
     public static boolean isEmpty(final String[] source) {
         return source == null || source.length == 0;
+    }
+
+
+    /**
+     * Check if a given string starts with char and ends with another one and trim them both.
+     *
+     * @param source The input string to trim.
+     * @return trimmed source or source if characters are not encapsulating source.
+     */
+    public static String trimBoth(final String source, final char prefix, final char suffix) {
+        if (source.charAt(0) == prefix && source.charAt(source.length() - 1) == suffix) {
+            return source.substring(1, source.length() - 1);
+        }
+        return source;
     }
 
 
