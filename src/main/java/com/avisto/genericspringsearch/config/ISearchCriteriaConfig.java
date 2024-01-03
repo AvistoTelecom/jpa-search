@@ -11,11 +11,15 @@ public interface ISearchCriteriaConfig<R extends SearchableEntity> {
 
     Class<R> getRootClass();
 
+    default IFilterConfig<R, ?> getFilterConfig() {
+        return (IFilterConfig<R, ?>) getSearchConfig();
+    }
+
     default String getKey() {
         return getSearchConfig().getKey();
     }
 
     default boolean needMultipleValues() {
-        return getSearchConfig().needMultipleValues();
+        return getFilterConfig().needMultipleValues();
     }
 }

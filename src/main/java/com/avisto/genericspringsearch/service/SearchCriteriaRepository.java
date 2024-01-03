@@ -165,7 +165,11 @@ public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum
                 .map(filter -> {
                     IFilterConfig filterConfig = SearchUtils.getSearchConfig(configurations, filter.getKey(), IFilterConfig.class);
                     Class<?> filterClazz = filterConfig.getEntryClass(rootClazz);
-                    return filterConfig.getPredicate(root, cb, joins, Arrays.stream(filter.getValues()).map(value -> CastService.cast(value, filterClazz)).toArray());
+                    if (filterConfig.needMultipleValues()) {
+                        return filterConfig.getPredicate(rootClazz, root, cb, joins, List.of(filter.getValues()));
+                    }
+                    String value = SearchUtils.isEmpty(filter.getValues()) ? null : filter.getValues()[0];
+                    return filterConfig.getPredicate(rootClazz, root, cb, joins, CastService.cast(value, filterClazz));
                 })
                 .toArray(Predicate[]::new));
     }
@@ -209,7 +213,7 @@ public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum
                     String value = rawValues.remove(key);
                     String[] values;
                     if (!SearchUtils.isBlank(value) && e.needMultipleValues()) {
-                        values = value.split(COMMA, -1);
+                        values = (String[]) CastService.cast(value, List.class).toArray(String[]::new);
                     } else {
                         values = new String[]{value};
                     }

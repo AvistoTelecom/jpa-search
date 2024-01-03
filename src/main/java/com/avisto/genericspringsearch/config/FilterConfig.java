@@ -1,44 +1,42 @@
 package com.avisto.genericspringsearch.config;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import com.avisto.genericspringsearch.FilterOperation;
+import com.avisto.genericspringsearch.exception.FilterOperationException;
+import com.avisto.genericspringsearch.exception.WrongDataTypeException;
+import com.avisto.genericspringsearch.operation.IFilterOperation;
 import com.avisto.genericspringsearch.SearchableEntity;
-import com.avisto.genericspringsearch.exception.CannotSortException;
 import com.avisto.genericspringsearch.model.FieldPathObject;
-import com.avisto.genericspringsearch.model.SortDirection;
+import com.avisto.genericspringsearch.service.CastService;
 import com.avisto.genericspringsearch.service.SearchUtils;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Join;
-import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import static com.avisto.genericspringsearch.service.SearchConstants.Strings.REGEX_DOT;
 
-public class FilterConfig<R extends SearchableEntity, T> implements IFilterConfig<R, T, T>, ISorterConfig<R> {
-    private final FilterOperation filterOperation;
+public class FilterConfig<R extends SearchableEntity, T> implements IFilterConfig<R, T> {
+    private final IFilterOperation<T> filterOperation;
     private final String key;
     private final List<String> paths;
 
-    private FilterConfig(FilterOperation filterOperation, String key, List<String> paths) {
+    protected FilterConfig(String key, IFilterOperation<T> filterOperation, List<String> paths) {
         this.filterOperation = filterOperation;
         this.key = key;
         this.paths = paths;
     }
 
-    public static <R extends SearchableEntity, T> FilterConfig<R, T> of(FilterOperation filterOperation, String key, String pathFirst, String... paths) {
+    public static <R extends SearchableEntity, T> FilterConfig<R, T> of(String key, IFilterOperation<T> filterOperation, String pathFirst, String... paths) {
         List<String> result = new ArrayList<>();
         result.add(pathFirst);
         if (paths != null) {
             result.addAll(List.of(paths));
         }
-        return new FilterConfig<>(filterOperation, key, result);
+        return new FilterConfig<>(key, filterOperation, result);
     }
 
     @Override
@@ -53,9 +51,12 @@ public class FilterConfig<R extends SearchableEntity, T> implements IFilterConfi
 
     @Override
     public void checkConfig(Class<R> rootClazz) {
-        paths.forEach(path -> SearchUtils.getEntityClass(rootClazz, path.split(REGEX_DOT)));
-        if (getSortPath().contains("[")) {
-            throw new CannotSortException("Cannot sort on a Collection");
+        Class<T> entryClazz = getEntryClass(rootClazz);
+        if (!filterOperation.getOperationType().isAssignableFrom(entryClazz)) {
+            throw new FilterOperationException(String.format("Filter Operation with operation type %s cannot be assigned to %s", filterOperation.getOperationType(), entryClazz));
+        }
+        if (paths.stream().anyMatch(path -> SearchUtils.getEntityClass(rootClazz, path.split(REGEX_DOT)) != entryClazz)) {
+            throw new WrongDataTypeException("Filter config cannot filter on 2 different object types");
         }
     }
 
@@ -63,13 +64,12 @@ public class FilterConfig<R extends SearchableEntity, T> implements IFilterConfi
         return this.paths.stream().map(FieldPathObject::of).toList();
     }
 
-    private String getFirstFilterPath() {
+    public String getFirstPath() {
         return this.paths.get(0);
     }
 
-
     @Override
-    public Predicate getPredicate(Root<R> root, CriteriaBuilder criteriaBuilder, Map<String, Join<R, ?>> joins, T... values) {
+    public Predicate getPredicate(Class<R> rootClazz, Root<R> root, CriteriaBuilder cb, Map<String, Join<R, ?>> joins, T value) {
         List<Predicate> orPredicates = new ArrayList<>();
         getDefaultFieldPath().forEach(
                 fieldPath -> {
@@ -84,28 +84,39 @@ public class FilterConfig<R extends SearchableEntity, T> implements IFilterConfi
                     else {
                         path = SearchUtils.getPath(root, stringBasePath);
                     }
-                    orPredicates.add(filterOperation.calculate(
-                            criteriaBuilder,
-                            path,
-                            values
-                    ));
+                    if (filterOperation.needsMultipleValues()) {
+                        Class<?> targetClazz = getTargetClass(rootClazz);
+                        orPredicates.add(filterOperation.calculate(
+                                cb,
+                                path,
+                                (T) ((List<String>) value).stream().map(v -> CastService.cast(v, targetClazz)).toList())
+                        );
+                    } else {
+                        orPredicates.add(filterOperation.calculate(
+                                cb,
+                                path,
+                                value
+                        ));
+                    }
                 }
         );
-        return criteriaBuilder.or(orPredicates.toArray(new Predicate[0]));
+        return cb.or(orPredicates.toArray(Predicate[]::new));
     }
 
     @Override
-    public Class<?> getEntryClass(Class<R> rootClazz) {
-        return SearchUtils.getEntityClass(rootClazz, paths.get(0).split(REGEX_DOT));
+    public Class<T> getEntryClass(Class<R> rootClazz) {
+        if (needMultipleValues()) {
+            return (Class<T>) List.class;
+        }
+        return (Class<T>) getTargetClass(rootClazz);
+    }
+
+    private Class<?> getTargetClass(Class<R> rootClazz) {
+        return SearchUtils.getEntityClass(rootClazz, getFirstPath().split(REGEX_DOT));
     }
 
     @Override
-    public Order getOrder(Root<R> root, CriteriaBuilder criteriaBuilder, SortDirection sortDirection) {
-        return sortDirection.getOrder(criteriaBuilder, SearchUtils.getPath(root, getFirstFilterPath()));
-    }
-
-    @Override
-    public String getSortPath() {
-        return paths.get(0);
+    public boolean needJoin() {
+        return paths.stream().anyMatch(path -> path.contains("["));
     }
 }
