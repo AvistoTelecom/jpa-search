@@ -206,7 +206,7 @@ public final class SearchUtils {
      * @return {@code true} if the string is blank, {@code false} otherwise.
      */
     public static boolean isBlank(final String source) {
-        if (source == null || source.isEmpty()) {
+        if (isEmpty(source)) {
             return true;
         }
         for (char c : source.toCharArray()) {
@@ -227,6 +227,15 @@ public final class SearchUtils {
         return source == null || source.length == 0;
     }
 
+    /**
+     * Check if a given string is empty.
+     *
+     * @param source The input string to check.
+     * @return {@code true} if the string is empty, {@code false} otherwise.
+     */
+    public static boolean isEmpty(final String source) {
+        return source == null || source.isEmpty();
+    }
 
     /**
      * Check if a given string starts with char and ends with another one and trim them both.
@@ -235,7 +244,7 @@ public final class SearchUtils {
      * @return trimmed source or source if characters are not encapsulating source.
      */
     public static String trimBoth(final String source, final char prefix, final char suffix) {
-        if (source.charAt(0) == prefix && source.charAt(source.length() - 1) == suffix) {
+        if (!isEmpty(source) && source.charAt(0) == prefix && source.charAt(source.length() - 1) == suffix) {
             return source.substring(1, source.length() - 1);
         }
         return source;
