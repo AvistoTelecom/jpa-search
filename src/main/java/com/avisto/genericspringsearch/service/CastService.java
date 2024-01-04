@@ -163,7 +163,7 @@ public class CastService {
         jsonString = SearchUtils.trimBoth(jsonString, '{', '}');
 
         // Split the JSON string into individual entries
-        String[] entryStrings = jsonString.split(",");
+        String[] entryStrings = jsonString.split(",", -1);
         List<String> valueAggregator = new ArrayList<>();
         String lastEntry = null;
 
@@ -172,7 +172,7 @@ public class CastService {
                 valueAggregator.add(entryString);
             } else {
                 // Split each entry into key and value
-                String[] entryParts = entryString.split(":");
+                String[] entryParts = entryString.split(":", -1);
                 if (entryParts.length == 2) {
                     String entryKey = SearchUtils.trimBoth(entryParts[0], '"', '"');
                     String entryValue = entryParts[1];
@@ -206,7 +206,7 @@ public class CastService {
         jsonString = SearchUtils.trimBoth(jsonString, '[', ']');
 
         // Split the JSON string into individual entries
-        String[] entryStrings = jsonString.split(",");
+        String[] entryStrings = jsonString.split(",", -1);
         List<String> valueAggregator = new ArrayList<>();
         boolean insideObject = false;
 
