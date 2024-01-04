@@ -16,6 +16,7 @@ import javax.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.avisto.genericspringsearch.service.SearchConstants.Strings.REGEX_DOT;
 
@@ -52,10 +53,15 @@ public class FilterConfig<R extends SearchableEntity, T> implements IFilterConfi
     @Override
     public void checkConfig(Class<R> rootClazz) {
         Class<T> entryClazz = getEntryClass(rootClazz);
-        if (!filterOperation.getOperationType().isAssignableFrom(entryClazz)) {
+        Class<?> targetClazz = getTargetClass(rootClazz);
+        Class<?> sanitizeEntryClazz = entryClazz;
+        if (SearchUtils.isPrimitiveType(entryClazz)) {
+            sanitizeEntryClazz = SearchUtils.getObjectTypeFromPrimitiveType(entryClazz);
+        }
+        if (filterOperation.getOperationType() != Void.class && !filterOperation.getOperationType().isAssignableFrom(sanitizeEntryClazz)) {
             throw new FilterOperationException(String.format("Filter Operation with operation type %s cannot be assigned to %s", filterOperation.getOperationType(), entryClazz));
         }
-        if (paths.stream().anyMatch(path -> SearchUtils.getEntityClass(rootClazz, path.split(REGEX_DOT)) != entryClazz)) {
+        if (paths.stream().anyMatch(path -> SearchUtils.getEntityClass(rootClazz, path.split(REGEX_DOT)) != targetClazz)) {
             throw new WrongDataTypeException("Filter config cannot filter on 2 different object types");
         }
     }

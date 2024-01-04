@@ -4,8 +4,10 @@ import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.text.Normalizer;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -38,7 +40,42 @@ public final class SearchUtils {
         throw new IllegalStateException("Utility class");
     }
 
+    private static final Map<Class<?>, Class<?>> WRAPPER_TYPE_MAP;
+    static {
+        WRAPPER_TYPE_MAP = new HashMap<Class<?>, Class<?>>(16);
+        WRAPPER_TYPE_MAP.put(int.class, Integer.class);
+        WRAPPER_TYPE_MAP.put(byte.class, Byte.class);
+        WRAPPER_TYPE_MAP.put(char.class, Character.class);
+        WRAPPER_TYPE_MAP.put(boolean.class, Boolean.class);
+        WRAPPER_TYPE_MAP.put(double.class, Double.class);
+        WRAPPER_TYPE_MAP.put(float.class, Float.class);
+        WRAPPER_TYPE_MAP.put(long.class, Long.class);
+        WRAPPER_TYPE_MAP.put(short.class, Short.class);
+        WRAPPER_TYPE_MAP.put(void.class, Void.class);
+    }
+
+
     private static final Pattern STRIP_ACCENTS_PATTERN = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
+
+    /**
+     * Check if it is a primitive type.
+     *
+     * @param source The class to check.
+     * @return {@code true} if the class is primitive, {@code false} otherwise.
+     */
+    public static boolean isPrimitiveType(Class<?> source) {
+        return WRAPPER_TYPE_MAP.containsKey(source);
+    }
+
+    /**
+     * Get Object type from a primitive type.
+     *
+     * @param source The primitive class.
+     * @return The object type associated to the primitive one.
+     */
+    public static Class<?> getObjectTypeFromPrimitiveType(Class<?> source) {
+        return WRAPPER_TYPE_MAP.get(source);
+    }
 
     /**
      * Get the entity class for a given class and an array of field paths.
@@ -169,7 +206,7 @@ public final class SearchUtils {
      * @return {@code true} if the string is blank, {@code false} otherwise.
      */
     public static boolean isBlank(final String source) {
-        if (source == null || source.isEmpty()) {
+        if (isEmpty(source)) {
             return true;
         }
         for (char c : source.toCharArray()) {
@@ -190,6 +227,15 @@ public final class SearchUtils {
         return source == null || source.length == 0;
     }
 
+    /**
+     * Check if a given string is empty.
+     *
+     * @param source The input string to check.
+     * @return {@code true} if the string is empty, {@code false} otherwise.
+     */
+    public static boolean isEmpty(final String source) {
+        return source == null || source.isEmpty();
+    }
 
     /**
      * Check if a given string starts with char and ends with another one and trim them both.
@@ -198,7 +244,7 @@ public final class SearchUtils {
      * @return trimmed source or source if characters are not encapsulating source.
      */
     public static String trimBoth(final String source, final char prefix, final char suffix) {
-        if (source.charAt(0) == prefix && source.charAt(source.length() - 1) == suffix) {
+        if (!isEmpty(source) && source.charAt(0) == prefix && source.charAt(source.length() - 1) == suffix) {
             return source.substring(1, source.length() - 1);
         }
         return source;
