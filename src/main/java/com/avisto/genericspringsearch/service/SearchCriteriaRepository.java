@@ -95,6 +95,9 @@ public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum
             throw new EmptyCriteriaException(String.format("%s is empty : Cannot declare an empty criteria", configClazz.getName()));
         }
         Class<R> rootClazz = configurations[0].getRootClass();
+        Map<String, IFilterConfig<R, ?>> filterMap = SearchUtils.getSearchConfigMap(configurations, searchCriteria.getFilterKeys(), (Class<IFilterConfig<R, ?>>)(Class)IFilterConfig.class);
+        Map<String, ISorterConfig<R>> sorterMap = SearchUtils.getSearchConfigMap(configurations, searchCriteria.getSorterKeys(), (Class<ISorterConfig<R>>)(Class)ISorterConfig.class);
+
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Tuple> criteriaQuery = cb.createTupleQuery();
         criteriaQuery.distinct(true);
@@ -102,12 +105,12 @@ public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum
         Map<String, Join<R, ?>> joins = new HashMap<>();
 
         // Get the predicate for filtering the search results
-        criteriaQuery.where(getPredicates(searchCriteria, rootClazz, configurations, root, cb, joins));
+        criteriaQuery.where(getPredicates(searchCriteria, rootClazz, filterMap, root, cb, joins));
 
         int limit = searchCriteria.getSize();
 
         // Get the total count of results to create the Page object
-        Long count = getCount(cb, rootClazz, configurations, searchCriteria);
+        Long count = getCount(cb, rootClazz, filterMap, searchCriteria);
 
         // Check if the "limit" is set to zero (size is zero)
         if (limit > 0) {
@@ -117,7 +120,7 @@ public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum
             List<Order> orders = searchCriteria.getSorts()
                     .stream()
                     .map(sort -> {
-                        ISorterConfig<R> sorterConfig = SearchUtils.getSearchConfig(configurations, sort.getKey(), ISorterConfig.class);
+                        ISorterConfig<R> sorterConfig = sorterMap.get(sort.getKey());
                         selections.add(SearchUtils.getPath(root, sorterConfig.getSortPath()));
                         return sorterConfig.getOrder(root, cb, sort.getSortDirection());
                     })
@@ -133,7 +136,7 @@ public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum
 
             List<Object> ids = typedQuery.getResultList().stream().map(tuple -> tuple.get(0)).toList();
 
-            List<R> results = getResult(cb, rootClazz, ids, searchCriteria.getSorts(), configurations, entityGraphName);
+            List<R> results = getResult(cb, rootClazz, ids, searchCriteria.getSorts(), sorterMap, entityGraphName);
 
             // Return the Page object with the search results and pagination information
             return new Page<>(results.stream().map(mapper).toList(), searchCriteria.getPageNumber(), limit, count);
@@ -149,13 +152,12 @@ public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum
         PRIVATE
      */
 
-    private List<R> getResult(CriteriaBuilder cb, Class<R> rootClazz, List<Object> ids, List<OrderCriteria> sorts, E[] configurations, String eg) {
+    private List<R> getResult(CriteriaBuilder cb, Class<R> rootClazz, List<Object> ids, List<OrderCriteria> sorts, Map<String, ISorterConfig<R>> sorterMap, String eg) {
         CriteriaQuery<R> cq = cb.createQuery(rootClazz);
         Root<R> r = cq.from(rootClazz);
         cq.where(ListObjectFilterOperation.IN_EQUAL.calculate(cb, SearchUtils.getIdPath(r, rootClazz), ids));
         cq.orderBy(sorts.stream()
-                .map(sort -> SearchUtils.getSearchConfig(configurations, sort.getKey(), ISorterConfig.class).
-                        getOrder(r, cb, sort.getSortDirection()))
+                .map(sort -> sorterMap.get(sort.getKey()).getOrder(r, cb, sort.getSortDirection()))
                 .toList());
 
         TypedQuery<R> tq = entityManager.createQuery(cq);
@@ -166,11 +168,11 @@ public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum
         return tq.getResultList();
     }
 
-    private Predicate getPredicates(SearchCriteria searchCriteria, Class<R> rootClazz, E[] configurations, Root<R> root, CriteriaBuilder cb, Map<String, Join<R, ?>> joins) {
+    private Predicate getPredicates(SearchCriteria searchCriteria, Class<R> rootClazz, Map<String, IFilterConfig<R, ?>> filterMap, Root<R> root, CriteriaBuilder cb, Map<String, Join<R, ?>> joins) {
         return cb.and(searchCriteria.getFilters()
                 .stream()
                 .map(filter -> {
-                    IFilterConfig filterConfig = SearchUtils.getSearchConfig(configurations, filter.getKey(), IFilterConfig.class);
+                    IFilterConfig filterConfig = filterMap.get(filter.getKey());
                     Class<?> filterClazz = filterConfig.getEntryClass(rootClazz);
                     if (filterConfig.needMultipleValues()) {
                         return filterConfig.getPredicate(rootClazz, root, cb, joins, List.of(filter.getValues()));
@@ -256,10 +258,10 @@ public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum
         return ordersCriteria;
     }
 
-    private Long getCount(CriteriaBuilder cb, Class<R> rootClazz, E[] configurations, SearchCriteria searchCriteria) {
+    private Long getCount(CriteriaBuilder cb, Class<R> rootClazz, Map<String, IFilterConfig<R, ?>> filterMap, SearchCriteria searchCriteria) {
         CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
         Root<R> root = countQuery.from(rootClazz);
-        countQuery.select(cb.count(root)).where(getPredicates(searchCriteria, rootClazz, configurations, root, cb, new HashMap<>()));
+        countQuery.select(cb.count(root)).where(getPredicates(searchCriteria, rootClazz, filterMap, root, cb, new HashMap<>()));
         return entityManager.createQuery(countQuery).getSingleResult();
     }
 }
