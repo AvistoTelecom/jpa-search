@@ -3,9 +3,11 @@ package com.avisto.genericspringsearch.service;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.text.Normalizer;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
@@ -23,6 +25,11 @@ import com.avisto.genericspringsearch.exception.FieldNotInCriteriaException;
 import com.avisto.genericspringsearch.exception.FieldPathNotFoundException;
 import com.avisto.genericspringsearch.exception.KeyDuplicateException;
 
+import javax.persistence.EmbeddedId;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.MappedSuperclass;
+import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Path;
 
@@ -265,6 +272,29 @@ public final class SearchUtils {
                 map(e -> (T) e.getSearchConfig()).
                 findFirst().
                 orElseThrow(() -> new FieldNotInCriteriaException(String.format("Field %s is not specified in criteria", key)));
+    }
+
+    /**
+     * Get Path of Entity @Id or @EmbeddedId
+     *
+     * @param from Config elements to search in.
+     * @param rootClazz The key of search config.
+     * @return The Path associated to the @Id or @EmbeddedId
+     */
+    public static <R extends SearchableEntity> Path<String> getIdPath(From<R, ?> from, Class<R> rootClazz) {
+        return getIdPathFromAnyClass(from, rootClazz);
+    }
+
+    private static <R extends SearchableEntity> Path<String> getIdPathFromAnyClass(From<R, ?> from, Class<?> clazz) {
+        if (clazz != null && (clazz.isAnnotationPresent(Entity.class) || clazz.isAnnotationPresent(MappedSuperclass.class))) {
+            for (Field field : clazz.getDeclaredFields()) {
+                if (field.isAnnotationPresent(Id.class) || field.isAnnotationPresent(EmbeddedId.class)) {
+                    return from.get(field.getName());
+                }
+            }
+            return getIdPathFromAnyClass(from, clazz.getSuperclass());
+        }
+        return null;
     }
 
     /**
