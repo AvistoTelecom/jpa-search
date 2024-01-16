@@ -39,7 +39,6 @@ import com.avisto.genericspringsearch.operation.ListObjectFilterOperation;
 import static com.avisto.genericspringsearch.service.SearchConstants.KeyWords.PAGE;
 import static com.avisto.genericspringsearch.service.SearchConstants.KeyWords.SIZE;
 import static com.avisto.genericspringsearch.service.SearchConstants.KeyWords.SORTS;
-import static com.avisto.genericspringsearch.service.SearchConstants.Strings.COMMA;
 
 /**
  * This class provides a generic search criteria repository to perform search operations on JPA entities. It supports filtering,
@@ -134,20 +133,7 @@ public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum
 
             List<Object> ids = typedQuery.getResultList().stream().map(tuple -> tuple.get(0)).toList();
 
-            CriteriaQuery<R> cq = cb.createQuery(rootClazz);
-            Root<R> r = criteriaQuery.from(rootClazz);
-            cq.where(ListObjectFilterOperation.IN_EQUAL.calculate(cb, SearchUtils.getIdPath(r, rootClazz), ids));
-            cq.orderBy(searchCriteria.getSorts().stream()
-                    .map(sort -> SearchUtils.getSearchConfig(configurations, sort.getKey(), ISorterConfig.class).
-                                getOrder(root, cb, sort.getSortDirection()))
-                    .toList());
-
-            TypedQuery<R> tq = entityManager.createQuery(cq);
-
-            if (entityGraphName != null) {
-                tq.setHint("javax.persistence.fetchgraph", entityManager.getEntityGraph(entityGraphName));
-            }
-            List<R> results = tq.getResultList();
+            List<R> results = getResult(cb, rootClazz, ids, searchCriteria.getSorts(), configurations, entityGraphName);
 
             // Return the Page object with the search results and pagination information
             return new Page<>(results.stream().map(mapper).toList(), searchCriteria.getPageNumber(), limit, count);
@@ -162,6 +148,23 @@ public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum
     /*
         PRIVATE
      */
+
+    private List<R> getResult(CriteriaBuilder cb, Class<R> rootClazz, List<Object> ids, List<OrderCriteria> sorts, E[] configurations, String eg) {
+        CriteriaQuery<R> cq = cb.createQuery(rootClazz);
+        Root<R> r = cq.from(rootClazz);
+        cq.where(ListObjectFilterOperation.IN_EQUAL.calculate(cb, SearchUtils.getIdPath(r, rootClazz), ids));
+        cq.orderBy(sorts.stream()
+                .map(sort -> SearchUtils.getSearchConfig(configurations, sort.getKey(), ISorterConfig.class).
+                        getOrder(r, cb, sort.getSortDirection()))
+                .toList());
+
+        TypedQuery<R> tq = entityManager.createQuery(cq);
+
+        if (eg != null) {
+            tq.setHint("javax.persistence.fetchgraph", entityManager.getEntityGraph(eg));
+        }
+        return tq.getResultList();
+    }
 
     private Predicate getPredicates(SearchCriteria searchCriteria, Class<R> rootClazz, E[] configurations, Root<R> root, CriteriaBuilder cb, Map<String, Join<R, ?>> joins) {
         return cb.and(searchCriteria.getFilters()
