@@ -98,6 +98,62 @@ public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum
         Map<String, IFilterConfig<R, ?>> filterMap = SearchUtils.getSearchConfigMap(configurations, searchCriteria.getFilterKeys(), (Class<IFilterConfig<R, ?>>)(Class)IFilterConfig.class);
         Map<String, ISorterConfig<R>> sorterMap = SearchUtils.getSearchConfigMap(configurations, searchCriteria.getSorterKeys(), (Class<ISorterConfig<R>>)(Class)ISorterConfig.class);
 
+        if (filterMap.values().stream().anyMatch(IFilterConfig::needJoin)) {
+            return doubleRequest(rootClazz, searchCriteria, filterMap, sorterMap, entityGraphName).map(mapper);
+        } else {
+            return simpleRequest(rootClazz, searchCriteria, filterMap, sorterMap, entityGraphName).map(mapper);
+        }
+    }
+
+    /*
+        PRIVATE
+     */
+
+    private Page<R> simpleRequest(Class<R> rootClazz, SearchCriteria searchCriteria, Map<String, IFilterConfig<R, ?>> filterMap, Map<String, ISorterConfig<R>> sorterMap, String entityGraphName) {
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<R> criteriaQuery = cb.createQuery(rootClazz);
+        Root<R> root = criteriaQuery.from(rootClazz);
+        Map<String, Join<R, ?>> joins = new HashMap<>();
+
+        // Get the predicate for filtering the search results
+        criteriaQuery.where(getPredicates(searchCriteria, rootClazz, filterMap, root, cb, joins));
+
+        int limit = searchCriteria.getSize();
+
+        // Get the total count of results to create the Page object
+        Long count = getCount(cb, rootClazz, filterMap, searchCriteria);
+
+        // Check if the "limit" is set to zero (size is zero)
+        if (limit > 0) {
+            // Set sorting in the CriteriaQuery
+            List<Order> orders = searchCriteria.getSorts()
+                    .stream()
+                    .map(sort -> sorterMap.get(sort.getKey()).getOrder(root, cb, sort.getSortDirection()))
+                    .toList();
+            criteriaQuery.orderBy(orders);
+
+            // Execute the query with pagination settings
+            TypedQuery<R> typedQuery = entityManager.createQuery(criteriaQuery);
+            typedQuery.setFirstResult(searchCriteria.getPageNumber() * limit);
+            typedQuery.setMaxResults(limit);
+            if (entityGraphName != null) {
+                typedQuery.setHint("javax.persistence.fetchgraph", entityManager.getEntityGraph(entityGraphName));
+            }
+
+            List<R> results = typedQuery.getResultList();
+
+            // Return the Page object with the search results and pagination information
+            return new Page<>(results, searchCriteria.getPageNumber(), limit, count);
+        } else if (limit == 0) {
+            // Return the Page object with the search results and pagination information
+            return new Page<>(Collections.emptyList(), searchCriteria.getPageNumber(), limit, count);
+        } else {
+            throw new WrongDataTypeException("Limit cannot be negative");
+        }
+
+    }
+
+    private Page<R> doubleRequest(Class<R> rootClazz, SearchCriteria searchCriteria, Map<String, IFilterConfig<R, ?>> filterMap, Map<String, ISorterConfig<R>> sorterMap, String entityGraphName) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Tuple> criteriaQuery = cb.createTupleQuery();
         criteriaQuery.distinct(true);
@@ -139,7 +195,7 @@ public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum
             List<R> results = getResult(cb, rootClazz, ids, searchCriteria.getSorts(), sorterMap, entityGraphName);
 
             // Return the Page object with the search results and pagination information
-            return new Page<>(results.stream().map(mapper).toList(), searchCriteria.getPageNumber(), limit, count);
+            return new Page<>(results, searchCriteria.getPageNumber(), limit, count);
         } else if (limit == 0) {
             // Return the Page object with the search results and pagination information
             return new Page<>(Collections.emptyList(), searchCriteria.getPageNumber(), limit, count);
@@ -147,10 +203,6 @@ public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum
             throw new WrongDataTypeException("Limit cannot be negative");
         }
     }
-
-    /*
-        PRIVATE
-     */
 
     private List<R> getResult(CriteriaBuilder cb, Class<R> rootClazz, List<Object> ids, List<OrderCriteria> sorts, Map<String, ISorterConfig<R>> sorterMap, String eg) {
         CriteriaQuery<R> cq = cb.createQuery(rootClazz);
