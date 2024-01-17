@@ -171,15 +171,16 @@ public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum
         // Check if the "limit" is set to zero (size is zero)
         if (limit > 0) {
             List<Selection<?>> selections = new ArrayList<>();
-            selections.add(SearchUtils.getIdPath(root, rootClazz));
+            String stringIdPath = SearchUtils.getIdStringPath(rootClazz);
+            selections.add(root.get(stringIdPath));
+
             // Set sorting and select elements in the CriteriaQuery
             List<Order> orders = searchCriteria.getSorts()
-                    .stream()
-                    .map(sort -> {
-                        ISorterConfig<R> sorterConfig = sorterMap.get(sort.getKey());
-                        selections.add(SearchUtils.getPath(root, sorterConfig.getSortPath()));
-                        return sorterConfig.getOrder(root, cb, sort.getSortDirection());
-                    })
+                    .stream().map(
+                            sort -> new Pair<>(sort.getSortDirection(), sorterMap.get(sort.getKey()))
+                    )
+                    .filter(pair -> !stringIdPath.equals(pair.right().getSortPath()))
+                    .map(pair -> pair.right().getOrder(root, cb, pair.left()))
                     .toList();
 
             criteriaQuery.multiselect(selections);
@@ -207,7 +208,7 @@ public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum
     private List<R> getResult(CriteriaBuilder cb, Class<R> rootClazz, List<Object> ids, List<OrderCriteria> sorts, Map<String, ISorterConfig<R>> sorterMap, String eg) {
         CriteriaQuery<R> cq = cb.createQuery(rootClazz);
         Root<R> r = cq.from(rootClazz);
-        cq.where(ListObjectFilterOperation.IN_EQUAL.calculate(cb, SearchUtils.getIdPath(r, rootClazz), ids));
+        cq.where(ListObjectFilterOperation.IN_EQUAL.calculate(cb, r.get(SearchUtils.getIdStringPath(rootClazz)), ids));
         cq.orderBy(sorts.stream()
                 .map(sort -> sorterMap.get(sort.getKey()).getOrder(r, cb, sort.getSortDirection()))
                 .toList());
@@ -315,5 +316,8 @@ public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum
         Root<R> root = countQuery.from(rootClazz);
         countQuery.select(cb.count(root)).where(getPredicates(searchCriteria, rootClazz, filterMap, root, cb, new HashMap<>()));
         return entityManager.createQuery(countQuery).getSingleResult();
+    }
+
+    public record Pair<A, B>(A left, B right) {
     }
 }

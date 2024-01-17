@@ -24,6 +24,7 @@ import com.avisto.genericspringsearch.exception.EmptyCriteriaException;
 import com.avisto.genericspringsearch.exception.FieldNotInCriteriaException;
 import com.avisto.genericspringsearch.exception.FieldPathNotFoundException;
 import com.avisto.genericspringsearch.exception.KeyDuplicateException;
+import com.avisto.genericspringsearch.exception.WrongDataTypeException;
 
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
@@ -181,7 +182,7 @@ public final class SearchUtils {
      * @param input The input string from which accents will be removed.
      * @return The string with accents removed.
      */
-    public static String stripAccents(final String input) {
+    static String stripAccents(final String input) {
         if (input == null) {
             return null;
         }
@@ -212,7 +213,7 @@ public final class SearchUtils {
      * @param source The input string to check.
      * @return {@code true} if the string is blank, {@code false} otherwise.
      */
-    public static boolean isBlank(final String source) {
+    static boolean isBlank(final String source) {
         if (isEmpty(source)) {
             return true;
         }
@@ -230,7 +231,7 @@ public final class SearchUtils {
      * @param source The input string to check.
      * @return {@code true} if the string array is empty, {@code false} otherwise.
      */
-    public static boolean isEmpty(final String[] source) {
+    static boolean isEmpty(final String[] source) {
         return source == null || source.length == 0;
     }
 
@@ -240,7 +241,7 @@ public final class SearchUtils {
      * @param source The input string to check.
      * @return {@code true} if the string is empty, {@code false} otherwise.
      */
-    public static boolean isEmpty(final String source) {
+    static boolean isEmpty(final String source) {
         return source == null || source.isEmpty();
     }
 
@@ -250,7 +251,7 @@ public final class SearchUtils {
      * @param source The input string to trim.
      * @return trimmed source or source if characters are not encapsulating source.
      */
-    public static String trimBoth(final String source, final char prefix, final char suffix) {
+    static String trimBoth(final String source, final char prefix, final char suffix) {
         if (!isEmpty(source) && source.charAt(0) == prefix && source.charAt(source.length() - 1) == suffix) {
             return source.substring(1, source.length() - 1);
         }
@@ -266,40 +267,39 @@ public final class SearchUtils {
      * @param castClass The class of cast needed.
      * @return The search config with the key mentioned in params.
      */
-    public static <E extends Enum<?> & ISearchCriteriaConfig<?>, T extends ISearchConfig<?>> T getSearchConfig(E[] configurations, String key, Class<T> castClass) {
+    private static <E extends Enum<?> & ISearchCriteriaConfig<?>, T extends ISearchConfig<?>> T getSearchConfig(E[] configurations, String key, Class<T> castClass) {
         return Arrays.stream(configurations).
                 filter(e -> Objects.equals(key,e.getKey()) && castClass.isAssignableFrom(e.getSearchConfig().getClass())).
                 map(e -> (T) e.getSearchConfig()).
                 findFirst().
                 orElseThrow(() -> new FieldNotInCriteriaException(String.format("Field %s is not specified in criteria", key)));
     }
-    public static <R extends SearchableEntity, E extends Enum<?> & ISearchCriteriaConfig<R>, T extends ISearchConfig<R>> Map<String, T> getSearchConfigMap(E[] configurations, List<String> keys, Class<T> castClass) {
+    static <R extends SearchableEntity, E extends Enum<?> & ISearchCriteriaConfig<R>, T extends ISearchConfig<R>> Map<String, T> getSearchConfigMap(E[] configurations, List<String> keys, Class<T> castClass) {
         Map<String, T> result = new HashMap<>();
         keys.forEach(key -> result.put(key, SearchUtils.getSearchConfig(configurations, key, castClass)));
         return result;
     }
 
     /**
-     * Get Path of Entity @Id or @EmbeddedId
+     * Get String Path of Entity @Id or @EmbeddedId
      *
-     * @param from Config elements to search in.
      * @param rootClazz The key of search config.
-     * @return The Path associated to the @Id or @EmbeddedId
+     * @return The String Path associated to the @Id or @EmbeddedId
      */
-    public static <R extends SearchableEntity> Path<String> getIdPath(From<R, ?> from, Class<R> rootClazz) {
-        return getIdPathFromAnyClass(from, rootClazz);
+    static <R extends SearchableEntity> String getIdStringPath(Class<R> rootClazz) {
+        return getIdPathFromAnyClass(rootClazz);
     }
 
-    private static <R extends SearchableEntity> Path<String> getIdPathFromAnyClass(From<R, ?> from, Class<?> clazz) {
+    private static <R extends SearchableEntity> String getIdPathFromAnyClass(Class<?> clazz) {
         if (clazz != null && (clazz.isAnnotationPresent(Entity.class) || clazz.isAnnotationPresent(MappedSuperclass.class))) {
             for (Field field : clazz.getDeclaredFields()) {
                 if (field.isAnnotationPresent(Id.class) || field.isAnnotationPresent(EmbeddedId.class)) {
-                    return from.get(field.getName());
+                    return field.getName();
                 }
             }
-            return getIdPathFromAnyClass(from, clazz.getSuperclass());
+            return getIdPathFromAnyClass(clazz.getSuperclass());
         }
-        return null;
+        throw new WrongDataTypeException("this entity needs to declare in it's hierarchy a @Id or @EmbeddedId");
     }
 
     /**
