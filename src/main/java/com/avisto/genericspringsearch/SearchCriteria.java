@@ -1,5 +1,7 @@
 package com.avisto.genericspringsearch;
 
+import com.avisto.genericspringsearch.config.AbstractCriteria;
+
 import java.util.List;
 import java.util.Set;
 
@@ -8,6 +10,14 @@ public class SearchCriteria {
     private int size = Integer.MAX_VALUE;
     private Set<FilterCriteria> filters;
     private List<OrderCriteria> sorts;
+
+    public List<String> getFilterKeys() {
+        return filters.stream().map(AbstractCriteria::getKey).toList();
+    }
+
+    public List<String> getSorterKeys() {
+        return sorts.stream().map(AbstractCriteria::getKey).toList();
+    }
 
     public boolean filtersContainsKey(String key) {
         return filters.stream().anyMatch(filterCriteria -> filterCriteria.getKey().equals(key));

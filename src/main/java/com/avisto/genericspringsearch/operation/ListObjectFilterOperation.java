@@ -9,7 +9,9 @@ public enum ListObjectFilterOperation implements IFilterOperation<List<Object>> 
     IN_EQUAL {
         @Override
         public Predicate calculate(CriteriaBuilder cb, Expression<?> expression, List<Object> value) {
-            return cb.or(value.stream().map(v -> ObjectFilterOperation.EQUAL.calculate(cb, expression, v)).toArray(Predicate[]::new));
+            CriteriaBuilder.In<Object> inClause = cb.in(expression);
+            value.forEach(inClause::value);
+            return inClause;
         }
     };
 
