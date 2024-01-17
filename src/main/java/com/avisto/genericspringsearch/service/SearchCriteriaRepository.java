@@ -177,10 +177,15 @@ public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum
             // Set sorting and select elements in the CriteriaQuery
             List<Order> orders = searchCriteria.getSorts()
                     .stream().map(
-                            sort -> new Pair<>(sort.getSortDirection(), sorterMap.get(sort.getKey()))
+                            sort -> {
+                                ISorterConfig<R> sorterConfig = sorterMap.get(sort.getKey());
+                                String sorterStringPath = sorterConfig.getSortPath();
+                                if (!stringIdPath.equals(sorterStringPath)) {
+                                    selections.add(SearchUtils.getPath(root, sorterStringPath));
+                                }
+                                return sorterConfig.getOrder(root, cb, sort.getSortDirection());
+                            }
                     )
-                    .filter(pair -> !stringIdPath.equals(pair.right().getSortPath()))
-                    .map(pair -> pair.right().getOrder(root, cb, pair.left()))
                     .toList();
 
             criteriaQuery.multiselect(selections);
@@ -316,8 +321,5 @@ public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum
         Root<R> root = countQuery.from(rootClazz);
         countQuery.select(cb.count(root)).where(getPredicates(searchCriteria, rootClazz, filterMap, root, cb, new HashMap<>()));
         return entityManager.createQuery(countQuery).getSingleResult();
-    }
-
-    public record Pair<A, B>(A left, B right) {
     }
 }
