@@ -121,7 +121,7 @@ public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum
         int limit = searchCriteria.getSize();
 
         // Get the total count of results to create the Page object
-        Long count = getCount(cb, rootClazz, filterMap, searchCriteria);
+        Long count = getCount(cb, rootClazz, filterMap, searchCriteria, SearchUtils.getIdStringPath(rootClazz));
 
         // Check if the "limit" is set to zero (size is zero)
         if (limit > 0) {
@@ -165,13 +165,14 @@ public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum
 
         int limit = searchCriteria.getSize();
 
+        String stringIdPath = SearchUtils.getIdStringPath(rootClazz);
+
         // Get the total count of results to create the Page object
-        Long count = getCount(cb, rootClazz, filterMap, searchCriteria);
+        Long count = getCount(cb, rootClazz, filterMap, searchCriteria, stringIdPath);
 
         // Check if the "limit" is set to zero (size is zero)
         if (limit > 0) {
             List<Selection<?>> selections = new ArrayList<>();
-            String stringIdPath = SearchUtils.getIdStringPath(rootClazz);
             selections.add(root.get(stringIdPath));
 
             // Set sorting and select elements in the CriteriaQuery
@@ -316,10 +317,10 @@ public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum
         return ordersCriteria;
     }
 
-    private Long getCount(CriteriaBuilder cb, Class<R> rootClazz, Map<String, IFilterConfig<R, ?>> filterMap, SearchCriteria searchCriteria) {
+    private Long getCount(CriteriaBuilder cb, Class<R> rootClazz, Map<String, IFilterConfig<R, ?>> filterMap, SearchCriteria searchCriteria, String idPath) {
         CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
         Root<R> root = countQuery.from(rootClazz);
-        countQuery.select(cb.countDistinct(root.get(SearchUtils.getIdStringPath(rootClazz)))).where(getPredicates(searchCriteria, rootClazz, filterMap, root, cb, new HashMap<>()));
+        countQuery.select(cb.countDistinct(root.get(idPath))).where(getPredicates(searchCriteria, rootClazz, filterMap, root, cb, new HashMap<>()));
         return entityManager.createQuery(countQuery).getSingleResult();
     }
 }
