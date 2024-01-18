@@ -319,7 +319,7 @@ public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum
     private Long getCount(CriteriaBuilder cb, Class<R> rootClazz, Map<String, IFilterConfig<R, ?>> filterMap, SearchCriteria searchCriteria) {
         CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
         Root<R> root = countQuery.from(rootClazz);
-        countQuery.select(cb.count(root)).where(getPredicates(searchCriteria, rootClazz, filterMap, root, cb, new HashMap<>()));
+        countQuery.select(cb.countDistinct(root.get(SearchUtils.getIdStringPath(rootClazz)))).where(getPredicates(searchCriteria, rootClazz, filterMap, root, cb, new HashMap<>()));
         return entityManager.createQuery(countQuery).getSingleResult();
     }
 }
