@@ -1,5 +1,5 @@
 plugins {
-    id 'java'
+    id 'java-library'
 }
 
 group 'com.avisto'
@@ -15,7 +15,7 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
     implementation 'javax.persistence:javax.persistence-api:2.2'
-    implementation 'javax.inject:javax.inject:1'
+    api 'javax.inject:javax.inject:1'
 }
 
 java {
