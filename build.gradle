@@ -9,16 +9,16 @@ repositories {
     mavenCentral()
 }
 
-//jar {
-//    manifest {
-//        attributes(
-//                'Main-Class': 'com.avisto.genericspringsearch.GenericSpringSearch'
-//        )
-//    }
-//    from {
-//        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
-//    }
-//}
+jar {
+    manifest {
+        attributes(
+                'Main-Class': 'com.avisto.genericspringsearch.GenericSpringSearch'
+        )
+    }
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
 
 dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter:5.9.3'
@@ -27,9 +27,6 @@ dependencies {
 
     implementation 'jakarta.persistence:jakarta.persistence-api:3.1.0'
     api 'jakarta.inject:jakarta.inject-api:2.0.1'
-
-    // Pourquoi faire hériter les projets de cette dépendence ?
-//    api 'jakarta.inject:jakarta.inject:1'
 }
 
 java {
