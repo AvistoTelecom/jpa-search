@@ -107,7 +107,7 @@ Within a particular ecosystem, there may be a common way of installing things, s
 <details>
   <summary>1 - Configure your SpringBootApplication</summary>
 
-  First you must precise that you want Spring scan your package and the library package so in your SpringBootApplication add this line:
+  Firstly, you need to specify that you want Spring to scan your package and the library package, so in your SpringBootApplication add this line :
   ```java
   @SpringBootApplication(scanBasePackages = {"your_package", "com.avisto.genericspringsearch"})
   ```
@@ -116,7 +116,7 @@ Within a particular ecosystem, there may be a common way of installing things, s
 <details>
   <summary>2 - Configure your Entity</summary>
 
-For the library to correctly scan your entity you must add SearchableEntity to your class :
+For the library to correctly analyze your entity, you must add SearchableEntity to your Entity :
 ```java
   public class Entity implements SearchableEntity {}
   ```
@@ -145,7 +145,7 @@ Pas nécessaire je pense à voir
 <details>
   <summary>4 - Create Criteria Enum</summary>
 
-To specify filter for your research you must create a enum as we saw above
+To specify a filter for your search, you need to create an enum as described in the description section.
 
 </details>
 
@@ -161,7 +161,7 @@ To integrate the library into your services, add the following lines :
 <details>
   <summary>6 - Example of use</summary>
 
-This example show you how to make a search of your entity with EntityCriteria Enum :
+This example shows you how to search your entity with EntityCriteria Enum :
 ```java
   public Page<EntityDTO.EntityInList> getEntities(Map<String, String> params, List<String> sorts) {
     return searchCriteriaRepository.search(EntityCriteria.class, params, sorts, EntityDTO.EntityInList::new);
