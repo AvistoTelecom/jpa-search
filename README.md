@@ -1,4 +1,4 @@
-<img src="https://www.advans-group.com//wp-content/uploads/2019/04/Logo-ADVANS-Group-A.png" alt="Logo Avisto" width="150" height="150" />
+<img src="https://www.apec.fr/files/live/mounts/images/presentation_entreprise/416917/MIG_RENAME_06F162FF85ACD9785CB46C012D1AEFF21A5DF630.png" alt="Logo Avisto" width="250" height="160" />
 
 # Generic-Spring-Search
 
