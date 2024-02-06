@@ -4,11 +4,16 @@
 
 
 TODO : Add JavaDoc and clean code
-TODO : remove spring dependency by implementing Pageables
+TODO : remove spring dependency by implementing Pageables ( already done ?)
 TODO : add Unit Tests
 
+[![Spring](https://img.shields.io/badge/Spring-6DB33F?style=for-the-badge&logo=spring&logoColor=white)](https://spring.io/)
+[![Postgres](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white
+)](https://www.postgresql.org/)
+
+
 ***
-## Description
+## Description 🔍
 
 Generic-Spring-Search simplifies specific entity searches with JPA, including :
 - Modular filters
@@ -83,7 +88,7 @@ The `FilterOperation` is used to describe the operation to be performed on the f
 
 You can easily create an other `enum` file like `FilterOperation.java`.
 
-### Known limitations
+### Known limitations 📈
 
 - The generic search doesn't yet offer the option of navigating through several levels of ManyToMany dependencies, for example: Companies → Employees → Pets (the generic search doesn't allow you to filter on the pets owned by the employees of each company).
 - Sorting on elements requiring a join is not possible (How to sort on a list of linked elements)
@@ -93,10 +98,10 @@ You can easily create an other `enum` file like `FilterOperation.java`.
     - String: String;
     - Object: Boolean, boolean, UUID;
 
-## Installation
+## Installation ⬇️
 Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
 
-## Usage
+## Usage ✋
 
 
 <details>
@@ -165,10 +170,10 @@ This example show you how to make a search of your entity with EntityCriteria En
 </details>
 
 
-## Contributing
+## Contributing 👯
 
 Gabriel Revelli\
 Gerald Gole
 
-## License
+## License 📃
 For open source projects, say how it is licensed.
