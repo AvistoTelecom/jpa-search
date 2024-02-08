@@ -30,7 +30,7 @@ A search works with a configuration file where you define each possible filter, 
 
 The search function takes as input a list of query params in the form of a `Map<String, String>` (also containing a `page` and `size` field for pagination), a `List<String>` sort list, the type of entity searched for `Class<T>` and the type of search configuration enumeration `Class<E>`. In return, this function returns a `Page<T>` containing the number of elements requested and the number of total elements.
 
-### How to use it ?
+### How to use it ? 🤔
 
 To configure a search, you need to create a configuration criteria `enum` described like below:
 
@@ -70,23 +70,84 @@ Taking `ACCOUNT_TYPE` as an example, we're looking for an `ApiKey` that is assoc
 
 The `FilterOperation` is used to describe the operation to be performed on the filter, many of which are already available and applicable to different types:
 
-| Operator Name | Description | Filter Type |
-| ------------- | ----------- | ---- |
-| `LIKE_IGNORE_CASE` | Checks that the `field` contains part of the `filter`, case ignored | `String` |
-| `START_WITH` | Checks that the `field` begins with the `filter` | `String` |
-| `START_WITH_IGNORE_CASE` | Check that the `field` begins with the `filter`, case ignored | `String` |
-| `START_WITH_IGNORE_CASE_IGNORE_ACCENT` | Check that the `field` starts with the `filter`, case and accents ignored | `String` |
-| `EQUAL` | Checks for equality between `field` and `filter` | `Object` |
-| `EQUAL_IGNORE_CASE_IGNORE_ACCENT` | Checks for equality between `field` and `filter`, case and accents ignored | `String` |
-| `NOT_NULL` | Checks for `field` nullity | `Object` |
-| `IN_EQUAL` | Checks the equality of `field` with one of the `fields` in the filter lis | `Object[]` |
-| `IN_LIKE` | Checks that `field` contains one of the fields in the `filter` list | `String[]` |
-| `IN_EQUAL_IGNORE_CASE_IGNORE_ACCENT` | Checks that `field` is equal to one of the fields in the `filter` list, case and accents ignored | `String[]` |
-| `BETWEEN` | Checks that `field` is between the two `filter` fields | `Comparable[2]` |
-| `GREATER_THAN_OR_EQUAL` | Checks that `field` is greater than or equal to `filter` | `Comparable` |
-| `LESS_THAN_OR_EQUAL` | Checks that `field` is smaller than or equal to `filter` | `Comparable` |
+#### IFilterOperation
 
-You can easily create an other `enum` file like `FilterOperation.java`.
+<details>
+  <summary>ObjectFilterOperation</summary>
+
+| Operator Name | Description                                      | Filter Type |
+|---------------|--------------------------------------------------|-------------|
+| `EQUAL`       | Checks for equality between `field` and `filter` | `Object`    |
+
+</details>
+
+<details>
+  <summary>StringFilterOperation</summary>
+
+| Operator Name                          | Description                                                                | Filter Type |
+|----------------------------------------|----------------------------------------------------------------------------|-------------|
+| `LIKE`                                 | Checks that `field` contains part of the `filter`                          | `String`    |
+| `LIKE_IGNORE_CASE`                     | Checks that the `field` contains part of the `filter`, case ignored        | `String`    |
+| `LIKE_IGNORE_CASE_IGNORE_ACCENT`       | Checks for equality between `field` and `filter`, case and accents ignored | `String`    |
+| `START_WITH`                           | Checks that the `field` begins with the `filter`                           | `String`    |
+| `START_WITH_IGNORE_CASE`               | Check that the `field` begins with the `filter`, case ignored              | `String`    |
+| `START_WITH_IGNORE_CASE_IGNORE_ACCENT` | Check that the `field` starts with the `filter`, case and accents ignored  | `String`    |
+| `EQUAL_IGNORE_CASE`                    | Checks for equality between `field` and `filter`, case                     | `String`    |
+| `EQUAL_IGNORE_CASE_IGNORE_ACCENT`      | Checks for equality between `field` and `filter`, case and accents ignored | `String`    |
+
+</details>
+
+<details>
+  <summary>ListComparableFilterOperation</summary>
+
+| Operator Name | Description                                            | Filter Type     |
+|---------------|--------------------------------------------------------|-----------------|
+| `BETWEEN`     | Checks that `field` is between the two `filter` fields | `Comparable[2]` |
+
+</details>
+
+<details>
+  <summary>ComparableFilterOperation</summary>
+
+| Operator Name                   | Description                                                      | Filter Type  |
+|---------------------------------|------------------------------------------------------------------|--------------|
+| `GREATER_THAN_OR_EQUAL`         | Checks that `field` is greater than or equal to `filter`         | `Comparable` |
+| `GREATER_THAN_OR_EQUAL_OR_NULL` | Checks that `field` is greater than or equal to `filter` or null | `Comparable` |
+| `LESS_THAN_OR_EQUAL`            | Checks that `field` is smaller than or equal to `filter`         | `Comparable` |
+
+</details>
+
+<details>
+  <summary>ListObjectFilterOperation</summary>
+
+| Operator Name | Description                                                                | Filter Type |
+|---------------|----------------------------------------------------------------------------|-------------|
+| `IN_EQUAL`    | Checks the equality of `field` with one of the `fields` in the filter list | `Object[]`  |
+
+</details>
+
+<details>
+  <summary>ListStringFilterOperation</summary>
+
+| Operator Name                        | Description                                                                                      | Filter Type |
+|--------------------------------------|--------------------------------------------------------------------------------------------------|-------------|
+| `IN_LIKE`                            | Checks that `field` contains one of the fields in the `filter` list                              | `String[]`  |
+| `IN_EQUAL_IGNORE_CASE_IGNORE_ACCENT` | Checks that `field` is equal to one of the fields in the `filter` list, case and accents ignored | `String[]`  |
+
+</details>
+
+<details>
+  <summary>VoidFilterOperation</summary>
+
+| Operator Name         | Description                | Filter Type |
+|-----------------------|----------------------------|-------------|
+| `NOT_NULL`            | Checks for `field` nullity | `Void`      |
+| `NULL`                | Checks for `field` nullity | `Void`      |
+| `COLLECTION_IS_EMPTY` | Checks for `field` nullity | `Void`      |
+
+</details>
+
+You can easily create an other `enum` file like `ObjectFilterOperation.java`.
 
 ### Known limitations 📈
 
