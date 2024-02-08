@@ -39,18 +39,20 @@ To configure a search, you need to create a configuration criteria `enum` descri
 @AllArgsConstructor
 public enum ApiKeyCriteria implements ISearchCriteriaConfig<Apikey> {
     ID(FilterSorterConfig.of("id", ObjectFilterOperation.EQUAL, "id")),
-    ACCOUNT_TYPE(FilterConfig.of("accountType", FilterOperation.EQUAL, "account.accountType.key")),
-    PROFILE_TYPE(FilterConfig.of("profileType", FilterOperation.EQUAL, "account.accountType.profile.key")),
-    ACCOUNT_FILES_NAME(FilterConfig.of("accountFilesName", FilterOperation.EQUAL, "account.files[name]")),
-    ACCOUNT_LABEL(FilterConfig.of("accountLabel", FilterOperation.EQUAL, "account.label")),
-    TYPE(FilterConfig.of("type", FilterOperation.EQUAL, "type")),
-    EXTERNAL_ID(FilterConfig.of("externalId", FilterOperation.LIKE_IGNORE_CASE, "externalId")),
-    CREATION_DATE(FilterConfig.of("creationDate", FilterOperation.BETWEEN, "creationDate")),
-    END_DATE(FilterConfig.of("endDate", FilterOperation.BETWEEN, "endDate")),
-    EXPIRATION_DATE(FilterConfig.of("expirationDate", FilterOperation.BETWEEN, "expirationDate")),
-    LABEL(FilterConfig.of("label", FilterOperation.LIKE_IGNORE_CASE_IGNORE_ACCENT, "label", "account.label"));
+    ACCOUNT_TYPE(FilterConfig.of("accountType", ObjectFilterOperation.EQUAL, "account.accountType.key")),
+    PROFILE_TYPE(FilterConfig.of("profileType", ObjectFilterOperation.EQUAL, "account.accountType.profile.key")),
+    ACCOUNT_FILES_NAME(FilterConfig.of("accountFilesName", ObjectFilterOperation.EQUAL, "account.files[name]")),
+    ACCOUNT_LABEL(FilterConfig.of("accountLabel", ObjectFilterOperation.EQUAL, "account.label")),
+    TYPE(FilterConfig.of("type", ObjectFilterOperation.EQUAL, "type")),
+    EXTERNAL_ID(FilterConfig.of("externalId", StringFilterOperation.LIKE_IGNORE_CASE, "externalId")),
+    CREATION_DATE(FilterConfig.of("creationDate", ListComparableFilterOperation.BETWEEN, "creationDate")),
+    END_DATE(FilterConfig.of("endDate", ListComparableFilterOperation.BETWEEN, "endDate")),
+    EXPIRATION_DATE(FilterConfig.of("expirationDate", ListComparableFilterOperation.BETWEEN, "expirationDate")),
+    LABEL(FilterConfig.of("label", StringFilterOperation.LIKE_IGNORE_CASE_IGNORE_ACCENT, "label", "account.label")),
+    YEAR(GroupFilterConfig.of("year", CREATION_DATE.getFilterConfig(), END_DATE.getFilterConfig())),
+    MULTI_ACCOUNT_LABEL(MultiFilterConfig.of("multiAccountLabel", ACCOUNT_LABEL.getFilterConfig(), "account"));
 
-    final ISearchConfig<ApiKey> searchConfig;
+  final ISearchConfig<ApiKey> searchConfig;
 
     @Override
     public OrderCriteria getDefaultOrderCriteria() {
@@ -64,13 +66,14 @@ public enum ApiKeyCriteria implements ISearchCriteriaConfig<Apikey> {
 
 }
 ```
-The idea here is to associate in `FilterConfig.of(...)` an operation, a query param name and an entity field name.
+
+[//]: # (The idea here is to associate in `FilterConfig.of&#40;...&#41;` an operation, a query param name and an entity field name.)
 
 Taking `ACCOUNT_TYPE` as an example, we're looking for an `ApiKey` that is associated with a particular account type, in this case equality.
 
-The `FilterOperation` is used to describe the operation to be performed on the filter, many of which are already available and applicable to different types:
+[//]: # (The `FilterOperation` is used to describe the operation to be performed on the filter, many of which are already available and applicable to different types:)
 
-#### IFilterOperation
+#### Filter
 
 <details>
   <summary>ObjectFilterOperation</summary>
@@ -148,6 +151,103 @@ The `FilterOperation` is used to describe the operation to be performed on the f
 </details>
 
 You can easily create an other `enum` file like `ObjectFilterOperation.java`.
+
+#### Config
+
+<details>
+  <summary>FilterConfig</summary>
+
+Apply the filter to the fields.
+
+Parameters:
+
+| Key                | Filter                        | pathFirst                                                  | paths (Optional)                                            |
+|--------------------|-------------------------------|------------------------------------------------------------|-------------------------------------------------------------|
+| Name of the filter | Filter that you want to apply | First path to the field where you want to apply the filter | Same function as for the path, but for the remaining fields |
+
+Example:
+```java
+SEARCH(FilterConfig.of("search", StringFilterOperation.LIKE_IGNORE_CASE, "firstName", "lastName"));
+```
+
+</details>
+
+<details>
+  <summary>SorterConfig</summary>
+
+You can add additional sorter like `id` in the example to sort your entities.
+In this case if we set `sorts = {id,asc}`, the response will be the sort by id in ascending order.
+
+Parameters:
+
+| Key                | path                                                 | 
+|--------------------|------------------------------------------------------|
+| Name of the sorter | Path to the field where you want to apply the sorter |
+
+Example:
+```java
+ID(FilterSorterConfig.of("id", ObjectFilterOperation.EQUAL, "id"));
+```
+
+</details>
+
+<details>
+  <summary>FilterSorterConfig</summary>
+
+This filter groups FilterConfig and SorterConfig. So you can use this config like a sort or like a filter.
+
+Parameters:
+
+| Key                | Filter                        | pathFirst                                                  | paths (Optional)                                            |
+|--------------------|-------------------------------|------------------------------------------------------------|-------------------------------------------------------------|
+| Name of the sorter | Filter that you want to apply | First path to the field where you want to apply the filter | Same function as for the path, but for the remaining fields |
+
+Example:
+```java
+ID(FilterSorterConfig.of("id", ObjectFilterOperation.EQUAL, "id"));
+```
+
+</details>
+
+<details>
+  <summary>GroupFilterConfig</summary>
+
+The purpose of this filter is to group some FilterConfig.
+
+Parameters:
+
+| Key               | Filter                        | Filters (Optional) |
+|-------------------|-------------------------------|--------------------|
+| Name of the Group | Filter that you want to apply | Other filters      |
+
+Example:
+```java
+PEOPLE(GroupFilterConfig.of("searchpeople", FIRSTNAME.getFilterConfig(), LASTNAME.getFilterConfig()));
+```
+
+</details>
+
+<details>
+  <summary>MultiFilterConfig</summary>
+
+To understand this filter, let's take the example of a company: Avisto. Avisto has a `List<Employee>`.
+ And if you want to get the employees whose names start with "M" or "N", you can use this filter to apply the name filter twice.
+
+Parameters:
+
+| Key                    | Filter                        | joinPath                                             |
+|------------------------|-------------------------------|------------------------------------------------------|
+| Name of the Multiplier | Filter that you want to apply | path to the field where you want to apply the filter |
+
+Example:
+```java
+PEOPLE(GroupFilterConfig.of("searchpeople", FIRSTNAME.getFilterConfig(), LASTNAME.getFilterConfig()));
+```
+
+Parameters example:
+`searchpeople="M","N"`
+
+</details>
 
 ### Known limitations 📈
 
