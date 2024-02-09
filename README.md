@@ -7,10 +7,11 @@ TODO : Add JavaDoc and clean code
 TODO : remove spring dependency by implementing Pageables ( already done ?)
 TODO : add Unit Tests
 
-[![Spring](https://img.shields.io/badge/Spring-6DB33F?style=for-the-badge&logo=spring&logoColor=white)](https://spring.io/)
-[![Postgres](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white
-)](https://www.postgresql.org/)
+[![SpringBoot](https://img.shields.io/badge/Spring-6DB33F?style=for-the-badge&logo=spring&logoColor=white)](https://spring.io/projects/spring-boot)
+[![Hibernate](https://img.shields.io/badge/Hibernate-59666C?style=for-the-badge&logo=Hibernate&logoColor=white
+)](https://hibernate.org/)
 
+[//]: # (dispo entity graph, voir benchmark(limit entity graph qui n'existe plus)
 
 ***
 ## Description 🔍
@@ -30,7 +31,7 @@ A search works with a configuration file where you define each possible filter, 
 
 The search function takes as input a list of query params in the form of a `Map<String, String>` (also containing a `page` and `size` field for pagination), a `List<String>` sort list, the type of entity searched for `Class<T>` and the type of search configuration enumeration `Class<E>`. In return, this function returns a `Page<T>` containing the number of elements requested and the number of total elements.
 
-### How to use it ? 🤔
+### How to use it ? 🤔 <a name="how-to-use-it"></a>
 
 To configure a search, you need to create a configuration criteria `enum` described like below:
 
@@ -52,7 +53,7 @@ public enum ApiKeyCriteria implements ISearchCriteriaConfig<Apikey> {
     YEAR(GroupFilterConfig.of("year", CREATION_DATE.getFilterConfig(), END_DATE.getFilterConfig())),
     MULTI_ACCOUNT_LABEL(MultiFilterConfig.of("multiAccountLabel", ACCOUNT_LABEL.getFilterConfig(), "account"));
 
-  final ISearchConfig<ApiKey> searchConfig;
+    final ISearchConfig<ApiKey> searchConfig;
 
     @Override
     public OrderCriteria getDefaultOrderCriteria() {
@@ -150,14 +151,14 @@ Taking `ACCOUNT_TYPE` as an example, we're looking for an `ApiKey` that is assoc
 
 </details>
 
-You can easily create an other `enum` file like `ObjectFilterOperation.java`.
+You can easily create an other `enum` which inherits from `IFilterOperation`, like `ObjectFilterOperation.java`.
 
 #### Config
 
 <details>
   <summary>FilterConfig</summary>
 
-Apply the filter to the fields.
+Configures the filter in relation to a field.
 
 Parameters:
 
@@ -262,8 +263,7 @@ Parameters example:
 ## Installation ⬇️
 Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
 
-## Usage ✋
-
+## Getting started ✋
 
 <details>
   <summary>1 - Configure your SpringBootApplication</summary>
@@ -306,7 +306,7 @@ Pas nécessaire je pense à voir
 <details>
   <summary>4 - Create Criteria Enum</summary>
 
-To specify a filter for your search, you need to create an enum as described in the description section.
+To specify a filter for your search, you need to create an enum as described in [How to use it ? 🤔](#how-to-use-it).
 
 </details>
 
@@ -334,7 +334,7 @@ This example shows you how to search your entity with EntityCriteria Enum :
 ## Contributing 👯
 
 Gabriel Revelli\
-Gerald Gole
+Martin Rech
 
 ## License 📃
 For open source projects, say how it is licensed.
