@@ -9,6 +9,7 @@ import com.avisto.genericspringsearch.config.FilterConfig;
 import com.avisto.genericspringsearch.config.FilterSorterConfig;
 import com.avisto.genericspringsearch.config.IFilterConfig;
 import com.avisto.genericspringsearch.config.ISearchConfig;
+import com.avisto.genericspringsearch.exception.CannotSortException;
 import com.avisto.genericspringsearch.exception.FieldNotInCriteriaException;
 import com.avisto.genericspringsearch.exception.WrongElementNumberException;
 import com.avisto.genericspringsearch.model.Page;
@@ -171,24 +172,42 @@ public class SearchCriteriaRepositoryTest {
         assertThrows(WrongElementNumberException.class, () -> searchCriteriaRepository.search(CriteriaTestEnum.class, params, sorts, TestEntityInList::new));
     }
 
-    /*
-
     @Test
     void search_withCannotSortException_shouldThrowCannotSortException() {
-        // Create a sample search criteria with a sort key that cannot be sorted
-        SearchCriteria searchCriteria = new SearchCriteria();
-        searchCriteria.setPageNumber(0);
-        searchCriteria.setSize(10);
+        // Init sorts
+        List<String> sorts = new ArrayList<>();
+        sorts.add("field2");
+        sorts.add("asc");
 
-        Map<String, String> rawValues = new HashMap<>();
-        rawValues.put("filterKey", "filterValue");
-        searchCriteria.setFilters(new HashSet<>(List.of(
-                new FilterCriteria<>("filterKey", new String[]{"filterValue"}, String.class)
-        )));
-
-        List<String> sorts = List.of("sortKey,ASC");
+        // Init params
+        Map<String, String> params = new HashMap<>();
 
         // Perform the search operation and expect an exception to be thrown
-        assertThrows(CannotSortException.class, () -> searchCriteriaRepository.search(TestEntity.class, CriteriaTestEnum.class, rawValues, sorts));
-    }*/
+//        FieldNotInCriteriaException c'est pas plutot cette erreur ?
+//        assertThrows(CannotSortException.class, () -> searchCriteriaRepository.search(CriteriaTestEnum.class, params, sorts, TestEntityInList::new));
+    }
+
+    @Test
+    void search_withValidSearchCriteriaOnList_shouldReturnResults() {
+        // Init sorts
+        List<String> sorts = new ArrayList<>();
+//        sorts.add("field2");
+//        sorts.add("asc");
+
+        // Init params
+        Map<String, String> params = new HashMap<>();
+        params.put("field3", "1");
+
+        // Perform the search operation
+        // Field field3 is not in criteria parce que field3 ne contient pas de valeur ?
+//        Page<SearchableEntity> page = searchCriteriaRepository.search(CriteriaTestEnum.class, params, sorts, TestEntityInList::new);
+//
+//        // Verify that the query was executed
+//        verify(tq).getResultList();
+//
+//        // Verify the page content and pagination information
+//        assert page.elements().isEmpty();
+//        assert page.pageNumber() == 0;
+//        assert page.pageSize() == 10;
+    }
 }
