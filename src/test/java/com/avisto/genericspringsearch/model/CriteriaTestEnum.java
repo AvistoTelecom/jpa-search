@@ -1,17 +1,27 @@
 package com.avisto.genericspringsearch.model;
 
+import com.avisto.genericspringsearch.config.FilterConfig;
 import com.avisto.genericspringsearch.operation.ObjectFilterOperation;
 import com.avisto.genericspringsearch.OrderCriteria;
 import com.avisto.genericspringsearch.SearchableEntity;
 import com.avisto.genericspringsearch.config.FilterSorterConfig;
 import com.avisto.genericspringsearch.config.ISearchConfig;
 import com.avisto.genericspringsearch.config.ISearchCriteriaConfig;
+import com.avisto.genericspringsearch.operation.StringFilterOperation;
 
-public enum CriteriaTestEnum implements ISearchCriteriaConfig<SearchableEntity> {
-    TEST;
+public enum CriteriaTestEnum implements ISearchCriteriaConfig<TestEntity> {
+    FIELD1(FilterConfig.of("field1", ObjectFilterOperation.EQUAL, "field1")),
+    FIELD2(FilterConfig.of("field2", StringFilterOperation.LIKE_IGNORE_CASE, "field2")),
+    ID(FilterConfig.of("id", ObjectFilterOperation.EQUAL, "id"));
+
+    final ISearchConfig<TestEntity> searchConfig;
+
+    CriteriaTestEnum(ISearchConfig<TestEntity> searchConfig) {
+        this.searchConfig = searchConfig;
+    }
 
     @Override
-    public ISearchConfig<SearchableEntity> getSearchConfig() {
+    public ISearchConfig<TestEntity> getSearchConfig() {
         return FilterSorterConfig.of("field1", ObjectFilterOperation.EQUAL, "field1");
     }
 
@@ -21,7 +31,7 @@ public enum CriteriaTestEnum implements ISearchCriteriaConfig<SearchableEntity> 
     }
 
     @Override
-    public Class<SearchableEntity> getRootClass() {
-        return SearchableEntity.class;
+    public Class<TestEntity> getRootClass() {
+        return TestEntity.class;
     }
 }
