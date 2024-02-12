@@ -9,6 +9,8 @@ import com.avisto.genericspringsearch.config.FilterConfig;
 import com.avisto.genericspringsearch.config.FilterSorterConfig;
 import com.avisto.genericspringsearch.config.IFilterConfig;
 import com.avisto.genericspringsearch.config.ISearchConfig;
+import com.avisto.genericspringsearch.exception.FieldNotInCriteriaException;
+import com.avisto.genericspringsearch.exception.WrongElementNumberException;
 import com.avisto.genericspringsearch.model.Page;
 import com.avisto.genericspringsearch.model.SortDirection;
 import com.avisto.genericspringsearch.model.TestEntity;
@@ -22,6 +24,7 @@ import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
@@ -52,6 +55,7 @@ import static org.mockito.Mockito.when;
 // faire un test pour tout les filteroperations et tous les groups filter
 public class SearchCriteriaRepositoryTest {
 
+//    private EntityManager entityManager;
     private EntityManager entityManager;
 
     private final SearchCriteriaRepository<TestEntity, CriteriaTestEnum> searchCriteriaRepository;
@@ -64,6 +68,7 @@ public class SearchCriteriaRepositoryTest {
     Root root;
 
     public SearchCriteriaRepositoryTest() {
+
         this.entityManager = Mockito.mock(EntityManager.class);
         this.searchCriteriaRepository = new SearchCriteriaRepository<>(entityManager);
 
@@ -93,8 +98,6 @@ public class SearchCriteriaRepositoryTest {
 
         List<String> sorts = new ArrayList<>();
 
-        CriteriaTestEnum.class.getEnumConstants()[0].getRootClass().getDeclaredFields();
-
         Page<TestEntity> page = searchCriteriaRepository.search(CriteriaTestEnum.class, params, sorts, TestEntity.TestEntityInList::new);
 
         // Verify that the query was not executed
@@ -109,10 +112,12 @@ public class SearchCriteriaRepositoryTest {
 
     @Test
     void search_withValidSearchCriteria_shouldReturnResults() {
+        // Init sorts
         List<String> sorts = new ArrayList<>();
         sorts.add("field1");
         sorts.add("asc");
 
+        // Init params
         Map<String, String> params = new HashMap<>();
         params.put("page", "0");
         params.put("size", "10");
@@ -127,53 +132,46 @@ public class SearchCriteriaRepositoryTest {
         verify(tq).getResultList();
 
         // Verify the page content and pagination information
-//        assert !page.elements().isEmpty();
+        assert page.elements().isEmpty();
         assert page.pageNumber() == 0;
         assert page.pageSize() == 10;
         assert page.totalElements() == 50L;
+
+//        tq.getResultList();
+
+//        String sqlQuery = tq.unwrap(Query.class).toString();
+//        System.out.println("typedquery : " + sqlQuery);
     }
-    /*
 
     @Test
     void search_withInvalidFilterKey_shouldThrowFieldNotInCriteriaException() {
-        // Create a sample search criteria with an invalid filter key
-        SearchCriteria searchCriteria = new SearchCriteria();
-        searchCriteria.setPageNumber(0);
-        searchCriteria.setSize(10);
+        // Init sorts
+        List<String> sorts = new ArrayList<>();
 
-        Map<String, String> rawValues = new HashMap<>();
-        rawValues.put("invalidFilterKey", "filterValue");
-        searchCriteria.setFilters(new HashSet<>(List.of(
-                new FilterCriteria<>("filterKey", new String[]{"filterValue"}, String.class)
-        )));
-
-        // Create mocks for SearchConfigInterface enums (e.g., SearchConfigInterface.CONFIG1)
-        SearchConfigInterface config1 = mock(SearchConfigInterface.class);
-        when(config1.getFilterKey()).thenReturn("filterKey");
-        when(config1.getFilterConfig()).thenReturn(FilterConfig1.INSTANCE);
-        when(config1.getDefaultFieldPath()).thenReturn(List.of("fieldPath"));
-
-        // Create a mock for the SearchConfigInterface enum class
-        Class<SearchConfigInterface> enumClazz = SearchConfigInterface.class;
-        when(enumClazz.getEnumConstants()).thenReturn(new SearchConfigInterface[]{config1});
+        // Init params
+        Map<String, String> params = new HashMap<>();
+        params.put("page", "0");
+        params.put("size", "10");
+        params.put("invalidFilterKey", "field1");
 
         // Perform the search operation and expect an exception to be thrown
-        assertThrows(FieldNotInCriteriaException.class, () -> searchCriteriaRepository.search(searchCriteria, false));
+        assertThrows(FieldNotInCriteriaException.class, () -> searchCriteriaRepository.search(CriteriaTestEnum.class, params, sorts, TestEntityInList::new));
     }
 
     @Test
     void search_withInvalidSorts_shouldThrowWrongElementNumberException() {
-        // Create a sample search criteria with an invalid sorts list
-        SearchCriteria searchCriteria = new SearchCriteria();
-        searchCriteria.setPageNumber(0);
-        searchCriteria.setSize(10);
+        // Init sorts
+        List<String> sorts = new ArrayList<>();
+        sorts.add("field1");
 
-        // Create an invalid sorts list with an odd number of elements
-        List<String> invalidSorts = List.of("sortKey1,ASC", "sortKey2");
+        // Init params
+        Map<String, String> params = new HashMap<>();
 
         // Perform the search operation and expect an exception to be thrown
-        assertThrows(WrongElementNumberException.class, () -> searchCriteriaRepository.search(searchCriteria, false));
+        assertThrows(WrongElementNumberException.class, () -> searchCriteriaRepository.search(CriteriaTestEnum.class, params, sorts, TestEntityInList::new));
     }
+
+    /*
 
     @Test
     void search_withCannotSortException_shouldThrowCannotSortException() {
