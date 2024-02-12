@@ -11,7 +11,8 @@ TODO : add Unit Tests
 [![Hibernate](https://img.shields.io/badge/Hibernate-59666C?style=for-the-badge&logo=Hibernate&logoColor=white
 )](https://hibernate.org/)
 
-[//]: # (dispo entity graph, voir benchmark(limit entity graph qui n'existe plus)
+[//]: # (dispo entity graph, voir benchmark&#40;limit entity graph qui n'existe plus)
+[//]: # (c'est à dire que la lib peut chercher dans des entityGraph ?)
 
 ***
 ## Description 🔍
