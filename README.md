@@ -11,8 +11,7 @@ TODO : add Unit Tests
 [![Hibernate](https://img.shields.io/badge/Hibernate-59666C?style=for-the-badge&logo=Hibernate&logoColor=white
 )](https://hibernate.org/)
 
-[//]: # (dispo entity graph, voir benchmark&#40;limit entity graph qui n'existe plus)
-[//]: # (c'est à dire que la lib peut chercher dans des entityGraph ?)
+[//]: # (voir benchmark&#40;limit entity graph qui n'existe plus)
 
 ***
 ## Description 🔍
@@ -250,6 +249,13 @@ Parameters example:
 `searchpeople="M","N"`
 
 </details>
+
+The library also supports EntityGraphs, so you can use the search function with an EntityGraph.
+
+Example:
+```java
+Page<EntityInList> entityInList = searchCriteriaRepository.search(EntityCriteria.class, params, sorts, EntityInList::new, "NameOfTheEntityGraph");
+```
 
 ### Known limitations 📈
 
