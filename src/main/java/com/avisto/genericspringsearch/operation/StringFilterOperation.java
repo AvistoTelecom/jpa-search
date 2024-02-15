@@ -64,7 +64,7 @@ public enum StringFilterOperation implements IFilterOperation<String> {
         }
     };
 
-    private static String unaccentFunction = "unaccent";
+    private static String unaccentFunction = "latin1";
 
 
     @Override
