@@ -1,7 +1,6 @@
-<img src="https://www.apec.fr/files/live/mounts/images/presentation_entreprise/416917/MIG_RENAME_06F162FF85ACD9785CB46C012D1AEFF21A5DF630.png" alt="Logo Avisto" width="270" height="173" />
+<img src="assets/logo_avisto.png" alt="Logo Avisto" width="270" height="173" />
 
 # Generic-Spring-Search
-
 
 TODO : Add JavaDoc and clean code
 TODO : remove spring dependency by implementing Pageables ( already done ?)
