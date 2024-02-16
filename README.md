@@ -11,7 +11,7 @@ TODO : add Unit Tests
 [![Hibernate](https://img.shields.io/badge/Hibernate-59666C?style=for-the-badge&logo=Hibernate&logoColor=white
 )](https://hibernate.org/)
 
-[//]: # (voir benchmark&#40;limit entity graph qui n'existe plus)
+[//]: # (voir benchmark&#40)
 
 ***
 ## Description 🔍
@@ -257,7 +257,96 @@ Example:
 Page<EntityInList> entityInList = searchCriteriaRepository.search(EntityCriteria.class, params, sorts, EntityInList::new, "NameOfTheEntityGraph");
 ```
 
-### Known limitations 📈
+### Benchmark 📈
+
+If you've ever done research with CriteriaBuilder, you probably know that it's very tedious and time-consuming.
+
+<details>
+  <summary>Example of 1 filter and 1 sorter without GenericSpringSearch</summary>
+
+```java
+public class EmployeeSpecification implements Specification<Employee> {
+
+    private final EmployeeCompleteDTO filter;
+    private final String scope;
+    private final String order;
+
+    public EmployeeSpecification(
+        EmployeeCompleteDTO filter,
+        String scope,
+        String order
+    ) {
+        this.filter = filter;
+        this.scope = scope;
+        this.order = order;
+    }
+
+    @Override
+    public Predicate toPredicate(Root<Employee> root, CriteriaQuery<?> query,
+        CriteriaBuilder criteriaBuilder) {
+
+        List<Predicate> predicates = new ArrayList<>();
+
+        if (filter.getFirstName() != null) {
+            predicates.add(criteriaBuilder.like(criteriaBuilder.function("unaccent",
+                    String.class,
+                    criteriaBuilder.lower(root.get("firstName"))),
+                "%" + StringUtils.stripAccents(filter.getFirstName()
+                    .toLowerCase()) + "%"));
+        }
+
+        Order sortOrder;
+
+        sortOrder = order.equals("asc")
+            ? criteriaBuilder.asc(root.get(scope))
+            : criteriaBuilder.desc(
+                criteriaBuilder.coalesce(root.get(scope), 0));
+        query.orderBy(sortOrder);
+
+        return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
+    }
+}
+```
+</details>
+
+<details>
+  <summary>Example of 13 filters and 2 sorters with GenericSpringSearch</summary>
+
+```java
+public enum EmployeeCriteria implements ISearchCriteriaConfig<Employee> {
+    ID(FilterSorterConfig.of("id", ObjectFilterOperation.EQUAL, "id")),
+    FIRSTNAME(FilterSorterConfig.of("firstname", StringFilterOperation.LIKE_IGNORE_CASE, "firstName")),
+    LASTNAME(FilterConfig.of("lastname", StringFilterOperation.LIKE_IGNORE_CASE, "lastName")),
+    LASTNAME_IGNORE_ACCENT(FilterConfig.of("lastnameIgnoreAccent", StringFilterOperation.LIKE_IGNORE_CASE_IGNORE_ACCENT, "lastName")),
+    BIRTHDATE(FilterConfig.of("birthdate", ListComparableFilterOperation.BETWEEN, "birthDate")),
+    MARRYING(FilterConfig.of("marrying", ObjectFilterOperation.EQUAL, "marriedEmployee.id")),
+    COMPANY(FilterConfig.of("company", StringFilterOperation.START_WITH, "company.name")),
+    FIRSTNAME_OR_LASTNAME(FilterConfig.of("firstnameLastname", StringFilterOperation.LIKE_IGNORE_CASE, "firstName", "lastName")),
+    FIRSTNAME_AND_LASTNAME(GroupFilterConfig.of("searchName", FIRSTNAME.getFilterConfig(), LASTNAME.getFilterConfig())),
+    SEARCH_MARRIED(MultiFilterConfig.of("search_married", FIRSTNAME_AND_LASTNAME.getFilterConfig(), "marriedEmployee.id")),
+    PET_NAME(FilterConfig.of("petName", StringFilterOperation.LIKE_IGNORE_CASE, "pets[name]")),
+    PET_SPECIES(FilterConfig.of("petSpecies", ObjectFilterOperation.EQUAL, "pets[species]")),
+    PETS(GroupFilterConfig.of("searchPets", PET_NAME.getFilterConfig(), PET_SPECIES.getFilterConfig())),
+    MULTI_PETS(MultiFilterConfig.of("multiPets", PET_SPECIES.getFilterConfig(), "pets"));
+
+    final ISearchConfig<Employee> searchConfig;
+
+    @Override
+    public OrderCriteria getDefaultOrderCriteria() {
+        return new OrderCriteria(ID.getKey(), SortDirection.ASC);
+    }
+
+    @Override
+    public Class<Employee> getRootClass() {
+        return Employee.class;
+    }
+}
+```
+
+</details>
+
+
+### Known limitations 🐧
 
 - The generic search doesn't yet offer the option of navigating through several levels of ManyToMany dependencies, for example: Companies → Employees → Pets (the generic search doesn't allow you to filter on the pets owned by the employees of each company).
 - Sorting on elements requiring a join is not possible (How to sort on a list of linked elements)
