@@ -11,8 +11,6 @@ TODO : add Unit Tests
 [![Hibernate](https://img.shields.io/badge/Hibernate-59666C?style=for-the-badge&logo=Hibernate&logoColor=white
 )](https://hibernate.org/)
 
-[//]: # (voir benchmark&#40)
-
 ***
 ## Description 🔍
 
