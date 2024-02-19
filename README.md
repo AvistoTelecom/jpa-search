@@ -6,7 +6,6 @@ TODO : Add JavaDoc and clean code
 TODO : remove spring dependency by implementing Pageables ( already done ?)
 TODO : add Unit Tests
 
-[![SpringBoot](https://img.shields.io/badge/Spring-6DB33F?style=for-the-badge&logo=spring&logoColor=white)](https://spring.io/projects/spring-boot)
 [![Hibernate](https://img.shields.io/badge/Hibernate-59666C?style=for-the-badge&logo=Hibernate&logoColor=white
 )](https://hibernate.org/)
 
@@ -26,7 +25,7 @@ This search is designed to be efficient, since it operates at a low level, as cl
 
 A search works with a configuration file where you define each possible filter, its associated operation (e.g.: name equals value) and where to fetch the field in DB. Once a filter has been defined, it is possible to filter by this ascending or descending field.
 
-The search function takes as input a list of query params in the form of a `Map<String, String>` (also containing a `page` and `size` field for pagination), a `List<String>` sort list, the type of entity searched for `Class<T>` and the type of search configuration enumeration `Class<E>`. In return, this function returns a `Page<T>` containing the number of elements requested and the number of total elements.
+The search function takes as input a list of query params in the form of a `Map<String, String>` (also containing a `page` and `size` field for pagination if it's not a key filter), a `List<String>` sort list, the type of entity searched for `Class<T>` and the type of search configuration enumeration `Class<E>`. In return, this function returns a `Page<T>` containing the number of elements requested and the number of total elements.
 
 ### How to use it ? 🤔 <a name="how-to-use-it"></a>
 
@@ -65,13 +64,13 @@ public enum ApiKeyCriteria implements ISearchCriteriaConfig<Apikey> {
 }
 ```
 
-[//]: # (The idea here is to associate in `FilterConfig.of&#40;...&#41;` an operation, a query param name and an entity field name.)
+The idea here is to associate in `FilterConfig.of(...)` an operation, a query param name and an entity field name.
 
 Taking `ACCOUNT_TYPE` as an example, we're looking for an `ApiKey` that is associated with a particular account type, in this case equality.
 
-[//]: # (The `FilterOperation` is used to describe the operation to be performed on the filter, many of which are already available and applicable to different types:)
+#### FilterOperation
 
-#### Filter
+The `FilterOperation` is used to describe the operation to be performed on the filter, many of which are already available and applicable to different types:
 
 <details>
   <summary>ObjectFilterOperation</summary>
@@ -352,6 +351,62 @@ public enum EmployeeCriteria implements ISearchCriteriaConfig<Employee> {
     - Comparable: Float, float, Integer, int, Long, long, Double, double, BigDecimal, LocalDate, LocalDateTime, ZonedDateTime;
     - String: String;
     - Object: Boolean, boolean, UUID;
+
+To use the IGNORE_ACCENT operation you must install the function according to your database manager.
+
+<details>
+  <summary>MySQL</summary>
+
+```sql
+DROP FUNCTION IF EXISTS unaccent;
+DELIMITER |
+CREATE FUNCTION unaccent( textvalue VARCHAR(10000) ) RETURNS VARCHAR(10000)
+DETERMINISTIC
+NO SQL
+    BEGIN
+
+    SET @textvalue = textvalue COLLATE utf8mb4_general_ci;
+
+    -- ACCENTS
+    SET @withaccents = 'ŠšŽžÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÑÒÓÔÕÖØÙÚÛÜÝŸÞàáâãäåæçèéêëìíîïñòóôõöøùúûüýÿþƒ';
+    SET @withoutaccents = 'SsZzAAAAAAACEEEEIIIINOOOOOOUUUUYYBaaaaaaaceeeeiiiinoooooouuuuyybf';
+    SET @count = LENGTH(@withaccents);
+
+    WHILE @count > 0 DO
+    SET @textvalue = REPLACE(@textvalue, SUBSTRING(@withaccents, @count, 1), SUBSTRING(@withoutaccents, @count, 1));
+    SET @count = @count - 1;
+    END WHILE;
+
+    -- SPECIAL CHARS
+
+    SET @special = '«»’”“!@#$%¨&()_+=§¹²³£¢¬"`´{[^~}]<,>.:;?/°ºª+|\';
+    SET @count = LENGTH(@special);
+
+    WHILE @count > 0 DO
+    SET @textvalue = REPLACE(@textvalue, SUBSTRING(@special, @count, 1), '');
+    SET @count = @count - 1;
+    END WHILE;
+
+    RETURN @textvalue;
+END
+|
+DELIMITER ;
+```
+
+</details>
+
+
+<details>
+  <summary>PostgreSQL</summary>
+
+```sql
+CREATE EXTENSION IF NOT EXISTS "unaccent";
+```
+
+</details>
+
+
+
 
 ## Installation ⬇️
 Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
