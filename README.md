@@ -3,7 +3,6 @@
 # Generic-Spring-Search
 
 TODO : Add JavaDoc and clean code
-TODO : remove spring dependency by implementing Pageables ( already done ?)
 TODO : add Unit Tests
 
 [![Hibernate](https://img.shields.io/badge/Hibernate-59666C?style=for-the-badge&logo=Hibernate&logoColor=white
