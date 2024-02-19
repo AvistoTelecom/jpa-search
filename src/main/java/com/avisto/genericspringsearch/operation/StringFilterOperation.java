@@ -60,12 +60,12 @@ public enum StringFilterOperation implements IFilterOperation<String> {
     EQUAL_IGNORE_CASE_IGNORE_ACCENT {
         @Override
         public Predicate calculate(CriteriaBuilder cb, Expression<?> expression, String value) {
-            return EQUAL_IGNORE_CASE.calculate(cb, cb.function(unaccentFunction, String.class, cb.lower((Expression<String>) expression)), SearchUtils.normalizeAccentsAndDashes(value));
+            return EQUAL_IGNORE_CASE.calculate(cb, cb.function(schemaUnAccentFunction + "." + unaccentFunction, String.class, cb.lower((Expression<String>) expression)), SearchUtils.normalizeAccentsAndDashes(value));
         }
     };
 
-    private static String unaccentFunction = "unaccent";
-
+    private static String unaccentFunction = System.getenv("UNACCENT_FUNCTION_NAME") != null ? System.getenv("UNACCENT_FUNCTION_NAME") : "unaccent";
+    private static String schemaUnAccentFunction = System.getenv("SCHEMA_UNACCENT_FUNCTION_NAME") != null ? System.getenv("SCHEMA_UNACCENT_FUNCTION_NAME") : "public";
 
     @Override
     public boolean needsMultipleValues() {
