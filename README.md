@@ -441,10 +441,16 @@ To specify a filter for your search, you need to create an enum as described in 
 <details>
   <summary>4 - Configure your Service</summary>
 
-To integrate the library into your services, add the following lines :
+After applying the previous steps, you can inject a SearchCriteriaRepository with the criteria and the entity you want to search with.
+example with constructor injection :
 ```java
-  private final SearchCriteriaRepository<Entity, EntityCriteria> searchCriteriaRepository;
-  ```
+private final SearchCriteriaRepository<Entity, EntityCriteria> searchCriteriaRepository;
+```
+example with field injection :
+
+```java
+@Autowired private SearchCriteriaRepository<Entity, EntityCriteria> searchCriteriaRepository;
+```
 </details>
 
 <details>
