@@ -432,34 +432,14 @@ For the library to correctly analyze your entity, you must add SearchableEntity 
 </details>
 
 <details>
-  <summary>3 - Configure your DTO</summary>
-
-Pas nécessaire je pense à voir
-```java
-  protected EntityDTO(Entity entity) {
-    this.id = entity.getId();
-    this.name = entity.getName();
-  }
-
-  @Getter
-  public static class EntityInList extends EntityDTO {
-
-  public EntityInList(Entity entity) {
-    super(entity);
-  }
-}
-  ```
-</details>
-
-<details>
-  <summary>4 - Create Criteria Enum</summary>
+  <summary>3 - Create Criteria Enum</summary>
 
 To specify a filter for your search, you need to create an enum as described in [How to use it ? 🤔](#how-to-use-it).
 
 </details>
 
 <details>
-  <summary>5 - Configure your Service</summary>
+  <summary>4 - Configure your Service</summary>
 
 To integrate the library into your services, add the following lines :
 ```java
@@ -468,7 +448,7 @@ To integrate the library into your services, add the following lines :
 </details>
 
 <details>
-  <summary>6 - Example of use</summary>
+  <summary>5 - Example of use</summary>
 
 This example shows you how to search your entity with EntityCriteria Enum :
 ```java
