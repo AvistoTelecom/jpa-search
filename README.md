@@ -351,7 +351,16 @@ public enum EmployeeCriteria implements ISearchCriteriaConfig<Employee> {
     - String: String;
     - Object: Boolean, boolean, UUID;
 
-To use the IGNORE_ACCENT operation you must install the function according to your database manager.
+To use the IGNORE_ACCENT operation you must install the function according to your database manager. After that you can specify the name of the function or the name of the schema where the function is located.
+
+Function name (by default = "unaccent")
+```
+System.setProperty("UNACCENT_FUNCTION_NAME", "unaccent");
+```
+Schema name (by default = "")
+```
+System.setProperty("SCHEMA_UNACCENT_FUNCTION_NAME", "dbo");
+```
 
 <details>
   <summary>MySQL</summary>
@@ -372,8 +381,8 @@ NO SQL
     SET @count = LENGTH(@withaccents);
 
     WHILE @count > 0 DO
-    SET @textvalue = REPLACE(@textvalue, SUBSTRING(@withaccents, @count, 1), SUBSTRING(@withoutaccents, @count, 1));
-    SET @count = @count - 1;
+        SET @textvalue = REPLACE(@textvalue, SUBSTRING(@withaccents, @count, 1), SUBSTRING(@withoutaccents, @count, 1));
+        SET @count = @count - 1;
     END WHILE;
 
     -- SPECIAL CHARS
@@ -382,8 +391,8 @@ NO SQL
     SET @count = LENGTH(@special);
 
     WHILE @count > 0 DO
-    SET @textvalue = REPLACE(@textvalue, SUBSTRING(@special, @count, 1), '');
-    SET @count = @count - 1;
+        SET @textvalue = REPLACE(@textvalue, SUBSTRING(@special, @count, 1), '');
+        SET @count = @count - 1;
     END WHILE;
 
     RETURN @textvalue;
@@ -400,6 +409,50 @@ DELIMITER ;
 
 ```sql
 CREATE EXTENSION IF NOT EXISTS "unaccent";
+```
+
+</details>
+
+<details>
+  <summary>Microsoft SQL Server</summary>
+
+```sql
+IF OBJECT_ID('dbo.unaccent', 'FN') IS NOT NULL
+    DROP FUNCTION dbo.unaccent;
+GO
+CREATE FUNCTION dbo.unaccent (@textvalue NVARCHAR(MAX))
+RETURNS NVARCHAR(MAX)
+AS
+BEGIN
+    DECLARE @withaccents NVARCHAR(MAX), @withoutaccents NVARCHAR(MAX), @special NVARCHAR(MAX);
+    DECLARE @count INT;
+
+    SET @textvalue = @textvalue COLLATE Latin1_General_BIN;
+
+     -- ACCENTS
+    SET @withaccents =    'ŠšŽžÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÑÒÓÔÕÖØÙÚÛÜÝŸàáâãäåæçèéêëìíîïñòóôõöøùúûüýÿƒ';
+    SET @withoutaccents = 'SsZzAAAAAAACEEEEIIIINOOOOOOUUUUYYaaaaaaaceeeeiiiinoooooouuuuyyf';
+
+    SET @count = LEN(@withaccents);
+        
+    WHILE @count > 0
+    BEGIN
+        SET @textvalue = REPLACE(@textvalue, SUBSTRING(@withaccents, @count, 1), SUBSTRING(@withoutaccents, @count, 1));
+        SET @count = @count - 1;
+    END;
+
+    -- SPECIAL CHARS
+    SET @special = '«»’”“!@#$%¨&()_+=§¹²³£¢¬"`´{[^~}]<,>.:;?/°ºª+|';
+    SET @count = LEN(@special);
+
+    WHILE @count > 0
+    BEGIN
+        SET @textvalue = REPLACE(@textvalue, SUBSTRING(@special, @count, 1), '');
+        SET @count = @count - 1;
+    END;
+
+    RETURN @textvalue;
+END;
 ```
 
 </details>
