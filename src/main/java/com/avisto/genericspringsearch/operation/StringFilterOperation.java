@@ -64,8 +64,8 @@ public enum StringFilterOperation implements IFilterOperation<String> {
         }
     };
 
-    private static String unaccentFunction = System.getenv("UNACCENT_FUNCTION_NAME") != null ? System.getenv("UNACCENT_FUNCTION_NAME") : "unaccent";
-    private static String schemaUnAccentFunction = System.getenv("SCHEMA_UNACCENT_FUNCTION_NAME") != null ? System.getenv("SCHEMA_UNACCENT_FUNCTION_NAME") : "public";
+    private static String unaccentFunction = System.getProperty("UNACCENT_FUNCTION_NAME") != null ? System.getenv("UNACCENT_FUNCTION_NAME") : "unaccent";
+    private static String schemaUnAccentFunction = System.getProperty("SCHEMA_UNACCENT_FUNCTION_NAME") != null ? System.getenv("SCHEMA_UNACCENT_FUNCTION_NAME") : "public";
 
     @Override
     public boolean needsMultipleValues() {
