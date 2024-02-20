@@ -25,6 +25,8 @@ public enum StringFilterOperation implements IFilterOperation<String> {
     LIKE_IGNORE_CASE_IGNORE_ACCENT {
         @Override
         public Predicate calculate(CriteriaBuilder cb, Expression<?> expression, String value) {
+            String unaccentFunction = System.getProperty("UNACCENT_FUNCTION_NAME") != null ? System.getenv("UNACCENT_FUNCTION_NAME") : "unaccent";
+            String schemaUnAccentFunction = System.getProperty("SCHEMA_UNACCENT_FUNCTION_NAME") != null ? System.getenv("SCHEMA_UNACCENT_FUNCTION_NAME") : "public";
             return LIKE_IGNORE_CASE.calculate(cb, cb.function(unaccentFunction, String.class, expression), SearchUtils.normalizeAccentsAndDashes(value));
         }
     },
@@ -46,6 +48,8 @@ public enum StringFilterOperation implements IFilterOperation<String> {
     START_WITH_IGNORE_CASE_IGNORE_ACCENT {
         @Override
         public Predicate calculate(CriteriaBuilder cb, Expression<?> expression, String value) {
+            String unaccentFunction = System.getProperty("UNACCENT_FUNCTION_NAME") != null ? System.getenv("UNACCENT_FUNCTION_NAME") : "unaccent";
+            String schemaUnAccentFunction = System.getProperty("SCHEMA_UNACCENT_FUNCTION_NAME") != null ? System.getenv("SCHEMA_UNACCENT_FUNCTION_NAME") : "public";
             return START_WITH_IGNORE_CASE.calculate(cb, cb.function(unaccentFunction, String.class, expression), SearchUtils.normalizeAccentsAndDashes(value));
         }
     },
@@ -60,12 +64,14 @@ public enum StringFilterOperation implements IFilterOperation<String> {
     EQUAL_IGNORE_CASE_IGNORE_ACCENT {
         @Override
         public Predicate calculate(CriteriaBuilder cb, Expression<?> expression, String value) {
+            String unaccentFunction = System.getProperty("UNACCENT_FUNCTION_NAME") != null ? System.getenv("UNACCENT_FUNCTION_NAME") : "unaccent";
+            String schemaUnAccentFunction = System.getProperty("SCHEMA_UNACCENT_FUNCTION_NAME") != null ? System.getenv("SCHEMA_UNACCENT_FUNCTION_NAME") : "public";
             return EQUAL_IGNORE_CASE.calculate(cb, cb.function(schemaUnAccentFunction + "." + unaccentFunction, String.class, cb.lower((Expression<String>) expression)), SearchUtils.normalizeAccentsAndDashes(value));
         }
     };
 
-    private static String unaccentFunction = System.getProperty("UNACCENT_FUNCTION_NAME") != null ? System.getenv("UNACCENT_FUNCTION_NAME") : "unaccent";
-    private static String schemaUnAccentFunction = System.getProperty("SCHEMA_UNACCENT_FUNCTION_NAME") != null ? System.getenv("SCHEMA_UNACCENT_FUNCTION_NAME") : "public";
+//    private static String unaccentFunction = System.getProperty("UNACCENT_FUNCTION_NAME") != null ? System.getenv("UNACCENT_FUNCTION_NAME") : "unaccent";
+//    private static String schemaUnAccentFunction = System.getProperty("SCHEMA_UNACCENT_FUNCTION_NAME") != null ? System.getenv("SCHEMA_UNACCENT_FUNCTION_NAME") : "public";
 
     @Override
     public boolean needsMultipleValues() {
