@@ -25,9 +25,7 @@ public enum StringFilterOperation implements IFilterOperation<String> {
     LIKE_IGNORE_CASE_IGNORE_ACCENT {
         @Override
         public Predicate calculate(CriteriaBuilder cb, Expression<?> expression, String value) {
-            String unaccentFunction = System.getProperty("UNACCENT_FUNCTION_NAME") != null ? System.getProperty("UNACCENT_FUNCTION_NAME") : "unaccent";
-            String schemaUnAccentFunction = System.getProperty("SCHEMA_UNACCENT_FUNCTION_NAME") != null ? System.getProperty("SCHEMA_UNACCENT_FUNCTION_NAME") + "." : "";
-            return LIKE_IGNORE_CASE.calculate(cb, cb.function(schemaUnAccentFunction + unaccentFunction, String.class, expression), SearchUtils.normalizeAccentsAndDashes(value));
+            return LIKE_IGNORE_CASE.calculate(cb, cb.function(getUnAccentFunctionPath(), String.class, expression), SearchUtils.normalizeAccentsAndDashes(value));
         }
     },
 
@@ -48,9 +46,7 @@ public enum StringFilterOperation implements IFilterOperation<String> {
     START_WITH_IGNORE_CASE_IGNORE_ACCENT {
         @Override
         public Predicate calculate(CriteriaBuilder cb, Expression<?> expression, String value) {
-            String unaccentFunction = System.getProperty("UNACCENT_FUNCTION_NAME") != null ? System.getProperty("UNACCENT_FUNCTION_NAME") : "unaccent";
-            String schemaUnAccentFunction = System.getProperty("SCHEMA_UNACCENT_FUNCTION_NAME") != null ? System.getProperty("SCHEMA_UNACCENT_FUNCTION_NAME") + "." : "";
-            return START_WITH_IGNORE_CASE.calculate(cb, cb.function(schemaUnAccentFunction + unaccentFunction, String.class, expression), SearchUtils.normalizeAccentsAndDashes(value));
+            return START_WITH_IGNORE_CASE.calculate(cb, cb.function(getUnAccentFunctionPath(), String.class, expression), SearchUtils.normalizeAccentsAndDashes(value));
         }
     },
 
@@ -64,9 +60,7 @@ public enum StringFilterOperation implements IFilterOperation<String> {
     EQUAL_IGNORE_CASE_IGNORE_ACCENT {
         @Override
         public Predicate calculate(CriteriaBuilder cb, Expression<?> expression, String value) {
-            String unaccentFunction = System.getProperty("UNACCENT_FUNCTION_NAME") != null ? System.getProperty("UNACCENT_FUNCTION_NAME") : "unaccent";
-            String schemaUnAccentFunction = System.getProperty("SCHEMA_UNACCENT_FUNCTION_NAME") != null ? System.getProperty("SCHEMA_UNACCENT_FUNCTION_NAME") + "." : "";
-            return EQUAL_IGNORE_CASE.calculate(cb, cb.function(schemaUnAccentFunction + unaccentFunction, String.class, cb.lower((Expression<String>) expression)), SearchUtils.normalizeAccentsAndDashes(value));
+            return EQUAL_IGNORE_CASE.calculate(cb, cb.function(getUnAccentFunctionPath(), String.class, cb.lower((Expression<String>) expression)), SearchUtils.normalizeAccentsAndDashes(value));
         }
     };
 
@@ -78,5 +72,11 @@ public enum StringFilterOperation implements IFilterOperation<String> {
     @Override
     public Class<String> getOperationType() {
         return String.class;
+    }
+
+    public static String getUnAccentFunctionPath() {
+        String unaccentFunction = System.getProperty("UNACCENT_FUNCTION_NAME") != null ? System.getProperty("UNACCENT_FUNCTION_NAME") : "unaccent";
+        String schemaUnAccentFunction = System.getProperty("SCHEMA_UNACCENT_FUNCTION_NAME") != null ? System.getProperty("SCHEMA_UNACCENT_FUNCTION_NAME") + "." : "";
+        return schemaUnAccentFunction + unaccentFunction;
     }
 }
