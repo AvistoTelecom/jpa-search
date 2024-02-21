@@ -75,8 +75,8 @@ public enum StringFilterOperation implements IFilterOperation<String> {
     }
 
     public static String getUnAccentFunctionPath() {
-        String unaccentFunction = System.getProperty("UNACCENT_FUNCTION_NAME") != null ? System.getProperty("UNACCENT_FUNCTION_NAME") : "unaccent";
-        String schemaUnAccentFunction = System.getProperty("SCHEMA_UNACCENT_FUNCTION_NAME") != null ? System.getProperty("SCHEMA_UNACCENT_FUNCTION_NAME") + "." : "";
+        final String unaccentFunction = System.getProperty("UNACCENT_FUNCTION_NAME") != null ? System.getProperty("UNACCENT_FUNCTION_NAME") : "unaccent";
+        final String schemaUnAccentFunction = System.getProperty("SCHEMA_UNACCENT_FUNCTION_NAME") != null ? System.getProperty("SCHEMA_UNACCENT_FUNCTION_NAME") + "." : "";
         return schemaUnAccentFunction + unaccentFunction;
     }
 }
