@@ -8,26 +8,25 @@ group 'io.github.avistotelecom'
 archivesBaseName = 'nom_de_la_librairie_visible_sur_maven_central'
 version '1.0.0.jpa2'
 
-//repositories {
-//    mavenCentral()
-//}
+repositories {
+    mavenCentral()
+}
 
-//jar {
-//    manifest {
-//        attributes(
-//                'Main-Class': 'com.avisto.genericspringsearch.GenericSpringSearch'
-//        )
-//    }
-//    from {
-//        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
-//    }
-//}
+jar {
+    manifest {
+        attributes(
+                'Main-Class': 'com.avisto.genericspringsearch.GenericSpringSearch'
+        )
+    }
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
 
 dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter:5.9.3'
     testImplementation 'org.mockito:mockito-core:5.4.0'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-
     implementation 'javax.persistence:javax.persistence-api:2.2'
     api 'javax.inject:javax.inject:1'
 }
@@ -39,34 +38,12 @@ java {
     withSourcesJar()
 }
 
-//tasks.register('javadocJar', Jar) {
-//    classifier = 'javadoc'
-//    from javadoc
-//}
-//
-//tasks.register('sourcesJar', Jar) {
-//    classifier = 'sources'
-//    from sourceSets.main.allSource
-//}
-
 javadoc {
     destinationDir = file("${buildDir}/docs/javadoc")
 }
 
-//tasks.withType(JavaCompile) {
-//    options.encoding = 'UTF-8'
-//}
-
 test {
     useJUnitPlatform()
-}
-//
-//artifacts {
-//    archives javadocJar, sourcesJar
-//}
-
-signing {
-    sign configurations.archives
 }
 
 publishing {
@@ -78,60 +55,58 @@ publishing {
 
             from components.java
 
-            signing {
-                sign(configurations.archives.get())
-                sign(publishing.publications["mavenJava"])
-            }
+//            signing {
+//                sign(configurations.archives.get())
+//                sign(publishing.publications["mavenJava"])
+//            }
 
-            repository(url: "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/") {
-                authentication(userName: ossrhUsername, password: ossrhPassword)
-            }
-
-            snapshotRepository(url: "https://s01.oss.sonatype.org/content/repositories/snapshots/") {
-                authentication(userName: ossrhUsername, password: ossrhPassword)
-            }
+//            repository(url: "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/") {
+//                authentication(userName: ossrhUsername, password: ossrhPassword)
+//            }
+////
+//            snapshotRepository(url: "https://s01.oss.sonatype.org/content/repositories/snapshots/") {
+//                authentication(userName: ossrhUsername, password: ossrhPassword)
+//            }
 
             pom {
-                name.set("Simple Spreadsheet")
-                packaging = "jar"
-
-                description.set("A simple spreasdheet parser.")
-                url.set("https://github.com/Draluy/SimpleSpreadsheet")
+                name = 'Generic Search'
+                description = 'Generic Search offers a solution that facilitates the search of database content in Java projects.'
+                url = 'https://github.com/Draluy/SimpleSpreadsheet'
 
                 licenses {
                     license {
-                        name.set("GNU General Public License, version 2")
-                        url.set("https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html")
+                        name = 'GNU General Public License, version 2'
+                        url = 'https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html'
                     }
                 }
 
                 organization {
-                    name 'Avisto'
-                    url 'https://www.avisto.com/'
+                    name = 'Avisto'
+                    url = 'https://www.avisto.com/'
                 }
 
                 developers {
                     developer {
-                        name.set("Gabriel Revelli")
-                        email.set("gabriel.revelli@avisto.com")
-                        organization.set("Avisto")
+                        name = 'Gabriel Revelli'
+                        email = 'gabriel.revelli@avisto.com'
+                        organization = 'Avisto'
                     }
                     developer {
-                        name.set("Martin Rech")
-                        email.set("martin.rech@avisto.com")
-                        organization.set("Avisto")
+                        name = 'Martin Rech'
+                        email = 'martin.rech@avisto.com'
+                        organization = 'Avisto'
                     }
                     developer {
-                        name.set("Technical Direction")
-                        email.set("dt@avisto.com")
-                        organization.set("Avisto")
+                        name = 'Technical Direction'
+                        email = 'dt@avisto.com'
+                        organization = 'Avisto'
                     }
                 }
 
                 scm {
-                    connection 'scm:git:git://github.com/AVISTOTELECOM/nom_du_projet.git'
-                    developerConnection 'scm:git:ssh://github.com:AVISTOTELECOM/nom_du_projet.git'
-                    url 'https://github.com/AVISTOTELECOM/nom_du_projet'
+                    connection = 'scm:git:git://github.com/AVISTOTELECOM/nom_du_projet.git'
+                    developerConnection = 'scm:git:ssh://github.com:AVISTOTELECOM/nom_du_projet.git'
+                    url = 'https://github.com/AVISTOTELECOM/nom_du_projet'
                 }
             }
         }
@@ -139,10 +114,18 @@ publishing {
 
     repositories {
         maven {
-            def releasesRepoUrl = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
-            def snapshotsRepoUrl = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
+            name "OSSRH"
+            def releasesRepoUrl = 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/'
+            def snapshotsRepoUrl = 'https://s01.oss.sonatype.org/content/repositories/snapshots/'
             url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+            credentials {
+                username = ossrhUsername
+                password = ossrhPassword
+            }
         }
     }
+}
 
+signing {
+    sign publishing.publications.mavenJava
 }
