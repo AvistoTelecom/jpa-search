@@ -2,6 +2,8 @@
 
 # Generic-Spring-Search
 
+Generic Search offers a solution that facilitates the search of database content in Java projects.
+
 TODO : Add JavaDoc and clean code
 TODO : add Unit Tests
 
