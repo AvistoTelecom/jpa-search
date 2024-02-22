@@ -1,9 +1,12 @@
 plugins {
     id 'java-library'
+    id 'maven-publish'
+    id 'signing'
 }
 
-group 'com.avisto'
-version '0.0.1-SNAPSHOT'
+group 'io.github.avistotelecom'
+archivesBaseName = 'nom_de_la_librairie_visible_sur_maven_central'
+version '1.0.0.jpa2'
 
 repositories {
     mavenCentral()
@@ -32,6 +35,18 @@ dependencies {
 java {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
+    withJavadocJar()
+    withSourcesJar()
+}
+
+task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from javadoc
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
 }
 
 javadoc {
@@ -44,4 +59,93 @@ tasks.withType(JavaCompile) {
 
 test {
     useJUnitPlatform()
+}
+
+artifacts {
+    archives javadocJar, sourcesJar
+}
+
+signing {
+    sign configurations.archives
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            signing {
+                sign(configurations.archives.get())
+                sign(publishing.publications["mavenJava"])
+            }
+
+            repository(url: "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
+            }
+
+            snapshotRepository(url: "https://s01.oss.sonatype.org/content/repositories/snapshots/") {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
+            }
+
+            from(components["java"])
+            pom {
+                name.set("Simple Spreadsheet")
+                packaging = "jar"
+
+                description.set("A simple spreasdheet parser.")
+                url.set("https://github.com/Draluy/SimpleSpreadsheet")
+
+                licenses {
+                    license {
+                        name.set("GNU General Public License, version 2")
+                        url.set("https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html")
+                    }
+                }
+
+                organization {
+                    name 'Avisto'
+                    url 'https://www.avisto.com/'
+                }
+
+                developers {
+                    developer {
+                        name.set("Gabriel Revelli")
+                        email.set("gabriel.revelli@avisto.com")
+                        organization.set("Avisto")
+                    }
+                    developer {
+                        name.set("Martin Rech")
+                        email.set("martin.rech@avisto.com")
+                        organization.set("Avisto")
+                    }
+                    developer {
+                        name.set("Technical Direction")
+                        email.set("dt@avisto.com")
+                        organization.set("Avisto")
+                    }
+                }
+
+                scm {
+                    connection 'scm:git:git://github.com/AVISTOTELECOM/nom_du_projet.git'
+                    developerConnection 'scm:git:ssh://github.com:AVISTOTELECOM/nom_du_projet.git'
+                    url 'https://github.com/AVISTOTELECOM/nom_du_projet'
+                }
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            name = "myRepo"
+            val releasesRepoUrl = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+            val snapshotsRepoUrl = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
+            url = uri(if (version.toString().endsWith("SNAPSHOT")) snapshotsRepoUrl else releasesRepoUrl)
+            val ossrhUsername: String by project
+            val ossrhPassword: String by project
+
+            credentials {
+                username = ossrhUsername
+                password = ossrhPassword
+            }
+        }
+    }
+
 }
