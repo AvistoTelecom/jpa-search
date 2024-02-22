@@ -8,20 +8,20 @@ group 'io.github.avistotelecom'
 archivesBaseName = 'nom_de_la_librairie_visible_sur_maven_central'
 version '1.0.0.jpa2'
 
-repositories {
-    mavenCentral()
-}
+//repositories {
+//    mavenCentral()
+//}
 
-jar {
-    manifest {
-        attributes(
-                'Main-Class': 'com.avisto.genericspringsearch.GenericSpringSearch'
-        )
-    }
-    from {
-        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
-    }
-}
+//jar {
+//    manifest {
+//        attributes(
+//                'Main-Class': 'com.avisto.genericspringsearch.GenericSpringSearch'
+//        )
+//    }
+//    from {
+//        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+//    }
+//}
 
 dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter:5.9.3'
@@ -39,31 +39,31 @@ java {
     withSourcesJar()
 }
 
-task javadocJar(type: Jar) {
-    classifier = 'javadoc'
-    from javadoc
-}
-
-task sourcesJar(type: Jar) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
-}
+//tasks.register('javadocJar', Jar) {
+//    classifier = 'javadoc'
+//    from javadoc
+//}
+//
+//tasks.register('sourcesJar', Jar) {
+//    classifier = 'sources'
+//    from sourceSets.main.allSource
+//}
 
 javadoc {
     destinationDir = file("${buildDir}/docs/javadoc")
 }
 
-tasks.withType(JavaCompile) {
-    options.encoding = 'UTF-8'
-}
+//tasks.withType(JavaCompile) {
+//    options.encoding = 'UTF-8'
+//}
 
 test {
     useJUnitPlatform()
 }
-
-artifacts {
-    archives javadocJar, sourcesJar
-}
+//
+//artifacts {
+//    archives javadocJar, sourcesJar
+//}
 
 signing {
     sign configurations.archives
@@ -71,7 +71,13 @@ signing {
 
 publishing {
     publications {
-        create<MavenPublication>("mavenJava") {
+        maven(MavenPublication) {
+            groupId = 'io.github.avistotelecom'
+            artifactId = 'nom_de_la_librairie_visible_sur_maven_central'
+            version = '1.0.0.jpa2'
+
+            from components.java
+
             signing {
                 sign(configurations.archives.get())
                 sign(publishing.publications["mavenJava"])
@@ -85,7 +91,6 @@ publishing {
                 authentication(userName: ossrhUsername, password: ossrhPassword)
             }
 
-            from(components["java"])
             pom {
                 name.set("Simple Spreadsheet")
                 packaging = "jar"
@@ -134,17 +139,9 @@ publishing {
 
     repositories {
         maven {
-            name = "myRepo"
-            val releasesRepoUrl = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
-            val snapshotsRepoUrl = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
-            url = uri(if (version.toString().endsWith("SNAPSHOT")) snapshotsRepoUrl else releasesRepoUrl)
-            val ossrhUsername: String by project
-            val ossrhPassword: String by project
-
-            credentials {
-                username = ossrhUsername
-                password = ossrhPassword
-            }
+            def releasesRepoUrl = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+            def snapshotsRepoUrl = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
+            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
         }
     }
 
