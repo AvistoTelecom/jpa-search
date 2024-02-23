@@ -48,7 +48,7 @@ test {
 
 publishing {
     publications {
-        maven(MavenPublication) {
+        mavenJava(MavenPublication) {
             groupId = 'io.github.avistotelecom'
             artifactId = 'nom_de_la_librairie_visible_sur_maven_central'
             version = '1.0.0.jpa2'
