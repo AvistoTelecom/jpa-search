@@ -1,5 +1,8 @@
 package com.avisto.genericspringsearch.model;
 
+/**
+ * Path to the database field where you want to apply the operation.
+ */
 public class FieldPathObject {
     private final String left;
     private final String right;

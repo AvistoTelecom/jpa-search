@@ -13,6 +13,15 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Root;
 
+/**
+ * This class is a combination of a FilterOperation and a SorterOperation. You can use it as a filter, a sorter or both.
+ *
+ * @param <R>
+ * @param <T>
+ *
+ * @author Gabriel Revelli
+ * @version 1.0
+ */
 public class FilterSorterConfig<R extends SearchableEntity, T> extends FilterConfig<R, T> implements ISorterConfig<R> {
 
     private FilterSorterConfig(IFilterOperation<T> filterOperation, String key, List<String> paths) {

@@ -20,9 +20,27 @@ import java.util.Objects;
 
 import static com.avisto.genericspringsearch.service.SearchConstants.Strings.REGEX_DOT;
 
+/**
+ * This class contains the FilterOperation, the key and the paths to create a filter that you can call with the search method.
+ * @param <R>
+ * @param <T>
+ *
+ * @author Gabriel Revelli
+ * @version 1.0
+ */
 public class FilterConfig<R extends SearchableEntity, T> implements IFilterConfig<R, T> {
+
+    /**
+     * Operation to apply to the field with the filter.
+     */
     private final IFilterOperation<T> filterOperation;
+    /**
+     * The name of the filter that you want to call in the params of your url
+     */
     private final String key;
+    /**
+     * Paths of the fields where you want to apply the filter.
+     */
     private final List<String> paths;
 
     protected FilterConfig(String key, IFilterOperation<T> filterOperation, List<String> paths) {
@@ -70,6 +88,10 @@ public class FilterConfig<R extends SearchableEntity, T> implements IFilterConfi
         return this.paths.stream().map(FieldPathObject::of).toList();
     }
 
+    /**
+     * Return the first path of the FilterConfig
+     * @return String of the first path
+     */
     public String getFirstPath() {
         return this.paths.get(0);
     }

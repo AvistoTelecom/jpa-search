@@ -12,8 +12,23 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * This class allows you to use a filter group that you may or may not have previously defined.
+ *
+ * @param <R>
+ *
+ * @author Gabriel Revelli
+ * @version 1.0
+ */
 public class GroupFilterConfig<R extends SearchableEntity> implements IFilterConfig<R, Map<String, String>> {
+
+    /**
+     * The name of the filter that you want to call in the params of your url
+     */
     private final String key;
+    /**
+     * List of the filter that you want to apply.
+     */
     private final List<IFilterConfig> filters;
 
     private GroupFilterConfig(String key, List<IFilterConfig> filters) {
