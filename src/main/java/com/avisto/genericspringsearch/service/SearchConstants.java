@@ -1,5 +1,11 @@
 package com.avisto.genericspringsearch.service;
 
+/**
+ * This class contains the constants used in the library.
+ *
+ * @author Gabriel Revelli
+ * @version 1.0
+ */
 public final class SearchConstants {
     private SearchConstants() {
         throw new IllegalStateException("Utility class");

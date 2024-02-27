@@ -7,11 +7,6 @@ package com.avisto.genericspringsearch.exception;
  * @version 1.0
  */
 public class CannotSortException extends GenericSearchException {
-
-    /**
-     * Display the exception with the message passed in param
-     * @param message Message to display when the exception is display
-     */
     public CannotSortException(String message) {
         super(message);
     }

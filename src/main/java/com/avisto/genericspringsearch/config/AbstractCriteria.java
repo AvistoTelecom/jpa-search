@@ -10,15 +10,8 @@ import java.util.Objects;
  */
 public abstract class AbstractCriteria {
 
-    /**
-     * Key of the config
-     */
     protected String key;
 
-    /**
-     * Return the key of the config
-     * @return The key of the config
-     */
     public String getKey() {
         return key;
     }
@@ -36,10 +29,6 @@ public abstract class AbstractCriteria {
         return Objects.equals(getKey(), that.getKey());
     }
 
-    /**
-     * Get the hashCode of the key
-     * @return the hashCode of the key
-     */
     @Override
     public int hashCode() {
         return Objects.hash(getKey());

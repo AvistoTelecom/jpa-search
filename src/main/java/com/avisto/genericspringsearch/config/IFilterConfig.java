@@ -12,6 +12,16 @@ import java.util.Map;
 
 import static com.avisto.genericspringsearch.service.SearchConstants.Strings.DOT;
 
+/**
+ * This interface is used in FilterConfig, FilterSorterConfig, GroupFilterConfig and MultiFilterConfig.
+ * It implements the common methods of this class.
+ *
+ * @param <R> The type of the entity that is searchable and used for search operations.
+ * @param <T> Filter type. For example, if the filter searches for a name, the value will be String.
+ *
+ * @author Gabriel Revelli
+ * @version 1.0
+ */
 public non-sealed interface IFilterConfig<R extends SearchableEntity, T> extends ISearchConfig<R> {
     Predicate getPredicate(Class<R> rootClazz, Root<R> root, CriteriaBuilder cb, Map<String, Join<R,?>> joins, T value);
 

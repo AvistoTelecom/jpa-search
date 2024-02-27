@@ -22,25 +22,17 @@ import static com.avisto.genericspringsearch.service.SearchConstants.Strings.REG
 
 /**
  * This class contains the FilterOperation, the key and the paths to create a filter that you can call with the search method.
- * @param <R>
- * @param <T>
+ *
+ * @param <R> The type of the entity that is searchable and used for search operations.
+ * @param <T> Filter type. For example, if the filter searches for a name, the value will be String.
  *
  * @author Gabriel Revelli
  * @version 1.0
  */
 public class FilterConfig<R extends SearchableEntity, T> implements IFilterConfig<R, T> {
 
-    /**
-     * Operation to apply to the field with the filter.
-     */
     private final IFilterOperation<T> filterOperation;
-    /**
-     * The name of the filter that you want to call in the params of your url
-     */
     private final String key;
-    /**
-     * Paths of the fields where you want to apply the filter.
-     */
     private final List<String> paths;
 
     protected FilterConfig(String key, IFilterOperation<T> filterOperation, List<String> paths) {
@@ -68,6 +60,10 @@ public class FilterConfig<R extends SearchableEntity, T> implements IFilterConfi
         return filterOperation.needsMultipleValues();
     }
 
+    /**
+     * Check that you're not trying to sort two objects of different type, or a wrong operation for a field.
+     * @param rootClazz Class to be analyzed
+     */
     @Override
     public void checkConfig(Class<R> rootClazz) {
         Class<T> entryClazz = getEntryClass(rootClazz);
@@ -88,14 +84,19 @@ public class FilterConfig<R extends SearchableEntity, T> implements IFilterConfi
         return this.paths.stream().map(FieldPathObject::of).toList();
     }
 
-    /**
-     * Return the first path of the FilterConfig
-     * @return String of the first path
-     */
     public String getFirstPath() {
         return this.paths.get(0);
     }
 
+    /**
+     *
+     * @param rootClazz Class to be analyzed
+     * @param root
+     * @param cb Criteria Builder
+     * @param joins joins
+     * @param value
+     * @return
+     */
     @Override
     public Predicate getPredicate(Class<R> rootClazz, Root<R> root, CriteriaBuilder cb, Map<String, Join<R, ?>> joins, T value) {
         List<Predicate> orPredicates = new ArrayList<>();
@@ -131,6 +132,12 @@ public class FilterConfig<R extends SearchableEntity, T> implements IFilterConfi
         return cb.or(orPredicates.toArray(Predicate[]::new));
     }
 
+    /**
+     * Get the entryClass to access a field
+     *
+     * @param rootClazz Class to be analyzed
+     * @return EntryClass
+     */
     @Override
     public Class<T> getEntryClass(Class<R> rootClazz) {
         if (needMultipleValues()) {
@@ -139,6 +146,12 @@ public class FilterConfig<R extends SearchableEntity, T> implements IFilterConfi
         return (Class<T>) getTargetClass(rootClazz);
     }
 
+    /**
+     * Get the targetClass in which the field is located.
+     *
+     * @param rootClazz Class to be analyzed
+     * @return TargetClass
+     */
     private Class<?> getTargetClass(Class<R> rootClazz) {
         return SearchUtils.getEntityClass(rootClazz, getFirstPath().split(REGEX_DOT));
     }

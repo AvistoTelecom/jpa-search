@@ -274,6 +274,17 @@ public final class SearchUtils {
                 findFirst().
                 orElseThrow(() -> new FieldNotInCriteriaException(String.format("Field %s is not specified in criteria", key)));
     }
+
+    /**
+     *
+     * @param configurations
+     * @param keys
+     * @param castClass
+     * @return
+     * @param <R> The type of the entity that is searchable and used for search operations.
+     * @param <E> Criteria Enum
+     * @param <T> Filter type. For example, if the filter searches for a name, the value will be String.
+     */
     static <R extends SearchableEntity, E extends Enum<?> & ISearchCriteriaConfig<R>, T extends ISearchConfig<R>> Map<String, T> getSearchConfigMap(E[] configurations, List<String> keys, Class<T> castClass) {
         Map<String, T> result = new HashMap<>();
         keys.forEach(key -> result.put(key, SearchUtils.getSearchConfig(configurations, key, castClass)));
@@ -290,6 +301,13 @@ public final class SearchUtils {
         return getIdPathFromAnyClass(rootClazz);
     }
 
+    /**
+     * Get id String Path of a Class
+     *
+     * @param clazz Search class
+     * @return The id String Path
+     * @param <R> The type of the entity that is searchable and used for search operations.
+     */
     private static <R extends SearchableEntity> String getIdPathFromAnyClass(Class<?> clazz) {
         if (clazz != null && (clazz.isAnnotationPresent(Entity.class) || clazz.isAnnotationPresent(MappedSuperclass.class))) {
             for (Field field : clazz.getDeclaredFields()) {

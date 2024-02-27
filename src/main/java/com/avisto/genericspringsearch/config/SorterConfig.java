@@ -9,6 +9,14 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Root;
 
+/**
+ * SorterConfig allows you to sort the search response
+ *
+ * @param <R> The type of the entity that is searchable and used for search operations.
+ *
+ * @author Gabriel Revelli
+ * @version 1.0
+ */
 public class SorterConfig<R extends SearchableEntity> implements ISorterConfig<R> {
 
     private final String key;
@@ -28,6 +36,10 @@ public class SorterConfig<R extends SearchableEntity> implements ISorterConfig<R
         return key;
     }
 
+    /**
+     * Check that you not try to sort on a collection.
+     * @param rootClazz The entity class
+     */
     @Override
     public void checkConfig(Class<R> rootClazz) {
         if (getSortPath().contains("[")) {

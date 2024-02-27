@@ -15,20 +15,13 @@ import java.util.Map;
 /**
  * This class allows you to use a filter group that you may or may not have previously defined.
  *
- * @param <R>
+ * @param <R> The type of the entity that is searchable and used for search operations.
  *
  * @author Gabriel Revelli
  * @version 1.0
  */
 public class GroupFilterConfig<R extends SearchableEntity> implements IFilterConfig<R, Map<String, String>> {
-
-    /**
-     * The name of the filter that you want to call in the params of your url
-     */
     private final String key;
-    /**
-     * List of the filter that you want to apply.
-     */
     private final List<IFilterConfig> filters;
 
     private GroupFilterConfig(String key, List<IFilterConfig> filters) {
@@ -44,6 +37,16 @@ public class GroupFilterConfig<R extends SearchableEntity> implements IFilterCon
         }
         return new GroupFilterConfig<>(key, result);
     }
+
+    /**
+     *
+     * @param rootClazz
+     * @param root
+     * @param cb
+     * @param joins
+     * @param value
+     * @return
+     */
     @Override
     public Predicate getPredicate(Class<R> rootClazz, Root<R> root, CriteriaBuilder cb, Map<String, Join<R, ?>> joins, Map<String, String> value) {
         if (value == null) {
@@ -59,6 +62,12 @@ public class GroupFilterConfig<R extends SearchableEntity> implements IFilterCon
 
     }
 
+    /**
+     * Get the entryClass to access a field
+     *
+     * @param rootClazz Class to be analyzed
+     * @return EntryClass
+     */
     @Override
     public Class<Map<String, String>> getEntryClass(Class<R> rootClazz) {
         return (Class<Map<String,String>>) (Class)Map.class;
@@ -69,6 +78,10 @@ public class GroupFilterConfig<R extends SearchableEntity> implements IFilterCon
         return this.key;
     }
 
+    /**
+     * Specify if the filter needs multiple values to access a field.
+     * @return boolean
+     */
     @Override
     public boolean needMultipleValues() {
         return false;
@@ -76,7 +89,6 @@ public class GroupFilterConfig<R extends SearchableEntity> implements IFilterCon
 
     @Override
     public void checkConfig(Class<R> rootClazz) {
-        //TODO : check if we need to check
     }
 
     @Override

@@ -1,14 +1,12 @@
 package com.avisto.genericspringsearch.exception;
 
 /**
- * Returns an exception when the search method has apply filter to an invalid field path.
+ * Returns an exception when the search method has applied a filter to an invalid field path.
+ *
+ * @author Gabriel Revelli
+ * @version 1.0
  */
 public class FieldPathNotFoundException extends GenericSearchException {
-
-    /**
-     * Display the exception with the message passed in param
-     * @param message Message to display when the exception is display
-     */
     public FieldPathNotFoundException(String message) {
         super(message);
     }

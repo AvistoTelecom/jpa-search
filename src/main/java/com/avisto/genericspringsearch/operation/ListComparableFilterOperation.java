@@ -8,8 +8,17 @@ import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
 import java.util.List;
 
+/**
+ * This enum provide between operation.
+ *
+ * @author Gabriel Revelli
+ * @version 1.0
+ */
 public enum ListComparableFilterOperation implements IFilterOperation<List<Comparable>> {
 
+    /**
+     * Check if expression is between two values.
+     */
     BETWEEN {
         @Override
         public Predicate calculate(CriteriaBuilder cb, Expression<?> expression, List<Comparable> value) {

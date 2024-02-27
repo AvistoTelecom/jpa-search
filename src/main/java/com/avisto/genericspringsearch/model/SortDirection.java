@@ -5,6 +5,10 @@ import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Order;
 import java.util.function.BiFunction;
 
+/**
+ * @author Gabriel Revelli
+ * @version 1.0
+ */
 public enum SortDirection {
     ASC(CriteriaBuilder::asc),
     DESC(CriteriaBuilder::desc);

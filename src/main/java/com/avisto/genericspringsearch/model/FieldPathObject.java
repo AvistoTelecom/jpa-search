@@ -2,6 +2,9 @@ package com.avisto.genericspringsearch.model;
 
 /**
  * Path to the database field where you want to apply the operation.
+ *
+ * @author Gabriel Revelli
+ * @version 1.0
  */
 public class FieldPathObject {
     private final String left;

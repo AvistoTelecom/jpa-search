@@ -64,18 +64,56 @@ public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum
         this.entityManager = entityManager;
     }
 
+    /**
+     * Performs a search operation based on the provided search criteria and returns the results as a pageable list.
+     *
+     * @param configClazz Criteria Class
+     * @param rawValues Search parameters
+     * @param sorts Sorter for your search
+     * @return A Page object containing the search results with pagination information.
+     */
     public Page<R> search(Class<E> configClazz, Map<String, String> rawValues, List<String> sorts) {
         return search(configClazz, format(configClazz, rawValues, sorts), Function.identity(), null);
     }
 
+    /**
+     * Performs a search operation based on the provided search criteria and returns the results as a pageable list.
+     *
+     * @param configClazz Criteria Class
+     * @param rawValues Search parameters
+     * @param sorts Sorter for your search
+     * @param mapper The entity mapper
+     * @return A Page object containing the search results with pagination information.
+     * @param <D> The type of the object that will be returned in the Page object.
+     */
     public <D> Page<D> search(Class<E> configClazz, Map<String, String> rawValues, List<String> sorts, Function<R, D> mapper) {
         return search(configClazz, format(configClazz, rawValues, sorts), mapper, null);
     }
 
+    /**
+     * Performs a search operation based on the provided search criteria and returns the results as a pageable list.
+     *
+     * @param configClazz Criteria Class
+     * @param rawValues Search parameters
+     * @param sorts Sorter for your search
+     * @param entityGraphName Name of the entityGraph
+     * @return A Page object containing the search results with pagination information.
+     */
     public Page<R> search(Class<E> configClazz, Map<String, String> rawValues, List<String> sorts, String entityGraphName) {
         return search(configClazz, format(configClazz, rawValues, sorts), Function.identity(), entityGraphName);
     }
 
+    /**
+     * Performs a search operation based on the provided search criteria and returns the results as a pageable list.
+     *
+     * @param configClazz Criteria Class
+     * @param rawValues Search parameters
+     * @param sorts Sorter for your search
+     * @param mapper The entity mapper
+     * @param entityGraphName Name of the entityGraph
+     * @return A Page object containing the search results with pagination information.
+     * @param <D> The type of the object that will be returned in the Page object.
+     */
     public <D> Page<D> search(Class<E> configClazz, Map<String, String> rawValues, List<String> sorts, Function<R, D> mapper, String entityGraphName) {
         return search(configClazz, format(configClazz, rawValues, sorts), mapper, entityGraphName);
     }
@@ -83,9 +121,12 @@ public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum
     /**
      * Performs a search operation based on the provided search criteria and returns the results as a pageable list.
      *
-     * @param searchCriteria   The SearchCriteria object containing filtering, sorting, and pagination details.
-     * @param <D> The type of the object that will be returned in the Page object.
+     * @param configClazz Criteria Class
+     * @param searchCriteria The SearchCriteria object containing filtering, sorting, and pagination details.
+     * @param mapper The entity mapper
+     * @param entityGraphName Name of the entityGraph
      * @return A Page object containing the search results with pagination information.
+     * @param <D> The type of the object that will be returned in the Page object.
      */
     public <D> Page<D> search(Class<E> configClazz, SearchCriteria searchCriteria, Function<R, D> mapper, String entityGraphName) {
 

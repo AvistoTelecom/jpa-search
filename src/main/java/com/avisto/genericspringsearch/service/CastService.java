@@ -45,6 +45,7 @@ import static com.avisto.genericspringsearch.service.SearchConstants.Strings.SPA
 
 /**
  * Utility class for casting string values to different types based on the target class.
+ *
  * @author Gabriel Revelli
  * @version 1.0
  */
@@ -157,6 +158,11 @@ public class CastService {
         throw new TypeNotHandledException(String.format("Cannot cast String to type %s : Type not handled", clazz.getSimpleName()));
     }
 
+    /**
+     *
+     * @param jsonString
+     * @return
+     */
     public static Map<String, String> parseJsonToMap(String jsonString) {
         Map<String, String> resultMap = new HashMap<>();
         jsonString = jsonString.trim();
@@ -200,6 +206,11 @@ public class CastService {
         return resultMap;
     }
 
+    /**
+     *
+     * @param jsonString
+     * @return
+     */
     public static List<String> parseJsonToList(String jsonString) {
         List<String> resultList = new ArrayList<>();
         jsonString = jsonString.trim();

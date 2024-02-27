@@ -10,6 +10,15 @@ import javax.persistence.criteria.Root;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * MultiFilterConfig lets you apply a filter several times. For example, you can search for an Employee who has two pets, a dog and a cat.
+ *
+ * @param <R> The type of the entity that is searchable and used for search operations.
+ * @param <X> Parent filter type. For example, if the parent filter is looking for a name, the value will be String.
+ *
+ * @author Gabriel Revelli
+ * @version 1.0
+ */
 public class MultiFilterConfig<R extends SearchableEntity, X> implements IFilterConfig<R, List<String>> {
     private final String key;
     private final IFilterConfig<R, X> filter;
@@ -29,6 +38,15 @@ public class MultiFilterConfig<R extends SearchableEntity, X> implements IFilter
         return new MultiFilterConfig<>(key, filter, null);
     }
 
+    /**
+     *
+     * @param rootClazz
+     * @param root
+     * @param cb
+     * @param joins
+     * @param value
+     * @return
+     */
     @Override
     public Predicate getPredicate(Class<R> rootClazz, Root<R> root, CriteriaBuilder cb, Map<String, Join<R, ?>> joins, List<String> value) {
         Class<X> filterClazz = filter.getEntryClass(rootClazz);
@@ -44,6 +62,12 @@ public class MultiFilterConfig<R extends SearchableEntity, X> implements IFilter
 
     }
 
+    /**
+     * Get the entryClass to access a field
+     *
+     * @param rootClazz Class to be analyzed
+     * @return EntryClass
+     */
     @Override
     public Class<List<String>> getEntryClass(Class<R> rootClazz) {
         return (Class<List<String>>) (Class)List.class;
@@ -59,11 +83,19 @@ public class MultiFilterConfig<R extends SearchableEntity, X> implements IFilter
         return this.key;
     }
 
+    /**
+     * Specify if the filter needs multiple values to access a field.
+     * @return boolean
+     */
     @Override
     public boolean needMultipleValues() {
         return true;
     }
 
+    /**
+     * Check the link with the other entity.
+     * @param rootClazz Entity class
+     */
     @Override
     public void checkConfig(Class<R> rootClazz) {
         //TODO : check if we need to check
