@@ -12,8 +12,7 @@ import com.avisto.genericspringsearch.operation.StringFilterOperation;
 public enum CriteriaTestEnum implements ISearchCriteriaConfig<TestEntity> {
     ID(FilterConfig.of("id", ObjectFilterOperation.EQUAL, "id")),
     FIELD1(FilterSorterConfig.of("field1", ObjectFilterOperation.EQUAL, "field1")),
-    FIELD2(FilterConfig.of("field2", StringFilterOperation.LIKE_IGNORE_CASE, "field2")),
-    FIELD3(FilterConfig.of("field3", ObjectFilterOperation.EQUAL, "field3[field1]"));
+    FIELD2(FilterConfig.of("field2", StringFilterOperation.LIKE_IGNORE_CASE, "field2"));
 
     final ISearchConfig<TestEntity> searchConfig;
 
