@@ -4,9 +4,6 @@
 
 Generic Search offers a solution that facilitates the search of database content in Java projects.
 
-TODO : Add JavaDoc and clean code
-TODO : add Unit Tests
-
 [![Hibernate](https://img.shields.io/badge/Hibernate-59666C?style=for-the-badge&logo=Hibernate&logoColor=white
 )](https://hibernate.org/)
 
@@ -36,15 +33,15 @@ To configure a search, you need to create a configuration criteria `enum` descri
 @Getter
 @AllArgsConstructor
 public enum ApiKeyCriteria implements ISearchCriteriaConfig<Apikey> {
-    ID(FilterSorterConfig.of("id", ObjectFilterOperation.EQUAL, "id")),
+    ID(sorterConfig.of("id", ObjectFilterOperation.EQUAL, "id")),
     ACCOUNT_TYPE(FilterConfig.of("accountType", ObjectFilterOperation.EQUAL, "account.accountType.key")),
-    PROFILE_TYPE(FilterConfig.of("profileType", ObjectFilterOperation.EQUAL, "account.accountType.profile.key")),
+    PROFILE_TYPE(FilterSorterConfig.of("profileType", ObjectFilterOperation.EQUAL, "account.accountType.profile.key")),
     ACCOUNT_FILES_NAME(FilterConfig.of("accountFilesName", ObjectFilterOperation.EQUAL, "account.files[name]")),
     ACCOUNT_LABEL(FilterConfig.of("accountLabel", ObjectFilterOperation.EQUAL, "account.label")),
     TYPE(FilterConfig.of("type", ObjectFilterOperation.EQUAL, "type")),
-    EXTERNAL_ID(FilterConfig.of("externalId", StringFilterOperation.LIKE_IGNORE_CASE, "externalId")),
+    EXTERNAL_ID(FilterSorterConfig.of("externalId", StringFilterOperation.LIKE_IGNORE_CASE, "externalId")),
     CREATION_DATE(FilterConfig.of("creationDate", ListComparableFilterOperation.BETWEEN, "creationDate")),
-    END_DATE(FilterConfig.of("endDate", ListComparableFilterOperation.BETWEEN, "endDate")),
+    END_DATE(FilterSorterConfig.of("endDate", ListComparableFilterOperation.BETWEEN, "endDate")),
     EXPIRATION_DATE(FilterConfig.of("expirationDate", ListComparableFilterOperation.BETWEEN, "expirationDate")),
     LABEL(FilterConfig.of("label", StringFilterOperation.LIKE_IGNORE_CASE_IGNORE_ACCENT, "label", "account.label")),
     YEAR(GroupFilterConfig.of("year", CREATION_DATE.getFilterConfig(), END_DATE.getFilterConfig())),
@@ -459,11 +456,9 @@ END;
 
 </details>
 
+## Requirements ⬇️
 
-
-
-## Installation ⬇️
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+This library is compatible with Java17+, so you can install it simply by adding its dependencies to your build.gradle / pom.xml.
 
 ## Getting started ✋
 
@@ -516,6 +511,9 @@ This example shows you how to search your entity with EntityCriteria Enum :
     return searchCriteriaRepository.search(EntityCriteria.class, params, sorts, EntityDTO.EntityInList::new);
   }
 ```
+
+The result: Page<EntityDTO.EntityInList> contains the total number of elements and a list of elements.
+
 </details>
 
 
