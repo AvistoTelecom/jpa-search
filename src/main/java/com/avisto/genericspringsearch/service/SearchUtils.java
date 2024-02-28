@@ -26,13 +26,13 @@ import com.avisto.genericspringsearch.exception.FieldPathNotFoundException;
 import com.avisto.genericspringsearch.exception.KeyDuplicateException;
 import com.avisto.genericspringsearch.exception.WrongDataTypeException;
 
-import jakarta.persistence.EmbeddedId;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.MappedSuperclass;
-import jakarta.persistence.criteria.Expression;
-import jakarta.persistence.criteria.From;
-import jakarta.persistence.criteria.Path;
+import javax.persistence.EmbeddedId;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.MappedSuperclass;
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.From;
+import javax.persistence.criteria.Path;
 
 import static com.avisto.genericspringsearch.service.SearchConstants.Strings.EMPTY_STRING;
 import static com.avisto.genericspringsearch.service.SearchConstants.Strings.REGEX_DOT;

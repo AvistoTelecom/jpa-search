@@ -5,9 +5,9 @@ import com.avisto.genericspringsearch.exception.CannotSortException;
 import com.avisto.genericspringsearch.model.SortDirection;
 import com.avisto.genericspringsearch.service.SearchUtils;
 
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.Order;
-import jakarta.persistence.criteria.Root;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Order;
+import javax.persistence.criteria.Root;
 
 public class SorterConfig<R extends SearchableEntity> implements ISorterConfig<R> {
 
