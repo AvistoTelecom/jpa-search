@@ -89,13 +89,14 @@ public class FilterConfig<R extends SearchableEntity, T> implements IFilterConfi
     }
 
     /**
+     * This method returns a predicate by applying a filter
      *
      * @param rootClazz Class to be analyzed
-     * @param root
+     * @param root Root
      * @param cb Criteria Builder
      * @param joins joins
-     * @param value
-     * @return
+     * @param value Value use to filter
+     * @return Predicate
      */
     @Override
     public Predicate getPredicate(Class<R> rootClazz, Root<R> root, CriteriaBuilder cb, Map<String, Join<R, ?>> joins, T value) {

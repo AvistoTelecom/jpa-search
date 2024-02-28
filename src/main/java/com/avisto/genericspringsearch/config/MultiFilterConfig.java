@@ -39,13 +39,14 @@ public class MultiFilterConfig<R extends SearchableEntity, X> implements IFilter
     }
 
     /**
+     * This method returns a predicate by applying a filter
      *
-     * @param rootClazz
-     * @param root
-     * @param cb
-     * @param joins
-     * @param value
-     * @return
+     * @param rootClazz Class to be analyzed
+     * @param root Root
+     * @param cb Criteria Builder
+     * @param joins joins
+     * @param value Value use to filter
+     * @return Predicate
      */
     @Override
     public Predicate getPredicate(Class<R> rootClazz, Root<R> root, CriteriaBuilder cb, Map<String, Join<R, ?>> joins, List<String> value) {

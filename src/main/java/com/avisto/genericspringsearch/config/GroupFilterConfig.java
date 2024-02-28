@@ -39,13 +39,14 @@ public class GroupFilterConfig<R extends SearchableEntity> implements IFilterCon
     }
 
     /**
+     * This method returns a predicate by applying a filter
      *
-     * @param rootClazz
-     * @param root
-     * @param cb
-     * @param joins
-     * @param value
-     * @return
+     * @param rootClazz Class to be analyzed
+     * @param root Root
+     * @param cb Criteria Builder
+     * @param joins joins
+     * @param value Value use to filter
+     * @return Predicate
      */
     @Override
     public Predicate getPredicate(Class<R> rootClazz, Root<R> root, CriteriaBuilder cb, Map<String, Join<R, ?>> joins, Map<String, String> value) {
