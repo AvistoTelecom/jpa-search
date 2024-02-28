@@ -276,6 +276,7 @@ public final class SearchUtils {
     }
 
     /**
+     * This method return a map of search configuration with associated key.
      *
      * @param configurations Config elements to search in.
      * @param keys keys of the search config
