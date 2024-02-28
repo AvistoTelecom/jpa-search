@@ -277,13 +277,13 @@ public final class SearchUtils {
 
     /**
      *
-     * @param configurations
-     * @param keys
-     * @param castClass
-     * @return
+     * @param configurations Config elements to search in.
+     * @param keys keys of the search config
+     * @param castClass The class of cast needed.
+     * @return Map of search configuration with associated key.
      * @param <R> The type of the entity that is searchable and used for search operations.
      * @param <E> Criteria Enum
-     * @param <T> Filter type. For example, if the filter searches for a name, the value will be String.
+     * @param <T> The search config
      */
     static <R extends SearchableEntity, E extends Enum<?> & ISearchCriteriaConfig<R>, T extends ISearchConfig<R>> Map<String, T> getSearchConfigMap(E[] configurations, List<String> keys, Class<T> castClass) {
         Map<String, T> result = new HashMap<>();
