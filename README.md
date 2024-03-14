@@ -280,6 +280,30 @@ Example:
 Page<EntityInList> entityInList = searchCriteriaRepository.search(EntityCriteria.class, params, sorts, EntityInList::new, "NameOfTheEntityGraph");
 ```
 
+<details>
+  <summary>Test</summary>
+
+If you want to test your ISearchCriteriaConfig, you can create tests like this:
+
+```java
+@Test
+<R extends SearchableEntity, E extends Enum<E> & ISearchCriteriaConfig<R>> void ValidateCriteriaConfigurationsTest() {
+    Reflections reflections = new Reflections("com.genericjpasearchimplem.genericjpasearchimplem");
+    Set<Class<? extends ISearchCriteriaConfig>> classes = reflections.getSubTypesOf(ISearchCriteriaConfig.class);
+    classes.forEach(clazz -> {
+        System.out.println("Checking for criteria : " + clazz.getSimpleName());
+        assertTrue(clazz.isEnum());
+        try {
+            SearchUtils.checkCriteriaConfig((Class<E>) clazz);
+        } catch (GenericSearchException e) {
+            fail(e.getMessage());
+        }
+    });
+}
+```
+
+</details>
+
 ### Benchmark 📈
 
 If you've ever done research with CriteriaBuilder, you probably know that it's very tedious and time-consuming.
