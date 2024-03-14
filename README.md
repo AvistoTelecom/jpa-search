@@ -145,7 +145,36 @@ The `FilterOperation` is used to describe the operation to be performed on the f
 
 </details>
 
-You can easily create an other `enum` which inherits from `IFilterOperation`, like `ObjectFilterOperation.java`.
+You can easily create an other `enum` which inherits from `IFilterOperation`, like :
+
+<details>
+  <summary>CustomFilterOperation</summary>
+
+This example shows you how to create an operation filter that can be reused.
+
+Example:
+```java
+public enum CustomFilterOperation implements IFilterOperation<Object> {
+    NOT_EQUAL {
+        public Predicate calculate(CriteriaBuilder cb, Expression<?> expression, Object value) {
+            return value == null ? cb.isNotNull(expression) : cb.notEqual(expression, value);
+        }
+    };
+
+    private CustomFilterOperation() {
+    }
+
+    public boolean needsMultipleValues() {
+        return false;
+    }
+
+    public Class<Object> getOperationType() {
+        return Object.class;
+    }
+}
+```
+
+</details>
 
 #### Config
 
