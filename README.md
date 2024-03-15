@@ -407,13 +407,9 @@ public enum EmployeeCriteria implements ISearchCriteriaConfig<Employee> {
 
 To use the IGNORE_ACCENT operation you must install the function according to your database manager. After that you can specify the name of the function or the name of the schema where the function is located.
 
-Function name (by default = "unaccent")
+Function location (by default = "unaccent")
 ```
-System.setProperty("UNACCENT_FUNCTION_NAME", "unaccent");
-```
-Schema name (by default = "")
-```
-System.setProperty("SCHEMA_UNACCENT_FUNCTION_NAME", "dbo");
+System.setProperty("UNACCENT_FUNCTION_PATH", "dbo.unaccent");
 ```
 
 <details>
