@@ -5,6 +5,8 @@ public final class SearchConstants {
         throw new IllegalStateException("Utility class");
     }
 
+    public static final String JPA_SEARCH_PACKAGE_NAME = "com.avisto.genericspringsearch";
+
     public static final class Strings {
         private Strings() {
             throw new IllegalStateException("Utility class");
