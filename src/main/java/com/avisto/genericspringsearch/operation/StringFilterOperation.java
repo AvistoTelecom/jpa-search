@@ -6,6 +6,12 @@ import javax.persistence.criteria.Predicate;
 
 import com.avisto.genericspringsearch.service.SearchUtils;
 
+/**
+ * This enumeration is used to compare strings.
+ *
+ * @author Gabriel Revelli
+ * @version 1.0
+ */
 public enum StringFilterOperation implements IFilterOperation<String> {
 
     CONTAIN {
@@ -64,6 +70,9 @@ public enum StringFilterOperation implements IFilterOperation<String> {
         }
     };
 
+    /**
+     * Name of your unaccent function in your database manager
+     */
     private static final String unAccentFunctionPath = getUnAccentFunctionPath();
 
     @Override

@@ -3,6 +3,12 @@ package com.avisto.genericspringsearch;
 import com.avisto.genericspringsearch.config.AbstractCriteria;
 import com.avisto.genericspringsearch.model.SortDirection;
 
+/**
+ * This class is used to sort the criteria query in a certain order.
+ *
+ * @author Gabriel Revelli
+ * @version 1.0
+ */
 public class OrderCriteria extends AbstractCriteria {
 
     private final SortDirection sortDirection;

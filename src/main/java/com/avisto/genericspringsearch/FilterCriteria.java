@@ -2,6 +2,12 @@ package com.avisto.genericspringsearch;
 
 import com.avisto.genericspringsearch.config.AbstractCriteria;
 
+/**
+ This class contains all information relating to the criteria used to perform a filter.
+ *
+ * @author Gabriel Revelli
+ * @version 1.0
+ */
 public class FilterCriteria extends AbstractCriteria {
 
     private final String[] values;

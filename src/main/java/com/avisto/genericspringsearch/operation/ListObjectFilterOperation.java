@@ -5,7 +5,17 @@ import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
 import java.util.List;
 
+/**
+ * This enum provide in_equal operation.
+ *
+ * @author Gabriel Revelli
+ * @version 1.0
+ */
 public enum ListObjectFilterOperation implements IFilterOperation<List<Object>> {
+
+    /**
+     * Checks that the expression is different from the value passed as a parameter.
+     */
     IN_EQUAL {
         @Override
         public Predicate calculate(CriteriaBuilder cb, Expression<?> expression, List<Object> value) {
