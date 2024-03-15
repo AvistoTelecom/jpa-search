@@ -1,66 +1,16 @@
+<img src="assets/logo_avisto.png" alt="Logo Avisto" width="270" height="173" />
+
 # Generic-Spring-Search
 
+Generic Search offers a solution that facilitates the search of database content in Java projects.
 
-TODO : Add JavaDoc and clean code
-TODO : remove spring dependency by implementing Pageables
-TODO : add Unit Tests
-
-
-
-## Getting started
-
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
-
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
-
-## Add your files
-
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
-
-```
-cd existing_repo
-git remote add origin https://versioning.advans-group.com/avisto-tooling/generic-spring-search.git
-git branch -M main
-git push -uf origin main
-```
-
-## Integrate with your tools
-
-- [ ] [Set up project integrations](https://versioning.advans-group.com/avisto-tooling/generic-spring-search/-/settings/integrations)
-
-## Collaborate with your team
-
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Automatically merge when pipeline succeeds](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
-
-## Test and Deploy
-
-Use the built-in continuous integration in GitLab.
-
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing(SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+[![Hibernate](https://img.shields.io/badge/Hibernate-59666C?style=for-the-badge&logo=Hibernate&logoColor=white
+)](https://hibernate.org/)
 
 ***
+## Description 🔍
 
-# Editing this README
-
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thank you to [makeareadme.com](https://www.makeareadme.com/) for this template.
-
-## Suggestions for a good README
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
-
-## Name
-Generic JPA Search
-
-## Description
-Generic search simplifies specific entity searches with JPA, including :
+Generic-Spring-Search simplifies specific entity searches with JPA, including :
 - Modular filters
 - Multiple filters
 - Modular sorts
@@ -73,101 +23,555 @@ This search is designed to be efficient, since it operates at a low level, as cl
 
 A search works with a configuration file where you define each possible filter, its associated operation (e.g.: name equals value) and where to fetch the field in DB. Once a filter has been defined, it is possible to filter by this ascending or descending field.
 
-The search function takes as input a list of query params in the form of a `Map<String, String>` (also containing a `page` and `size` field for pagination), a `List<String>` sort list, the type of entity searched for `Class<T>` and the type of search configuration enumeration `Class<E>`. In return, this function returns a `Page<T>` containing the number of elements requested and the number of total elements.
+The search function takes as input a list of query params in the form of a `Map<String, String>` (also containing a `page` and `size` field for pagination if it's not a key filter), a `List<String>` sort list, the type of entity searched for `Class<T>` and the type of search configuration enumeration `Class<E>`. In return, this function returns a `Page<T>` containing the number of elements requested and the number of total elements.
 
-### How to use it ?
+### How to use it ? 🤔 <a name="how-to-use-it"></a>
 
 To configure a search, you need to create a configuration criteria `enum` described like below:
 
 ```java
 @Getter
 @AllArgsConstructor
-@SearchEntity(target = ApiKey.class)
-public enum ApiKeyCriteria implements SearchConfigInterface {
-    ACCOUNT_TYPE(FilterConfig.of(FilterOperation.EQUAL, "accountType", "account.accountType.key")),
-    PROFILE_TYPE(FilterConfig.of(FilterOperation.EQUAL, "profileType", "account.accountType.profile.key")),
-    ACCOUNT_FILES_NAME(FilterConfig.of(FilterOperation.EQUAL, "accountFilesName", "account.files[name]")),
-    ACCOUNT_LABEL(FilterConfig.of(FilterOperation.EQUAL, "accountLabel", "account.label")),
-    TYPE(FilterConfig.of(FilterOperation.EQUAL, "type", "type")),
-    EXTERNAL_ID(FilterConfig.of(FilterOperation.LIKE_IGNORE_CASE, "externalId", "externalId")),
-    CREATION_DATE(FilterConfig.of(FilterOperation.BETWEEN, "creationDate", "creationDate")),
-    END_DATE(FilterConfig.of(FilterOperation.BETWEEN, "endDate", "endDate")),
-    EXPIRATION_DATE(FilterConfig.of(FilterOperation.BETWEEN, "expirationDate", "expirationDate")),
-    LABEL(FilterConfig.of(FilterOperation.LIKE_IGNORE_CASE_IGNORE_ACCENT, "label", "label", "account.label"));
+public enum ApiKeyCriteria implements ISearchCriteriaConfig<Apikey> {
+    ID(sorterConfig.of("id", ObjectFilterOperation.EQUAL, "id")),
+    ACCOUNT_TYPE(FilterConfig.of("accountType", ObjectFilterOperation.EQUAL, "account.accountType.key")),
+    PROFILE_TYPE(FilterSorterConfig.of("profileType", ObjectFilterOperation.EQUAL, "account.accountType.profile.key")),
+    ACCOUNT_FILES_NAME(FilterConfig.of("accountFilesName", ObjectFilterOperation.EQUAL, "account.files[name]")),
+    ACCOUNT_LABEL(FilterConfig.of("accountLabel", ObjectFilterOperation.EQUAL, "account.label")),
+    TYPE(FilterConfig.of("type", ObjectFilterOperation.EQUAL, "type")),
+    EXTERNAL_ID(FilterSorterConfig.of("externalId", StringFilterOperation.LIKE_IGNORE_CASE, "externalId")),
+    CREATION_DATE(FilterConfig.of("creationDate", ListComparableFilterOperation.BETWEEN, "creationDate")),
+    END_DATE(FilterSorterConfig.of("endDate", ListComparableFilterOperation.BETWEEN, "endDate")),
+    EXPIRATION_DATE(FilterConfig.of("expirationDate", ListComparableFilterOperation.BETWEEN, "expirationDate")),
+    LABEL(FilterConfig.of("label", StringFilterOperation.LIKE_IGNORE_CASE_IGNORE_ACCENT, "label", "account.label")),
+    YEAR(GroupFilterConfig.of("year", CREATION_DATE.getFilterConfig(), END_DATE.getFilterConfig())),
+    MULTI_ACCOUNT_LABEL(MultiFilterConfig.of("multiAccountLabel", ACCOUNT_LABEL.getFilterConfig(), "account"));
 
-    FilterConfig filterConfig;
+    final ISearchConfig<ApiKey> searchConfig;
 
     @Override
     public OrderCriteria getDefaultOrderCriteria() {
-        return new OrderCriteria(ACCOUNT_LABEL.getFilterKey(), SortDirection.ASC);
+        return new OrderCriteria(ID.getKey(), SortDirection.ASC);
+    }
+  
+    @Override
+    public Class<ApiKey> getRootClass() {
+        return ApiKey.class;
     }
 
 }
 ```
+
 The idea here is to associate in `FilterConfig.of(...)` an operation, a query param name and an entity field name.
 
 Taking `ACCOUNT_TYPE` as an example, we're looking for an `ApiKey` that is associated with a particular account type, in this case equality.
 
+#### FilterOperation
+
 The `FilterOperation` is used to describe the operation to be performed on the filter, many of which are already available and applicable to different types:
 
-| Operator Name | Description | Filter Type |
-| ------------- | ----------- | ---- |
-| `LIKE_IGNORE_CASE` | Checks that the `field` contains part of the `filter`, case ignored | `String` |
-| `START_WITH` | Checks that the `field` begins with the `filter` | `String` |
-| `START_WITH_IGNORE_CASE` | Check that the `field` begins with the `filter`, case ignored | `String` |
-| `START_WITH_IGNORE_CASE_IGNORE_ACCENT` | Check that the `field` starts with the `filter`, case and accents ignored | `String` |
-| `EQUAL` | Checks for equality between `field` and `filter` | `Object` |
-| `EQUAL_IGNORE_CASE_IGNORE_ACCENT` | Checks for equality between `field` and `filter`, case and accents ignored | `String` |
-| `NOT_NULL` | Checks for `field` nullity | `Object` |
-| `IN_EQUAL` | Checks the equality of `field` with one of the `fields` in the filter lis | `Object[]` |
-| `IN_LIKE` | Checks that `field` contains one of the fields in the `filter` list | `String[]` |
-| `IN_EQUAL_IGNORE_CASE_IGNORE_ACCENT` | Checks that `field` is equal to one of the fields in the `filter` list, case and accents ignored | `String[]` |
-| `BETWEEN` | Checks that `field` is between the two `filter` fields | `Comparable[2]` |
-| `GREATER_THAN_OR_EQUAL` | Checks that `field` is greater than or equal to `filter` | `Comparable` |
-| `LESS_THAN_OR_EQUAL` | Checks that `field` is smaller than or equal to `filter` | `Comparable` |
+<details>
+  <summary>ObjectFilterOperation</summary>
 
-You can easily create an other `enum` file like `FilterOperation.java`.
+| Operator Name | Description                                      | Filter Type |
+|---------------|--------------------------------------------------|-------------|
+| `EQUAL`       | Checks for equality between `field` and `filter` | `Object`    |
 
-### Known limitations
+</details>
 
-- The generic search doesn't yet offer the option of navigating through several levels of ManyToMany dependencies, for example: Companies → Employees → Pets (the generic search doesn't allow you to filter on the pets owned by the employees of each company).
+<details>
+  <summary>StringFilterOperation</summary>
+
+| Operator Name                          | Description                                                                | Filter Type |
+|----------------------------------------|----------------------------------------------------------------------------|-------------|
+| `LIKE`                                 | Checks that `field` contains part of the `filter`                          | `String`    |
+| `LIKE_IGNORE_CASE`                     | Checks that the `field` contains part of the `filter`, case ignored        | `String`    |
+| `LIKE_IGNORE_CASE_IGNORE_ACCENT`       | Checks for equality between `field` and `filter`, case and accents ignored | `String`    |
+| `START_WITH`                           | Checks that the `field` begins with the `filter`                           | `String`    |
+| `START_WITH_IGNORE_CASE`               | Check that the `field` begins with the `filter`, case ignored              | `String`    |
+| `START_WITH_IGNORE_CASE_IGNORE_ACCENT` | Check that the `field` starts with the `filter`, case and accents ignored  | `String`    |
+| `EQUAL_IGNORE_CASE`                    | Checks for equality between `field` and `filter`, case                     | `String`    |
+| `EQUAL_IGNORE_CASE_IGNORE_ACCENT`      | Checks for equality between `field` and `filter`, case and accents ignored | `String`    |
+
+</details>
+
+<details>
+  <summary>ListComparableFilterOperation</summary>
+
+| Operator Name | Description                                            | Filter Type     |
+|---------------|--------------------------------------------------------|-----------------|
+| `BETWEEN`     | Checks that `field` is between the two `filter` fields | `Comparable[2]` |
+
+</details>
+
+<details>
+  <summary>ComparableFilterOperation</summary>
+
+| Operator Name                   | Description                                                      | Filter Type  |
+|---------------------------------|------------------------------------------------------------------|--------------|
+| `GREATER_THAN_OR_EQUAL`         | Checks that `field` is greater than or equal to `filter`         | `Comparable` |
+| `GREATER_THAN_OR_EQUAL_OR_NULL` | Checks that `field` is greater than or equal to `filter` or null | `Comparable` |
+| `LESS_THAN_OR_EQUAL`            | Checks that `field` is smaller than or equal to `filter`         | `Comparable` |
+
+</details>
+
+<details>
+  <summary>ListObjectFilterOperation</summary>
+
+| Operator Name | Description                                                                | Filter Type |
+|---------------|----------------------------------------------------------------------------|-------------|
+| `IN_EQUAL`    | Checks the equality of `field` with one of the `fields` in the filter list | `Object[]`  |
+
+</details>
+
+<details>
+  <summary>ListStringFilterOperation</summary>
+
+| Operator Name                        | Description                                                                                      | Filter Type |
+|--------------------------------------|--------------------------------------------------------------------------------------------------|-------------|
+| `IN_LIKE`                            | Checks that `field` contains one of the fields in the `filter` list                              | `String[]`  |
+| `IN_EQUAL_IGNORE_CASE_IGNORE_ACCENT` | Checks that `field` is equal to one of the fields in the `filter` list, case and accents ignored | `String[]`  |
+
+</details>
+
+<details>
+  <summary>VoidFilterOperation</summary>
+
+| Operator Name         | Description                | Filter Type |
+|-----------------------|----------------------------|-------------|
+| `NOT_NULL`            | Checks for `field` nullity | `Void`      |
+| `NULL`                | Checks for `field` nullity | `Void`      |
+| `COLLECTION_IS_EMPTY` | Checks for `field` nullity | `Void`      |
+
+</details>
+
+You can easily create an other `enum` which inherits from `IFilterOperation`, like :
+
+<details>
+  <summary>CustomFilterOperation</summary>
+
+This example shows you how to create an operation filter that can be reused.
+
+Example:
+```java
+public enum CustomFilterOperation implements IFilterOperation<Object> {
+    NOT_EQUAL {
+        public Predicate calculate(CriteriaBuilder cb, Expression<?> expression, Object value) {
+            return value == null ? cb.isNotNull(expression) : cb.notEqual(expression, value);
+        }
+    };
+
+    private CustomFilterOperation() {
+    }
+
+    public boolean needsMultipleValues() {
+        return false;
+    }
+
+    public Class<Object> getOperationType() {
+        return Object.class;
+    }
+}
+```
+
+</details>
+
+#### Config
+
+<details>
+  <summary>FilterConfig</summary>
+
+Configures the filter in relation to a field.
+
+Parameters:
+
+| Key                | Filter                        | pathFirst                                                  | paths (Optional)                                            |
+|--------------------|-------------------------------|------------------------------------------------------------|-------------------------------------------------------------|
+| Name of the filter | Filter that you want to apply | First path to the field where you want to apply the filter | Same function as for the path, but for the remaining fields |
+
+Example:
+```java
+SEARCH(FilterConfig.of("search", StringFilterOperation.LIKE_IGNORE_CASE, "firstName", "lastName"));
+```
+
+</details>
+
+<details>
+  <summary>SorterConfig</summary>
+
+You can add additional sorter like `id` in the example to sort your entities.
+In this case if we set `sorts = {id,asc}`, the response will be the sort by id in ascending order.
+
+Parameters:
+
+| Key                | path                                                 | 
+|--------------------|------------------------------------------------------|
+| Name of the sorter | Path to the field where you want to apply the sorter |
+
+Example:
+```java
+ID(FilterSorterConfig.of("id", ObjectFilterOperation.EQUAL, "id"));
+```
+
+</details>
+
+<details>
+  <summary>FilterSorterConfig</summary>
+
+This filter groups FilterConfig and SorterConfig. So you can use this config like a sort or like a filter.
+
+Parameters:
+
+| Key                | Filter                        | pathFirst                                                  | paths (Optional)                                            |
+|--------------------|-------------------------------|------------------------------------------------------------|-------------------------------------------------------------|
+| Name of the sorter | Filter that you want to apply | First path to the field where you want to apply the filter | Same function as for the path, but for the remaining fields |
+
+Example:
+```java
+ID(FilterSorterConfig.of("id", ObjectFilterOperation.EQUAL, "id"));
+```
+
+</details>
+
+<details>
+  <summary>GroupFilterConfig</summary>
+
+The purpose of this filter is to group some FilterConfig.
+
+Parameters:
+
+| Key               | Filter                        | Filters (Optional) |
+|-------------------|-------------------------------|--------------------|
+| Name of the Group | Filter that you want to apply | Other filters      |
+
+Example:
+```java
+PEOPLE(GroupFilterConfig.of("searchpeople", FIRSTNAME.getFilterConfig(), LASTNAME.getFilterConfig()));
+```
+
+</details>
+
+<details>
+  <summary>MultiFilterConfig</summary>
+
+To understand this filter, let's take the example of a company: Avisto. Avisto has a `List<Employee>`.
+ And if you want to get the employees whose names start with "M" or "N", you can use this filter to apply the name filter twice.
+
+Parameters:
+
+| Key                    | Filter                        | joinPath                                             |
+|------------------------|-------------------------------|------------------------------------------------------|
+| Name of the Multiplier | Filter that you want to apply | path to the field where you want to apply the filter |
+
+Example:
+```java
+PEOPLE(GroupFilterConfig.of("searchpeople", FIRSTNAME.getFilterConfig(), LASTNAME.getFilterConfig()));
+```
+
+Parameters example:
+`searchpeople="M","N"`
+
+</details>
+
+The library also supports EntityGraphs, so you can use the search function with an EntityGraph.
+
+Example:
+```java
+Page<EntityInList> entityInList = searchCriteriaRepository.search(EntityCriteria.class, params, sorts, EntityInList::new, "NameOfTheEntityGraph");
+```
+
+<details>
+  <summary>Test</summary>
+
+If you want to test your ISearchCriteriaConfig, you can create tests like this:
+
+```java
+@Test
+<R extends SearchableEntity, E extends Enum<E> & ISearchCriteriaConfig<R>> void ValidateCriteriaConfigurationsTest() {
+    Reflections reflections = new Reflections("com.genericjpasearchimplem.genericjpasearchimplem");
+    Set<Class<? extends ISearchCriteriaConfig>> classes = reflections.getSubTypesOf(ISearchCriteriaConfig.class);
+    classes.forEach(clazz -> {
+        System.out.println("Checking for criteria : " + clazz.getSimpleName());
+        assertTrue(clazz.isEnum());
+        try {
+            SearchUtils.checkCriteriaConfig((Class<E>) clazz);
+        } catch (GenericSearchException e) {
+            fail(e.getMessage());
+        }
+    });
+}
+```
+
+</details>
+
+### Benchmark 📈
+
+If you've ever done research with CriteriaBuilder, you probably know that it's very tedious and time-consuming.
+
+<details>
+  <summary>Example of 1 filter and 1 sorter without GenericSpringSearch</summary>
+
+```java
+public class EmployeeSpecification implements Specification<Employee> {
+
+    private final EmployeeCompleteDTO filter;
+    private final String scope;
+    private final String order;
+
+    public EmployeeSpecification(
+        EmployeeCompleteDTO filter,
+        String scope,
+        String order
+    ) {
+        this.filter = filter;
+        this.scope = scope;
+        this.order = order;
+    }
+
+    @Override
+    public Predicate toPredicate(Root<Employee> root, CriteriaQuery<?> query,
+        CriteriaBuilder criteriaBuilder) {
+
+        List<Predicate> predicates = new ArrayList<>();
+
+        if (filter.getFirstName() != null) {
+            predicates.add(criteriaBuilder.like(criteriaBuilder.function("unaccent",
+                    String.class,
+                    criteriaBuilder.lower(root.get("firstName"))),
+                "%" + StringUtils.stripAccents(filter.getFirstName()
+                    .toLowerCase()) + "%"));
+        }
+
+        Order sortOrder;
+
+        sortOrder = order.equals("asc")
+            ? criteriaBuilder.asc(root.get(scope))
+            : criteriaBuilder.desc(
+                criteriaBuilder.coalesce(root.get(scope), 0));
+        query.orderBy(sortOrder);
+
+        return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
+    }
+}
+```
+</details>
+
+<details>
+  <summary>Example of 13 filters and 2 sorters with GenericSpringSearch</summary>
+
+```java
+public enum EmployeeCriteria implements ISearchCriteriaConfig<Employee> {
+    ID(FilterSorterConfig.of("id", ObjectFilterOperation.EQUAL, "id")),
+    FIRSTNAME(FilterSorterConfig.of("firstname", StringFilterOperation.LIKE_IGNORE_CASE, "firstName")),
+    LASTNAME(FilterConfig.of("lastname", StringFilterOperation.LIKE_IGNORE_CASE, "lastName")),
+    LASTNAME_IGNORE_ACCENT(FilterConfig.of("lastnameIgnoreAccent", StringFilterOperation.LIKE_IGNORE_CASE_IGNORE_ACCENT, "lastName")),
+    BIRTHDATE(FilterConfig.of("birthdate", ListComparableFilterOperation.BETWEEN, "birthDate")),
+    MARRYING(FilterConfig.of("marrying", ObjectFilterOperation.EQUAL, "marriedEmployee.id")),
+    COMPANY(FilterConfig.of("company", StringFilterOperation.START_WITH, "company.name")),
+    FIRSTNAME_OR_LASTNAME(FilterConfig.of("firstnameLastname", StringFilterOperation.LIKE_IGNORE_CASE, "firstName", "lastName")),
+    FIRSTNAME_AND_LASTNAME(GroupFilterConfig.of("searchName", FIRSTNAME.getFilterConfig(), LASTNAME.getFilterConfig())),
+    SEARCH_MARRIED(MultiFilterConfig.of("search_married", FIRSTNAME_AND_LASTNAME.getFilterConfig(), "marriedEmployee.id")),
+    PET_NAME(FilterConfig.of("petName", StringFilterOperation.LIKE_IGNORE_CASE, "pets[name]")),
+    PET_SPECIES(FilterConfig.of("petSpecies", ObjectFilterOperation.EQUAL, "pets[species]")),
+    PETS(GroupFilterConfig.of("searchPets", PET_NAME.getFilterConfig(), PET_SPECIES.getFilterConfig())),
+    MULTI_PETS(MultiFilterConfig.of("multiPets", PET_SPECIES.getFilterConfig(), "pets"));
+
+    final ISearchConfig<Employee> searchConfig;
+
+    @Override
+    public OrderCriteria getDefaultOrderCriteria() {
+        return new OrderCriteria(ID.getKey(), SortDirection.ASC);
+    }
+
+    @Override
+    public Class<Employee> getRootClass() {
+        return Employee.class;
+    }
+}
+```
+
+</details>
+
+
+### Known limitations 🐧
+
+- The generic search doesn't provide the option to filter through several *ToMany relations, for example: Companies → Employees → Pets (the generic search doesn't allow you to filter on the pets owned by the employees of each company).
 - Sorting on elements requiring a join is not possible (How to sort on a list of linked elements)
 - Autogenerated swaggers can't identify fields in queryparams, since a `Map<String, String>` is passed.
 - Types actually handled:
     - Comparable: Float, float, Integer, int, Long, long, Double, double, BigDecimal, LocalDate, LocalDateTime, ZonedDateTime;
     - String: String;
     - Object: Boolean, boolean, UUID;
+- Count take place each time.
+- Page and Size names are not configurable.
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+To use the IGNORE_ACCENT operation you must install the function according to your database manager. After that you can specify the name of the function or the name of the schema where the function is located.
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+Function location (by default = "unaccent")
+```
+System.setProperty("UNACCENT_FUNCTION_PATH", "dbo.unaccent");
+```
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+<details>
+  <summary>MySQL</summary>
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+```sql
+DROP FUNCTION IF EXISTS unaccent;
+DELIMITER |
+CREATE FUNCTION unaccent( textvalue VARCHAR(10000) ) RETURNS VARCHAR(10000)
+DETERMINISTIC
+NO SQL
+    BEGIN
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+    SET @textvalue = textvalue COLLATE utf8mb4_general_ci;
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+    -- ACCENTS
+    SET @withaccents = 'ŠšŽžÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÑÒÓÔÕÖØÙÚÛÜÝŸÞàáâãäåæçèéêëìíîïñòóôõöøùúûüýÿþƒ';
+    SET @withoutaccents = 'SsZzAAAAAAACEEEEIIIINOOOOOOUUUUYYBaaaaaaaceeeeiiiinoooooouuuuyybf';
+    SET @count = LENGTH(@withaccents);
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+    WHILE @count > 0 DO
+        SET @textvalue = REPLACE(@textvalue, SUBSTRING(@withaccents, @count, 1), SUBSTRING(@withoutaccents, @count, 1));
+        SET @count = @count - 1;
+    END WHILE;
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+    -- SPECIAL CHARS
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+    SET @special = '«»’”“!@#$%¨&()_+=§¹²³£¢¬"`´{[^~}]<,>.:;?/°ºª+|\';
+    SET @count = LENGTH(@special);
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+    WHILE @count > 0 DO
+        SET @textvalue = REPLACE(@textvalue, SUBSTRING(@special, @count, 1), '');
+        SET @count = @count - 1;
+    END WHILE;
 
-## License
+    RETURN @textvalue;
+END
+|
+DELIMITER ;
+```
+
+</details>
+
+
+<details>
+  <summary>PostgreSQL</summary>
+
+```sql
+CREATE EXTENSION IF NOT EXISTS "unaccent";
+```
+
+</details>
+
+<details>
+  <summary>Microsoft SQL Server</summary>
+
+```sql
+IF OBJECT_ID('dbo.unaccent', 'FN') IS NOT NULL
+    DROP FUNCTION dbo.unaccent;
+GO
+CREATE FUNCTION dbo.unaccent (@textvalue NVARCHAR(MAX))
+RETURNS NVARCHAR(MAX)
+AS
+BEGIN
+    DECLARE @withaccents NVARCHAR(MAX), @withoutaccents NVARCHAR(MAX), @special NVARCHAR(MAX);
+    DECLARE @count INT;
+
+    SET @textvalue = @textvalue COLLATE Latin1_General_BIN;
+
+     -- ACCENTS
+    SET @withaccents =    'ŠšŽžÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÑÒÓÔÕÖØÙÚÛÜÝŸàáâãäåæçèéêëìíîïñòóôõöøùúûüýÿƒ';
+    SET @withoutaccents = 'SsZzAAAAAAACEEEEIIIINOOOOOOUUUUYYaaaaaaaceeeeiiiinoooooouuuuyyf';
+
+    SET @count = LEN(@withaccents);
+        
+    WHILE @count > 0
+    BEGIN
+        SET @textvalue = REPLACE(@textvalue, SUBSTRING(@withaccents, @count, 1), SUBSTRING(@withoutaccents, @count, 1));
+        SET @count = @count - 1;
+    END;
+
+    -- SPECIAL CHARS
+    SET @special = '«»’”“!@#$%¨&()_+=§¹²³£¢¬"`´{[^~}]<,>.:;?/°ºª+|';
+    SET @count = LEN(@special);
+
+    WHILE @count > 0
+    BEGIN
+        SET @textvalue = REPLACE(@textvalue, SUBSTRING(@special, @count, 1), '');
+        SET @count = @count - 1;
+    END;
+
+    RETURN @textvalue;
+END;
+```
+
+</details>
+
+## Requirements ⬇️
+
+This library is compatible with Java17+, so you can install it simply by adding its dependencies to your build.gradle / pom.xml.
+
+## Getting started ✋
+
+<details>
+  <summary>1 - Configure your SpringBootApplication</summary>
+
+Firstly, you need to specify that you want Spring to scan your package and the library package to allow Spring bean detectiona and injection, so in your SpringBootApplication add this line :
+  ```java
+  @SpringBootApplication(scanBasePackages = {"your_package", "com.avisto.genericspringsearch"})
+  ```
+</details>
+
+<details>
+  <summary>2 - Configure your Entity</summary>
+
+For the library to correctly analyze your entity, you must add SearchableEntity to your Entity :
+```java
+  public class Entity implements SearchableEntity {}
+  ```
+</details>
+
+<details>
+  <summary>3 - Create Criteria Enum</summary>
+
+To specify a filter for your search, you need to create an enum as described in [How to use it ? 🤔](#how-to-use-it).
+
+</details>
+
+<details>
+  <summary>4 - Configure your Service</summary>
+
+After applying the previous steps, you can inject a SearchCriteriaRepository with the criteria and the entity you want to search with.
+example with constructor injection :
+```java
+private final SearchCriteriaRepository<Entity, EntityCriteria> searchCriteriaRepository;
+```
+example with field injection :
+
+```java
+@Autowired private SearchCriteriaRepository<Entity, EntityCriteria> searchCriteriaRepository;
+```
+</details>
+
+<details>
+  <summary>5 - Example of use</summary>
+
+This example shows you how to search your entity with EntityCriteria Enum :
+```java
+  public Page<EntityDTO.EntityInList> getEntities(Map<String, String> params, List<String> sorts) {
+    return searchCriteriaRepository.search(EntityCriteria.class, params, sorts, EntityDTO.EntityInList::new);
+  }
+```
+
+The result: Page<EntityDTO.EntityInList> contains the total number of elements and a list of elements.
+
+</details>
+
+
+## Contributing 👯
+
+Gabriel Revelli\
+Martin Rech
+
+## License 📃
 For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
