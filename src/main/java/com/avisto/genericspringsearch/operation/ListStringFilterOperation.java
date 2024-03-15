@@ -7,10 +7,10 @@ import java.util.List;
 
 public enum ListStringFilterOperation implements IFilterOperation<List<String>> {
 
-    IN_LIKE {
+    IN_CONTAIN {
         @Override
         public Predicate calculate(CriteriaBuilder cb, Expression<?> expression, List<String> value) {
-            return cb.or(value.stream().map(v -> StringFilterOperation.LIKE_IGNORE_CASE.calculate(cb, expression, v)).toArray(Predicate[]::new));
+            return cb.or(value.stream().map(v -> StringFilterOperation.CONTAIN_IGNORE_CASE.calculate(cb, expression, v)).toArray(Predicate[]::new));
         }
     },
 

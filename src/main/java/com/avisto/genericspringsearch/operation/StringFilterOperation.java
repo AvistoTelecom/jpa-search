@@ -8,24 +8,24 @@ import com.avisto.genericspringsearch.service.SearchUtils;
 
 public enum StringFilterOperation implements IFilterOperation<String> {
 
-    LIKE {
+    CONTAIN {
         @Override
         public Predicate calculate(CriteriaBuilder cb, Expression<?> expression, String value) {
             return cb.like((Expression<String>) expression, "%" + value + "%");
         }
     },
 
-    LIKE_IGNORE_CASE {
+    CONTAIN_IGNORE_CASE {
         @Override
         public Predicate calculate(CriteriaBuilder cb, Expression<?> expression, String value) {
-            return LIKE.calculate(cb, cb.lower((Expression<String>) expression), SearchUtils.toRootLowerCase(value));
+            return CONTAIN.calculate(cb, cb.lower((Expression<String>) expression), SearchUtils.toRootLowerCase(value));
         }
     },
 
-    LIKE_IGNORE_CASE_IGNORE_ACCENT {
+    CONTAIN_IGNORE_CASE_IGNORE_ACCENT {
         @Override
         public Predicate calculate(CriteriaBuilder cb, Expression<?> expression, String value) {
-            return LIKE_IGNORE_CASE.calculate(cb, cb.function(unAccentFunctionPath, String.class, expression), SearchUtils.normalizeAccentsAndDashes(value));
+            return CONTAIN_IGNORE_CASE.calculate(cb, cb.function(unAccentFunctionPath, String.class, expression), SearchUtils.normalizeAccentsAndDashes(value));
         }
     },
 
@@ -70,7 +70,6 @@ public enum StringFilterOperation implements IFilterOperation<String> {
     public boolean needsMultipleValues() {
         return false;
     }
-
 
     @Override
     public Class<String> getOperationType() {

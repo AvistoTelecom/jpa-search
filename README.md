@@ -39,11 +39,11 @@ public enum ApiKeyCriteria implements ISearchCriteriaConfig<Apikey> {
     ACCOUNT_FILES_NAME(FilterConfig.of("accountFilesName", ObjectFilterOperation.EQUAL, "account.files[name]")),
     ACCOUNT_LABEL(FilterConfig.of("accountLabel", ObjectFilterOperation.EQUAL, "account.label")),
     TYPE(FilterConfig.of("type", ObjectFilterOperation.EQUAL, "type")),
-    EXTERNAL_ID(FilterSorterConfig.of("externalId", StringFilterOperation.LIKE_IGNORE_CASE, "externalId")),
+    EXTERNAL_ID(FilterSorterConfig.of("externalId", StringFilterOperation.CONTAIN_IGNORE_CASE, "externalId")),
     CREATION_DATE(FilterConfig.of("creationDate", ListComparableFilterOperation.BETWEEN, "creationDate")),
     END_DATE(FilterSorterConfig.of("endDate", ListComparableFilterOperation.BETWEEN, "endDate")),
     EXPIRATION_DATE(FilterConfig.of("expirationDate", ListComparableFilterOperation.BETWEEN, "expirationDate")),
-    LABEL(FilterConfig.of("label", StringFilterOperation.LIKE_IGNORE_CASE_IGNORE_ACCENT, "label", "account.label")),
+    LABEL(FilterConfig.of("label", StringFilterOperation.CONTAIN_IGNORE_CASE_IGNORE_ACCENT, "label", "account.label")),
     YEAR(GroupFilterConfig.of("year", CREATION_DATE.getFilterConfig(), END_DATE.getFilterConfig())),
     MULTI_ACCOUNT_LABEL(MultiFilterConfig.of("multiAccountLabel", ACCOUNT_LABEL.getFilterConfig(), "account"));
 
@@ -84,9 +84,9 @@ The `FilterOperation` is used to describe the operation to be performed on the f
 
 | Operator Name                          | Description                                                                | Filter Type |
 |----------------------------------------|----------------------------------------------------------------------------|-------------|
-| `LIKE`                                 | Checks that `field` contains part of the `filter`                          | `String`    |
-| `LIKE_IGNORE_CASE`                     | Checks that the `field` contains part of the `filter`, case ignored        | `String`    |
-| `LIKE_IGNORE_CASE_IGNORE_ACCENT`       | Checks for equality between `field` and `filter`, case and accents ignored | `String`    |
+| `CONTAIN`                                 | Checks that `field` contains part of the `filter`                          | `String`    |
+| `CONTAIN_IGNORE_CASE`                     | Checks that the `field` contains part of the `filter`, case ignored        | `String`    |
+| `CONTAIN_IGNORE_CASE_IGNORE_ACCENT`       | Checks for equality between `field` and `filter`, case and accents ignored | `String`    |
 | `START_WITH`                           | Checks that the `field` begins with the `filter`                           | `String`    |
 | `START_WITH_IGNORE_CASE`               | Check that the `field` begins with the `filter`, case ignored              | `String`    |
 | `START_WITH_IGNORE_CASE_IGNORE_ACCENT` | Check that the `field` starts with the `filter`, case and accents ignored  | `String`    |
@@ -129,7 +129,7 @@ The `FilterOperation` is used to describe the operation to be performed on the f
 
 | Operator Name                        | Description                                                                                      | Filter Type |
 |--------------------------------------|--------------------------------------------------------------------------------------------------|-------------|
-| `IN_LIKE`                            | Checks that `field` contains one of the fields in the `filter` list                              | `String[]`  |
+| `IN_CONTAIN`                            | Checks that `field` contains one of the fields in the `filter` list                              | `String[]`  |
 | `IN_EQUAL_IGNORE_CASE_IGNORE_ACCENT` | Checks that `field` is equal to one of the fields in the `filter` list, case and accents ignored | `String[]`  |
 
 </details>
@@ -191,7 +191,7 @@ Parameters:
 
 Example:
 ```java
-SEARCH(FilterConfig.of("search", StringFilterOperation.LIKE_IGNORE_CASE, "firstName", "lastName"));
+SEARCH(FilterConfig.of("search", StringFilterOperation.CONTAIN_IGNORE_CASE, "firstName", "lastName"));
 ```
 
 </details>
@@ -362,16 +362,16 @@ public class EmployeeSpecification implements Specification<Employee> {
 ```java
 public enum EmployeeCriteria implements ISearchCriteriaConfig<Employee> {
     ID(FilterSorterConfig.of("id", ObjectFilterOperation.EQUAL, "id")),
-    FIRSTNAME(FilterSorterConfig.of("firstname", StringFilterOperation.LIKE_IGNORE_CASE, "firstName")),
-    LASTNAME(FilterConfig.of("lastname", StringFilterOperation.LIKE_IGNORE_CASE, "lastName")),
-    LASTNAME_IGNORE_ACCENT(FilterConfig.of("lastnameIgnoreAccent", StringFilterOperation.LIKE_IGNORE_CASE_IGNORE_ACCENT, "lastName")),
+    FIRSTNAME(FilterSorterConfig.of("firstname", StringFilterOperation.CONTAIN_IGNORE_CASE, "firstName")),
+    LASTNAME(FilterConfig.of("lastname", StringFilterOperation.CONTAIN_IGNORE_CASE, "lastName")),
+    LASTNAME_IGNORE_ACCENT(FilterConfig.of("lastnameIgnoreAccent", StringFilterOperation.CONTAIN_IGNORE_CASE_IGNORE_ACCENT, "lastName")),
     BIRTHDATE(FilterConfig.of("birthdate", ListComparableFilterOperation.BETWEEN, "birthDate")),
     MARRYING(FilterConfig.of("marrying", ObjectFilterOperation.EQUAL, "marriedEmployee.id")),
     COMPANY(FilterConfig.of("company", StringFilterOperation.START_WITH, "company.name")),
-    FIRSTNAME_OR_LASTNAME(FilterConfig.of("firstnameLastname", StringFilterOperation.LIKE_IGNORE_CASE, "firstName", "lastName")),
+    FIRSTNAME_OR_LASTNAME(FilterConfig.of("firstnameLastname", StringFilterOperation.CONTAIN_IGNORE_CASE, "firstName", "lastName")),
     FIRSTNAME_AND_LASTNAME(GroupFilterConfig.of("searchName", FIRSTNAME.getFilterConfig(), LASTNAME.getFilterConfig())),
     SEARCH_MARRIED(MultiFilterConfig.of("search_married", FIRSTNAME_AND_LASTNAME.getFilterConfig(), "marriedEmployee.id")),
-    PET_NAME(FilterConfig.of("petName", StringFilterOperation.LIKE_IGNORE_CASE, "pets[name]")),
+    PET_NAME(FilterConfig.of("petName", StringFilterOperation.CONTAIN_IGNORE_CASE, "pets[name]")),
     PET_SPECIES(FilterConfig.of("petSpecies", ObjectFilterOperation.EQUAL, "pets[species]")),
     PETS(GroupFilterConfig.of("searchPets", PET_NAME.getFilterConfig(), PET_SPECIES.getFilterConfig())),
     MULTI_PETS(MultiFilterConfig.of("multiPets", PET_SPECIES.getFilterConfig(), "pets"));
