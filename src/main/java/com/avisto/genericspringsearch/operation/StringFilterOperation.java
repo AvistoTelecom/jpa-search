@@ -25,7 +25,7 @@ public enum StringFilterOperation implements IFilterOperation<String> {
     LIKE_IGNORE_CASE_IGNORE_ACCENT {
         @Override
         public Predicate calculate(CriteriaBuilder cb, Expression<?> expression, String value) {
-            return LIKE_IGNORE_CASE.calculate(cb, cb.function(getUnAccentFunctionPath(), String.class, expression), SearchUtils.normalizeAccentsAndDashes(value));
+            return LIKE_IGNORE_CASE.calculate(cb, cb.function(unAccentFunctionPath, String.class, expression), SearchUtils.normalizeAccentsAndDashes(value));
         }
     },
 
@@ -46,7 +46,7 @@ public enum StringFilterOperation implements IFilterOperation<String> {
     START_WITH_IGNORE_CASE_IGNORE_ACCENT {
         @Override
         public Predicate calculate(CriteriaBuilder cb, Expression<?> expression, String value) {
-            return START_WITH_IGNORE_CASE.calculate(cb, cb.function(getUnAccentFunctionPath(), String.class, expression), SearchUtils.normalizeAccentsAndDashes(value));
+            return START_WITH_IGNORE_CASE.calculate(cb, cb.function(unAccentFunctionPath, String.class, expression), SearchUtils.normalizeAccentsAndDashes(value));
         }
     },
 
@@ -60,23 +60,24 @@ public enum StringFilterOperation implements IFilterOperation<String> {
     EQUAL_IGNORE_CASE_IGNORE_ACCENT {
         @Override
         public Predicate calculate(CriteriaBuilder cb, Expression<?> expression, String value) {
-            return EQUAL_IGNORE_CASE.calculate(cb, cb.function(getUnAccentFunctionPath(), String.class, cb.lower((Expression<String>) expression)), SearchUtils.normalizeAccentsAndDashes(value));
+            return EQUAL_IGNORE_CASE.calculate(cb, cb.function(unAccentFunctionPath, String.class, cb.lower((Expression<String>) expression)), SearchUtils.normalizeAccentsAndDashes(value));
         }
     };
+
+    private static final String unAccentFunctionPath = getUnAccentFunctionPath();
 
     @Override
     public boolean needsMultipleValues() {
         return false;
     }
 
+
     @Override
     public Class<String> getOperationType() {
         return String.class;
     }
 
-    public static String getUnAccentFunctionPath() {
-        final String unaccentFunction = System.getProperty("UNACCENT_FUNCTION_NAME") != null ? System.getProperty("UNACCENT_FUNCTION_NAME") : "unaccent";
-        final String schemaUnAccentFunction = System.getProperty("SCHEMA_UNACCENT_FUNCTION_NAME") != null ? System.getProperty("SCHEMA_UNACCENT_FUNCTION_NAME") + "." : "";
-        return schemaUnAccentFunction + unaccentFunction;
+    private static String getUnAccentFunctionPath() {
+        return System.getProperty("UNACCENT_FUNCTION_PATH") != null ? System.getProperty("UNACCENT_FUNCTION_PATH") : "unaccent";
     }
 }
