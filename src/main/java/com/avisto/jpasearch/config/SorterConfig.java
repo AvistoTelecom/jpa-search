@@ -5,9 +5,9 @@ import com.avisto.jpasearch.exception.CannotSortException;
 import com.avisto.jpasearch.model.SortDirection;
 import com.avisto.jpasearch.service.SearchUtils;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.Order;
-import javax.persistence.criteria.Root;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.Order;
+import jakarta.persistence.criteria.Root;
 
 /**
  * SorterConfig allows you to sort the search response

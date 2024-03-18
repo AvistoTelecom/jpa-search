@@ -3,9 +3,9 @@ package com.avisto.jpasearch.config;
 import com.avisto.jpasearch.SearchableEntity;
 import com.avisto.jpasearch.model.SortDirection;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.Order;
-import javax.persistence.criteria.Root;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.Order;
+import jakarta.persistence.criteria.Root;
 
 /**
  * This class ISorterConfig is the interface of the Sorter with which you can sort you search.

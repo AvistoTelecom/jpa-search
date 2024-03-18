@@ -25,12 +25,12 @@ import com.avisto.jpasearch.exception.FieldPathNotFoundException;
 import com.avisto.jpasearch.exception.KeyDuplicateException;
 import com.avisto.jpasearch.exception.WrongDataTypeException;
 
-import javax.persistence.EmbeddedId;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Path;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.Path;
 
 import static com.avisto.jpasearch.service.SearchConstants.Strings.EMPTY_STRING;
 import static com.avisto.jpasearch.service.SearchConstants.Strings.REGEX_DOT;

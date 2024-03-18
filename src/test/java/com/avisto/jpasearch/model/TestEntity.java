@@ -3,10 +3,10 @@ package com.avisto.jpasearch.model;
 import com.avisto.jpasearch.SearchableEntity;
 
 import java.util.List;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 
 @Entity
 public class TestEntity implements SearchableEntity {
