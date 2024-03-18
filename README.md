@@ -570,8 +570,8 @@ The result: Page<EntityDTO.EntityInList> contains the total number of elements a
 
 ## Contributing 👯
 
-Gabriel Revelli\
-Martin Rech
+[Gabriel Revelli](https://github.com/GabrielRevelli)\
+[Martin Rech](https://github.com/martinrech4806)
 
 ## License 📃
 For open source projects, say how it is licensed.
