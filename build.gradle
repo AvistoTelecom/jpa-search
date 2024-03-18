@@ -4,7 +4,7 @@ plugins {
 
 group 'io.github.avistotelecom'
 archivesBaseName = 'jpa-search'
-version '1.0.0.jpa2'
+version '1.0.0.jpa3'
 
 repositories {
     mavenCentral()
