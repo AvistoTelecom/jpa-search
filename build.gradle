@@ -6,7 +6,7 @@ plugins {
 
 group 'io.github.avistotelecom'
 archivesBaseName = 'jpa-search'
-version '0.0.1.jpa3'
+version '0.0.1-jpa3'
 
 repositories {
     mavenCentral()
@@ -59,7 +59,7 @@ publishing {
         mavenJava(MavenPublication) {
             groupId = 'io.github.avistotelecom'
             artifactId = 'jpa-search'
-            version = '0.0.1.jpa3'
+            version = '0.0.1-jpa3'
 
             from components.java
             pom {
