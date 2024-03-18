@@ -52,6 +52,8 @@ test {
     useJUnitPlatform()
 }
 
+ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
+
 publishing {
     publications {
         mavenJava(MavenPublication) {
@@ -105,22 +107,17 @@ publishing {
     }
     repositories {
         maven {
-            url = uri('https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/')
+            def releaseRepo = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+            def snapshotRepo = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
+
+            name = "OSSRH"
+            url = isReleaseVersion ? releaseRepo : snapshotRepo
+
             def ossrhUsername = providers
                     .environmentVariable("OSSRH_USERNAME")
             def ossrhPassword = providers
                     .environmentVariable("OSSRH_PASSWORD")
-            credentials {
-                username = ossrhUsername.isPresent() ? ossrhUsername.get() : null
-                password = ossrhPassword.isPresent() ? ossrhPassword.get() : null
-            }
-        }
-        maven {
-            url = uri('https://s01.oss.sonatype.org/content/repositories/snapshots/')
-            def ossrhUsername = providers
-                    .environmentVariable("OSSRH_USERNAME")
-            def ossrhPassword = providers
-                    .environmentVariable("OSSRH_PASSWORD")
+
             credentials {
                 username = ossrhUsername.isPresent() ? ossrhUsername.get() : null
                 password = ossrhPassword.isPresent() ? ossrhPassword.get() : null
