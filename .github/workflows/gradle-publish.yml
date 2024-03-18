@@ -39,7 +39,7 @@ jobs:
       if: success()
       run: |
         if [ ${{ job.status }} == 'success' ]; then
-          ./gradlew publish --version=$RELEASE_VERSION
+          ./gradlew publish
         else
           echo "Build failed. Skipping deployment to Maven Central."
         fi
