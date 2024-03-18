@@ -38,7 +38,6 @@ jobs:
     - name: Publish to Maven Central
       if: success()
       run: |
-      # Conditionally deploy to Maven Central only on successful builds
         if [ ${{ job.status }} == 'success' ]; then
           ./gradlew publish closeAndReleaseStagingRepository -ReleaseVersion=$RELEASE_VERSION
         else
