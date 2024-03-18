@@ -132,7 +132,6 @@ signing {
 
     if (signingKey.isPresent() && signingPassphrase.isPresent()) {
         useInMemoryPgpKeys(signingKey.get(), signingPassphrase.get())
-        PublishingExtension extension = extensions.getByType(PublishingExtension)
-        sign(extension.publications.mavenJava)
+        sign(publishing.publications.mavenJava)
     }
 }
