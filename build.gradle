@@ -1,5 +1,7 @@
 plugins {
     id 'java-library'
+    id 'maven-publish'
+    id 'signing'
 }
 
 group 'io.github.avistotelecom'
@@ -35,6 +37,7 @@ java {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
     withJavadocJar()
+    withSourcesJar()
 }
 
 javadoc {
@@ -47,4 +50,71 @@ tasks.withType(JavaCompile) {
 
 test {
     useJUnitPlatform()
+}
+
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId = 'io.github.avistotelecom'
+            artifactId = 'jpa-search'
+            version = '1.0.0.jpa3'
+
+            from components.java
+            pom {
+                name = 'JPA Search'
+                description = 'JPA offers a solution that facilitates the search of database content in Java projects.'
+                url = 'https://github.com/AvistoTelecom/jpa-search'
+
+                licenses {
+                    license {
+                        name = 'GNU LESSER GENERAL PUBLIC LICENSE, version 2.1'
+                        url = 'https://www.gnu.org/licenses/old-licenses/lgpl-2.1.en.html'
+                    }
+                }
+
+                organization {
+                    name = 'Avisto'
+                    url = 'https://www.avisto.com/'
+                }
+
+                developers {
+                    developer {
+                        name = 'Gabriel Revelli'
+                        email = 'gabriel.revelli@avisto.com'
+                        organization = 'Avisto'
+                    }
+                    developer {
+                        name = 'Martin Rech'
+                        email = 'martin.rech@avisto.com'
+                        organization = 'Avisto'
+                    }
+                    developer {
+                        name = 'Contact'
+                        email = 'community@avisto.com'
+                        organization = 'Avisto'
+                    }
+                }
+
+                scm {
+                    connection = 'scm:git:git://github.com/AVISTOTELECOM/jpa-search.git'
+                    developerConnection = 'scm:git:ssh://github.com:AVISTOTELECOM/jpa-search.git'
+                    url = 'https://github.com/AVISTOTELECOM/jpa-search'
+                }
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            name "OSSRH"
+            def releasesRepoUrl = 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/'
+            def snapshotsRepoUrl = 'https://s01.oss.sonatype.org/content/repositories/snapshots/'
+            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+        }
+    }
+}
+
+signing {
+    sign publishing.publications.mavenJava
 }
