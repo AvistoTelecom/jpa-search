@@ -52,7 +52,6 @@ test {
     useJUnitPlatform()
 }
 
-
 publishing {
     publications {
         mavenJava(MavenPublication) {
@@ -104,17 +103,39 @@ publishing {
             }
         }
     }
-
     repositories {
         maven {
-            name "OSSRH"
-            def releasesRepoUrl = 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/'
-            def snapshotsRepoUrl = 'https://s01.oss.sonatype.org/content/repositories/snapshots/'
-            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+            url = uri('https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/')
+            def ossrhUsername = providers
+                    .environmentVariable("OSSRH_USERNAME")
+            def ossrhPassword = providers
+                    .environmentVariable("OSSRH_PASSWORD")
+            credentials {
+                username = ossrhUsername.isPresent() ? ossrhUsername.get() : null
+                password = ossrhPassword.isPresent() ? ossrhPassword.get() : null
+            }
+        }
+        maven {
+            url = uri('https://s01.oss.sonatype.org/content/repositories/snapshots/')
+            def ossrhUsername = providers
+                    .environmentVariable("OSSRH_USERNAME")
+            def ossrhPassword = providers
+                    .environmentVariable("OSSRH_PASSWORD")
+            credentials {
+                username = ossrhUsername.isPresent() ? ossrhUsername.get() : null
+                password = ossrhPassword.isPresent() ? ossrhPassword.get() : null
+            }
         }
     }
 }
 
 signing {
-    sign publishing.publications.mavenJava
+    def signingKey = providers.environmentVariable("GPG_SIGNING_KEY").forUseAtConfigurationTime()
+    def signingPassphrase = providers.environmentVariable("GPG_SIGNING_PASSPHRASE").forUseAtConfigurationTime()
+
+    if (signingKey.isPresent() && signingPassphrase.isPresent()) {
+        useInMemoryPgpKeys(signingKey.get(), signingPassphrase.get())
+        PublishingExtension extension = extensions.getByType(PublishingExtension)
+        sign(extension.publications.mavenJava)
+    }
 }
