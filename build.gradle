@@ -121,7 +121,7 @@ signing {
 nexusPublishing {
     repositories {
         sonatype {
-            def releaseRepo = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+            def releaseRepo = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/io/github/avistotelecom"
             def snapshotRepo = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
 
             nexusUrl = uri(releaseRepo)
