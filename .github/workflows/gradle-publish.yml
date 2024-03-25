@@ -35,13 +35,6 @@ jobs:
     - name: Gradle build
       run: ./gradlew clean build
 
-    - name: Decode GPG Key
-      run: |
-        mkdir -p ~/.gradle/
-        echo "${{secrets.GPG_SIGNING_KEY}}" > ~/.gradle/secring.gpg.b64
-        base64 -d ~/.gradle/secring.gpg.b64 > ~/.gradle/secring.gpg
-
-
     - name: Publish to Maven Central
       if: success()
       run: |
