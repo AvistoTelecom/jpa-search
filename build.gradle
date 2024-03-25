@@ -126,6 +126,7 @@ nexusPublishing {
 
             nexusUrl = uri(releaseRepo)
             snapshotRepositoryUrl = uri(snapshotRepo)
+            stagingProfileId = "io.github.avistotelecom"
 
             def ossrhUsername = providers
                     .environmentVariable("OSSRH_USERNAME")
