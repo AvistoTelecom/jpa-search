@@ -35,11 +35,18 @@ jobs:
     - name: Gradle build
       run: ./gradlew clean build
 
+    - name: Decode GPG Key
+      run: |
+        mkdir -p ~/.gradle/
+        echo "${{secrets.GPG_SIGNING_KEY}}" > ~/.gradle/secring.gpg.b64
+        base64 -d ~/.gradle/secring.gpg.b64 > ~/.gradle/secring.gpg
+
+
     - name: Publish to Maven Central
       if: success()
       run: |
         if [ ${{ job.status }} == 'success' ]; then
-          ./gradlew publish -Pversion=$RELEASE_VERSION
+          ./gradlew publish -Pversion=$RELEASE_VERSION -Psigning.password='${{secrets.GPG_SIGNING_PASSPHRASE}}' -Psigning.secretKeyRingFile=$(echo ~/.gradle/secring.gpg) --warn --stacktrace
         else
           echo "Build failed. Skipping deployment to Maven Central."
         fi
