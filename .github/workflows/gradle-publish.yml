@@ -1,8 +1,9 @@
 name: Gradle Package
 
 on:
-  release:
-    types: [created]
+  push:
+    tags:
+      - '*.*.*-*'
 
 jobs:
   build:
@@ -32,14 +33,13 @@ jobs:
       run: chmod +x gradlew
 
     - name: Gradle build
-      run: ./gradlew build
+      run: ./gradlew clean build
 
     - name: Publish to Maven Central
       if: success()
       run: |
-      # Conditionally deploy to Maven Central only on successful builds
         if [ ${{ job.status }} == 'success' ]; then
-          ./gradlew publish closeAndReleaseStagingRepository -ReleaseVersion=$RELEASE_VERSION
+          ./gradlew publish -Pversion=$RELEASE_VERSION --warn --stacktrace --info
         else
           echo "Build failed. Skipping deployment to Maven Central."
         fi
@@ -47,4 +47,4 @@ jobs:
         GPG_SIGNING_KEY: ${{ secrets.GPG_SIGNING_KEY }}
         GPG_SIGNING_PASSPHRASE: ${{ secrets.GPG_SIGNING_PASSPHRASE }}
         OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
-        OSSRH_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
+        OSSRH_PASSWORD: ${{ secrets.OSSRH_PWD }}

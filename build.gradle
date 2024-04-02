@@ -2,11 +2,12 @@ plugins {
     id 'java-library'
     id 'maven-publish'
     id 'signing'
+    id("io.github.gradle-nexus.publish-plugin") version "1.0.0"
 }
 
 group 'io.github.avistotelecom'
 archivesBaseName = 'jpa-search'
-version '1.0.0.jpa3'
+version '0.0.1-jpa3'
 
 repositories {
     mavenCentral()
@@ -52,12 +53,14 @@ test {
     useJUnitPlatform()
 }
 
+ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
+
 publishing {
     publications {
         mavenJava(MavenPublication) {
             groupId = 'io.github.avistotelecom'
             artifactId = 'jpa-search'
-            version = '1.0.0.jpa3'
+            version = '0.0.1-jpa3'
 
             from components.java
             pom {
@@ -103,30 +106,6 @@ publishing {
             }
         }
     }
-    repositories {
-        maven {
-            url = uri('https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/')
-            def ossrhUsername = providers
-                    .environmentVariable("OSSRH_USERNAME")
-            def ossrhPassword = providers
-                    .environmentVariable("OSSRH_PASSWORD")
-            credentials {
-                username = ossrhUsername.isPresent() ? ossrhUsername.get() : null
-                password = ossrhPassword.isPresent() ? ossrhPassword.get() : null
-            }
-        }
-        maven {
-            url = uri('https://s01.oss.sonatype.org/content/repositories/snapshots/')
-            def ossrhUsername = providers
-                    .environmentVariable("OSSRH_USERNAME")
-            def ossrhPassword = providers
-                    .environmentVariable("OSSRH_PASSWORD")
-            credentials {
-                username = ossrhUsername.isPresent() ? ossrhUsername.get() : null
-                password = ossrhPassword.isPresent() ? ossrhPassword.get() : null
-            }
-        }
-    }
 }
 
 signing {
@@ -135,7 +114,27 @@ signing {
 
     if (signingKey.isPresent() && signingPassphrase.isPresent()) {
         useInMemoryPgpKeys(signingKey.get(), signingPassphrase.get())
-        PublishingExtension extension = extensions.getByType(PublishingExtension)
-        sign(extension.publications.mavenJava)
+        sign(publishing.publications.mavenJava)
+    }
+}
+
+nexusPublishing {
+    repositories {
+        sonatype {
+            def releaseRepo = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/io/github/avistotelecom/"
+            def snapshotRepo = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
+
+            nexusUrl = uri(releaseRepo)
+            snapshotRepositoryUrl = uri(snapshotRepo)
+            stagingProfileId = "io.github.avistotelecom"
+
+            def ossrhUsername = providers
+                    .environmentVariable("OSSRH_USERNAME")
+            def ossrhPassword = providers
+                    .environmentVariable("OSSRH_PASSWORD")
+
+            username = ossrhUsername.isPresent() ? ossrhUsername.get() : null
+            password = ossrhPassword.isPresent() ? ossrhPassword.get() : null
+        }
     }
 }
