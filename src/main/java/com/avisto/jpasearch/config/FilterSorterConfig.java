@@ -9,9 +9,9 @@ import com.avisto.jpasearch.exception.CannotSortException;
 import com.avisto.jpasearch.model.SortDirection;
 import com.avisto.jpasearch.service.SearchUtils;
 
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.Order;
-import jakarta.persistence.criteria.Root;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Order;
+import javax.persistence.criteria.Root;
 
 /**
  * This class is a combination of a FilterOperation and a SorterOperation. You can use it as a filter, a sorter or both.
