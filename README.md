@@ -19,7 +19,7 @@ Jpa-Search simplifies specific entity searches with JPA, including :
 - Complete pagination
 
 
-This search is designed to be efficient, since it operates at a low level, as close as possible to SQL, thanks to the CriteriaBuilder provided by jakarta.persistence.
+This search is designed to be efficient, since it operates at a low level, as close as possible to SQL, thanks to the CriteriaBuilder provided by javax.persistence.
 
 A search works with a configuration file where you define each possible filter, its associated operation (e.g.: name equals value) and where to fetch the field in DB. Once a filter has been defined, it is possible to filter by this ascending or descending field.
 
