@@ -6,7 +6,7 @@ on:
       - '*.*.*-*'
 
 jobs:
-  build:
+  publish:
 
     runs-on: ubuntu-latest
     permissions:
@@ -39,12 +39,12 @@ jobs:
       if: success()
       run: |
         if [ ${{ job.status }} == 'success' ]; then
-          ./gradlew publish -Pversion=$RELEASE_VERSION --warn --stacktrace --info
+          ./gradlew publishToSonatype -Pversion=$RELEASE_VERSION --info --stacktrace
         else
           echo "Build failed. Skipping deployment to Maven Central."
         fi
       env:
-        GPG_SIGNING_KEY: ${{ secrets.GPG_SIGNING_KEY }}
-        GPG_SIGNING_PASSPHRASE: ${{ secrets.GPG_SIGNING_PASSPHRASE }}
-        OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
-        OSSRH_PASSWORD: ${{ secrets.OSSRH_PWD }}
+        ORG_GRADLE_PROJECT_sonatypePassword: ${{ secrets.OSSRH_PWD }}
+        ORG_GRADLE_PROJECT_sonatypeUsername: ${{ secrets.OSSRH_USERNAME }}
+        ORG_GRADLE_PROJECT_signingKey: ${{ secrets.GPG_SIGNING_KEY }}
+        ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.GPG_SIGNING_PASSPHRASE }}

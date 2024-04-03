@@ -575,4 +575,4 @@ The result: Page<EntityDTO.EntityInList> contains the total number of elements a
 
 ## License 📃
 
-GNU LESSER GENERAL PUBLIC LICENSE, Version 2.1, February 1999
+GNU LESSER GENERAL PUBLIC LICENSE, Version 3.0, 29 June 2007
