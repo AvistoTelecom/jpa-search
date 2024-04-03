@@ -7,7 +7,7 @@ plugins {
 
 group 'io.github.avistotelecom'
 archivesBaseName = 'jpa-search'
-version 'jpa3'
+version 'jpa2'
 
 if (project.hasProperty("projectVersion")) {
     project.version = project.projectVersion
