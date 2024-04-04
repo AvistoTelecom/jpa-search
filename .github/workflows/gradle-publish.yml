@@ -23,12 +23,6 @@ jobs:
         distribution: 'temurin'
         cache: gradle
 
-    - name: Extract release version
-      run: |
-        export RELEASE_VERSION="${{ github.event.release.tag_name }}"
-        echo "Release Version: $RELEASE_VERSION"
-      id: extract_release_version
-
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
@@ -39,7 +33,7 @@ jobs:
       if: success()
       run: |
         if [ ${{ job.status }} == 'success' ]; then
-          ./gradlew -PprojectVersion=$RELEASE_VERSION publishToSonatype closeSonatypeStagingRepository --info --stacktrace
+          ./gradlew -PprojectVersion=$GITHUB_REF_NAME publishToSonatype closeSonatypeStagingRepository --info --stacktrace
         else
           echo "Build failed. Skipping deployment to Maven Central."
         fi
