@@ -39,7 +39,7 @@ jobs:
       if: success()
       run: |
         if [ ${{ job.status }} == 'success' ]; then
-          ./gradlew publishToSonatype closeStagingRepository -Pversion=$RELEASE_VERSION --info --stacktrace
+          ./gradlew publishToSonatype closeSonatypeStagingRepository -Pversion=$RELEASE_VERSION --info --stacktrace
         else
           echo "Build failed. Skipping deployment to Maven Central."
         fi
