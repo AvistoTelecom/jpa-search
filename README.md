@@ -2,10 +2,10 @@
 
 # JPA-Search
 
-JPA Search offers a solution that facilitates the search of database content in Java projects.
+JPA Search offers a solution based on JPA that simplify database search from an API with pagination and sorting.
 
-[![Hibernate](https://img.shields.io/badge/Hibernate-59666C?style=for-the-badge&logo=Hibernate&logoColor=white
-)](https://hibernate.org/)
+[![Static Badge](https://img.shields.io/badge/JPA%20%26%20Hibernate-59666C?style=for-the-badge&logo=Hibernate&logoColor=white)](https://hibernate.org/)
+[![Static Badge](https://img.shields.io/badge/EntityGraph-009900?style=for-the-badge&logoColor=white)](https://www.baeldung.com/jpa-entity-graph)
 
 ***
 ## Description 🔍
