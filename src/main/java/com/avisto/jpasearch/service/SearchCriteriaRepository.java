@@ -280,7 +280,7 @@ public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum
         tq.setHint("org.hibernate.readOnly", true);
 
         if (eg != null) {
-            tq.setHint("javax.persistence.fetchgraph", entityManager.getEntityGraph(eg));
+            tq.setHint("jakarta.persistence.fetchgraph", entityManager.getEntityGraph(eg));
         }
         return tq.getResultList();
     }
@@ -372,7 +372,9 @@ public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum
         List<OrderCriteria> ordersCriteria = new ArrayList<>();
         int i = 0;
         while (i < sortSize) {
-            ordersCriteria.add(new OrderCriteria(sorts.get(i++), SortDirection.of(sorts.get(i++))));
+            int sortField = i++;
+            int sortDirection = i++;
+            ordersCriteria.add(new OrderCriteria(sorts.get(sortField), SortDirection.of(sorts.get(sortDirection))));
         }
         return ordersCriteria;
     }
