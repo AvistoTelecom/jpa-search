@@ -146,10 +146,10 @@ public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum
         Long count = getCount(cb, rootClazz, filterMap, searchCriteria, stringIdPath);
 
         Page<R> page;
-        if (filterMap.values().stream().anyMatch(IFilterConfig::needJoin)) {
+        if (entityGraphName != null || filterMap.values().stream().anyMatch(IFilterConfig::needJoin)) {
             page = doubleRequest(cb, rootClazz, searchCriteria, filterMap, sorterMap, count, stringIdPath, entityGraphName);
         } else {
-            page = simpleRequest(cb, rootClazz, searchCriteria, filterMap, sorterMap, count, entityGraphName);
+            page = simpleRequest(cb, rootClazz, searchCriteria, filterMap, sorterMap, count);
         }
         if (mapper != null) {
             return page.map(mapper);
@@ -167,8 +167,7 @@ public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum
             SearchCriteria searchCriteria,
             Map<String, IFilterConfig<R, ?>> filterMap,
             Map<String, ISorterConfig<R>> sorterMap,
-            long count,
-            String entityGraphName
+            long count
     ) {
         CriteriaQuery<R> criteriaQuery = cb.createQuery(rootClazz);
         Root<R> root = criteriaQuery.from(rootClazz);
@@ -193,9 +192,6 @@ public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum
             typedQuery.setHint("org.hibernate.readOnly", true);
             typedQuery.setFirstResult(searchCriteria.getPageNumber() * limit);
             typedQuery.setMaxResults(limit);
-            if (entityGraphName != null) {
-                typedQuery.setHint("jakarta.persistence.fetchgraph", entityManager.getEntityGraph(entityGraphName));
-            }
 
             List<R> results = typedQuery.getResultList();
 
@@ -284,7 +280,7 @@ public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum
         tq.setHint("org.hibernate.readOnly", true);
 
         if (eg != null) {
-            tq.setHint("jakarta.persistence.fetchgraph", entityManager.getEntityGraph(eg));
+            tq.setHint("javax.persistence.fetchgraph", entityManager.getEntityGraph(eg));
         }
         return tq.getResultList();
     }
