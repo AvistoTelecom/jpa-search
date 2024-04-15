@@ -158,6 +158,7 @@ public class FilterConfig<R extends SearchableEntity, T> implements IFilterConfi
 
     @Override
     public boolean needJoin() {
-        return paths.stream().anyMatch(path -> path.contains("["));
+        // check if contains ] or 1 point (need to check in further releases that a single point targets a foreign)
+        return paths.stream().anyMatch(path -> path.lastIndexOf(']') >= 2 || path.contains("."));
     }
 }
