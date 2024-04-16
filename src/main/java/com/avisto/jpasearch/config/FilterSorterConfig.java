@@ -44,7 +44,7 @@ public class FilterSorterConfig<R extends SearchableEntity, T> extends FilterCon
     @Override
     public void checkConfig(Class<R> rootClazz) {
         super.checkConfig(rootClazz);
-        if (needJoin()) {
+        if (getSortPath().contains("[")) {
             throw new CannotSortException("Cannot sort on a Collection");
         }
     }
