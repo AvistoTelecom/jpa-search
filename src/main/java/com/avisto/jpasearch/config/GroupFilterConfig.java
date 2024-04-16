@@ -35,7 +35,7 @@ public class GroupFilterConfig<R extends SearchableEntity> implements IFilterCon
     public static <R extends SearchableEntity> GroupFilterConfig<R> of(String key, IFilterConfig firstFilter, IFilterConfig... filters) {
         List<IFilterConfig> result = new ArrayList<>();
         result.add(firstFilter);
-        if (filters != null) {
+        if (filters != null && filters.length > 0) {
             result.addAll(List.of(filters));
         }
         return new GroupFilterConfig<>(key, result, ConditionOperator.AND);
@@ -44,7 +44,7 @@ public class GroupFilterConfig<R extends SearchableEntity> implements IFilterCon
     public static <R extends SearchableEntity> GroupFilterConfig<R> of(String key, ConditionOperator conditionOperator, IFilterConfig firstFilter, IFilterConfig... filters) {
         List<IFilterConfig> result = new ArrayList<>();
         result.add(firstFilter);
-        if (filters != null) {
+        if (filters != null && filters.length > 0) {
             result.addAll(List.of(filters));
         }
         return new GroupFilterConfig<>(key, result, conditionOperator);
