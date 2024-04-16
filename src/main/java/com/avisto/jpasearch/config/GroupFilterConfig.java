@@ -32,7 +32,7 @@ public class GroupFilterConfig<R extends SearchableEntity> implements IFilterCon
         this.conditionOperator = conditionOperator;
     }
 
-    public static <R extends SearchableEntity> GroupFilterConfig<R> of(String key, pushIFilterConfig firstFilter, IFilterConfig... filters) {
+    public static <R extends SearchableEntity> GroupFilterConfig<R> of(String key, IFilterConfig firstFilter, IFilterConfig... filters) {
         List<IFilterConfig> result = new ArrayList<>();
         result.add(firstFilter);
         if (filters != null) {
