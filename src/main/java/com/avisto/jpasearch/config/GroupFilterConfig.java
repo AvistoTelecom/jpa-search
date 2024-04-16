@@ -2,6 +2,7 @@ package com.avisto.jpasearch.config;
 
 import com.avisto.jpasearch.SearchableEntity;
 import com.avisto.jpasearch.exception.TypeNotHandledException;
+import com.avisto.jpasearch.model.ConditionOperator;
 import com.avisto.jpasearch.service.CastService;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -23,19 +24,30 @@ import java.util.Map;
 public class GroupFilterConfig<R extends SearchableEntity> implements IFilterConfig<R, Map<String, String>> {
     private final String key;
     private final List<IFilterConfig> filters;
+    private final ConditionOperator conditionOperator;
 
-    private GroupFilterConfig(String key, List<IFilterConfig> filters) {
+    private GroupFilterConfig(String key, List<IFilterConfig> filters, ConditionOperator conditionOperator) {
         this.key = key;
         this.filters = filters;
+        this.conditionOperator = conditionOperator;
     }
 
     public static <R extends SearchableEntity> GroupFilterConfig<R> of(String key, IFilterConfig firstFilter, IFilterConfig... filters) {
         List<IFilterConfig> result = new ArrayList<>();
         result.add(firstFilter);
-        if (filters != null) {
+        if (filters != null && filters.length > 0) {
             result.addAll(List.of(filters));
         }
-        return new GroupFilterConfig<>(key, result);
+        return new GroupFilterConfig<>(key, result, ConditionOperator.AND);
+    }
+
+    public static <R extends SearchableEntity> GroupFilterConfig<R> of(String key, ConditionOperator conditionOperator, IFilterConfig firstFilter, IFilterConfig... filters) {
+        List<IFilterConfig> result = new ArrayList<>();
+        result.add(firstFilter);
+        if (filters != null && filters.length > 0) {
+            result.addAll(List.of(filters));
+        }
+        return new GroupFilterConfig<>(key, result, conditionOperator);
     }
 
     /**
@@ -53,7 +65,7 @@ public class GroupFilterConfig<R extends SearchableEntity> implements IFilterCon
         if (value == null) {
             throw new TypeNotHandledException("Cannot group null or empty filters");
         }
-        return cb.and(filters
+        return conditionOperator.applyCondition(cb, filters
                 .stream()
                 .map(filter -> {
                     Class<?> filterClazz = filter.getEntryClass(rootClazz);
