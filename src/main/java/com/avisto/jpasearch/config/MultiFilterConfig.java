@@ -103,7 +103,7 @@ public class MultiFilterConfig<R extends SearchableEntity, X> implements IFilter
     }
 
     @Override
-    public Boolean testConfig(Class<R> rootClazz) {
+    public boolean testConfig(Class<R> rootClazz) {
         return filter.testConfig(rootClazz);
     }
 }

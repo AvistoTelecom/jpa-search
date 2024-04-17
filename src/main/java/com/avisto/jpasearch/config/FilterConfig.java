@@ -92,20 +92,15 @@ public class FilterConfig<R extends SearchableEntity, T> implements IFilterConfi
      * @param rootClazz Class to be analyzed
      */
     @Override
-    public Boolean testConfig(Class<R> rootClazz) {
+    public boolean testConfig(Class<R> rootClazz) {
         Class<T> entryClazz = getEntryClass(rootClazz);
         Class<?> targetClazz = getTargetClass(rootClazz);
         Class<?> sanitizeEntryClazz = entryClazz;
         if (SearchUtils.isPrimitiveType(entryClazz)) {
             sanitizeEntryClazz = SearchUtils.getObjectTypeFromPrimitiveType(entryClazz);
         }
-        if (filterOperation.getOperationType() != Void.class && !filterOperation.getOperationType().isAssignableFrom(sanitizeEntryClazz)) {
-            return FALSE;
-        }
-        if (paths.stream().anyMatch(path -> SearchUtils.getEntityClass(rootClazz, path.split(REGEX_DOT)) != targetClazz)) {
-            return FALSE;
-        }
-        return TRUE;
+        return (filterOperation.getOperationType() == Void.class || filterOperation.getOperationType().isAssignableFrom(sanitizeEntryClazz)) &&
+                paths.stream().allMatch(path -> SearchUtils.getEntityClass(rootClazz, path.split(REGEX_DOT)) == targetClazz);
     }
 
     private List<FieldPathObject> getDefaultFieldPath() {

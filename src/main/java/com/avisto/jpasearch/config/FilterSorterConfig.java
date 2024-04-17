@@ -13,9 +13,6 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Order;
 import jakarta.persistence.criteria.Root;
 
-import static java.lang.Boolean.FALSE;
-import static java.lang.Boolean.TRUE;
-
 /**
  * This class is a combination of a FilterOperation and a SorterOperation. You can use it as a filter, a sorter or both.
  *
@@ -63,11 +60,8 @@ public class FilterSorterConfig<R extends SearchableEntity, T> extends FilterCon
      * @param rootClazz Class to be analyzed
      */
     @Override
-    public Boolean testConfig(Class<R> rootClazz) {
-        if (super.testConfig(rootClazz).equals(FALSE) || getSortPath().contains("[")) {
-            return FALSE;
-        }
-        return TRUE;
+    public boolean testConfig(Class<R> rootClazz) {
+        return super.testConfig(rootClazz) && !getSortPath().contains("[");
     }
 
     @Override

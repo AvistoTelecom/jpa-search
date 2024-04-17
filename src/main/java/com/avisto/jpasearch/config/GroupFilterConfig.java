@@ -13,9 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static java.lang.Boolean.FALSE;
-import static java.lang.Boolean.TRUE;
-
 /**
  * This class allows you to use a filter group that you may or may not have previously defined.
  *
@@ -108,12 +105,8 @@ public class GroupFilterConfig<R extends SearchableEntity> implements IFilterCon
     }
 
     @Override
-    public Boolean testConfig(Class<R> rootClazz) {
-        List<Boolean> testConfigs = filters.stream().map(iFilterConfig -> iFilterConfig.testConfig(rootClazz)).toList();
-        if (testConfigs.contains(FALSE)) {
-            return FALSE;
-        }
-        return TRUE;
+    public boolean testConfig(Class<R> rootClazz) {
+        return filters.stream().allMatch(iFilterConfig -> iFilterConfig.testConfig(rootClazz));
     }
 
     @Override

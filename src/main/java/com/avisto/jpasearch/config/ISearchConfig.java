@@ -22,5 +22,5 @@ public sealed interface ISearchConfig<R extends SearchableEntity> permits IFilte
      */
     @Deprecated(since = "0.1.0", forRemoval = true)
     void checkConfig(Class<R> rootClazz);
-    Boolean testConfig(Class<R> rootClazz);
+    boolean testConfig(Class<R> rootClazz);
 }

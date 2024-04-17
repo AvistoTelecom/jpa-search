@@ -61,11 +61,8 @@ public class SorterConfig<R extends SearchableEntity> implements ISorterConfig<R
      * @param rootClazz Class to be analyzed
      */
     @Override
-    public Boolean testConfig(Class<R> rootClazz) {
-        if (getSortPath().contains("[")) {
-            return FALSE;
-        }
-        return TRUE;
+    public boolean testConfig(Class<R> rootClazz) {
+        return (!getSortPath().contains("["));
     }
 
     @Override
