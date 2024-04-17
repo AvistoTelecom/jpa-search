@@ -18,8 +18,6 @@ import java.util.List;
 import java.util.Map;
 
 import static com.avisto.jpasearch.service.SearchConstants.Strings.REGEX_DOT;
-import static java.lang.Boolean.FALSE;
-import static java.lang.Boolean.TRUE;
 
 /**
  * This class contains the FilterOperation, the key and the paths to create a filter that you can call with the search method.
