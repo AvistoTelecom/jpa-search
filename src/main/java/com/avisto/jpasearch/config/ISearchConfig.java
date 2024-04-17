@@ -14,4 +14,5 @@ public sealed interface ISearchConfig<R extends SearchableEntity> permits IFilte
 
     String getKey();
     void checkConfig(Class<R> rootClazz);
+    Boolean testConfig(Class<R> rootClazz);
 }

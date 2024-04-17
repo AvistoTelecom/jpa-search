@@ -9,6 +9,9 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Order;
 import jakarta.persistence.criteria.Root;
 
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
+
 /**
  * SorterConfig allows you to sort the search response
  *
@@ -38,13 +41,32 @@ public class SorterConfig<R extends SearchableEntity> implements ISorterConfig<R
 
     /**
      * Check that you not try to sort on a collection.
+     * @deprecated
+     * This method will be replaced by testConfig in 1.0.0
+     * <p> Use {@link SorterConfig#testConfig(Class)} instead.
+     *
      * @param rootClazz The entity class
      */
     @Override
+    @Deprecated(since = "0.0.3", forRemoval = true)
     public void checkConfig(Class<R> rootClazz) {
         if (getSortPath().contains("[")) {
             throw new CannotSortException("Cannot sort on a Collection");
         }
+    }
+
+    /**
+     * Check that you're not trying to sort two objects of different type, or a wrong operation for a field.
+     *
+     * @return Boolean True if it's ok and false if not
+     * @param rootClazz Class to be analyzed
+     */
+    @Override
+    public Boolean testConfig(Class<R> rootClazz) {
+        if (getSortPath().contains("[")) {
+            return FALSE;
+        }
+        return TRUE;
     }
 
     @Override

@@ -18,6 +18,8 @@ import java.util.List;
 import java.util.Map;
 
 import static com.avisto.jpasearch.service.SearchConstants.Strings.REGEX_DOT;
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
 
 /**
  * This class contains the FilterOperation, the key and the paths to create a filter that you can call with the search method.
@@ -61,9 +63,14 @@ public class FilterConfig<R extends SearchableEntity, T> implements IFilterConfi
 
     /**
      * Check that you're not trying to sort two objects of different type, or a wrong operation for a field.
+     * @deprecated
+     * This method will be replaced by testConfig in 1.0.0
+     * <p> Use {@link FilterConfig#testConfig(Class)} instead.
+     *
      * @param rootClazz Class to be analyzed
      */
     @Override
+    @Deprecated(since = "0.0.3", forRemoval = true)
     public void checkConfig(Class<R> rootClazz) {
         Class<T> entryClazz = getEntryClass(rootClazz);
         Class<?> targetClazz = getTargetClass(rootClazz);
@@ -77,6 +84,29 @@ public class FilterConfig<R extends SearchableEntity, T> implements IFilterConfi
         if (paths.stream().anyMatch(path -> SearchUtils.getEntityClass(rootClazz, path.split(REGEX_DOT)) != targetClazz)) {
             throw new WrongDataTypeException("Filter config cannot filter on 2 different object types");
         }
+    }
+
+    /**
+     * Check that you're not trying to sort two objects of different type, or a wrong operation for a field.
+     *
+     * @return Boolean True if it's ok and false if not
+     * @param rootClazz Class to be analyzed
+     */
+    @Override
+    public Boolean testConfig(Class<R> rootClazz) {
+        Class<T> entryClazz = getEntryClass(rootClazz);
+        Class<?> targetClazz = getTargetClass(rootClazz);
+        Class<?> sanitizeEntryClazz = entryClazz;
+        if (SearchUtils.isPrimitiveType(entryClazz)) {
+            sanitizeEntryClazz = SearchUtils.getObjectTypeFromPrimitiveType(entryClazz);
+        }
+        if (filterOperation.getOperationType() != Void.class && !filterOperation.getOperationType().isAssignableFrom(sanitizeEntryClazz)) {
+            return FALSE;
+        }
+        if (paths.stream().anyMatch(path -> SearchUtils.getEntityClass(rootClazz, path.split(REGEX_DOT)) != targetClazz)) {
+            return FALSE;
+        }
+        return TRUE;
     }
 
     private List<FieldPathObject> getDefaultFieldPath() {
