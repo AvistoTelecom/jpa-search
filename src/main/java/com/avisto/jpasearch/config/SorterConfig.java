@@ -48,7 +48,6 @@ public class SorterConfig<R extends SearchableEntity> implements ISorterConfig<R
      * @param rootClazz The entity class
      */
     @Override
-    @Deprecated(since = "0.0.3", forRemoval = true)
     public void checkConfig(Class<R> rootClazz) {
         if (getSortPath().contains("[")) {
             throw new CannotSortException("Cannot sort on a Collection");

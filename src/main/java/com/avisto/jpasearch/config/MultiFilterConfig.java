@@ -98,7 +98,6 @@ public class MultiFilterConfig<R extends SearchableEntity, X> implements IFilter
      * @param rootClazz Entity class
      */
     @Override
-    @Deprecated(since = "0.0.3", forRemoval = true)
     public void checkConfig(Class<R> rootClazz) {
         //TODO : check if we need to check
     }

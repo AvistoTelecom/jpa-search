@@ -13,6 +13,14 @@ import com.avisto.jpasearch.SearchableEntity;
 public sealed interface ISearchConfig<R extends SearchableEntity> permits IFilterConfig, ISorterConfig {
 
     String getKey();
+    /**
+     * @deprecated
+     * This method will be replaced by testConfig in 1.0.0
+     * <p> Use {@link FilterConfig#testConfig(Class)} instead.
+     *
+     * @param rootClazz Class to be analyzed
+     */
+    @Deprecated(since = "0.1.0", forRemoval = true)
     void checkConfig(Class<R> rootClazz);
     Boolean testConfig(Class<R> rootClazz);
 }

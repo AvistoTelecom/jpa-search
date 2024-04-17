@@ -70,7 +70,6 @@ public class FilterConfig<R extends SearchableEntity, T> implements IFilterConfi
      * @param rootClazz Class to be analyzed
      */
     @Override
-    @Deprecated(since = "0.0.3", forRemoval = true)
     public void checkConfig(Class<R> rootClazz) {
         Class<T> entryClazz = getEntryClass(rootClazz);
         Class<?> targetClazz = getTargetClass(rootClazz);

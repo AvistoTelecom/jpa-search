@@ -104,7 +104,6 @@ public class GroupFilterConfig<R extends SearchableEntity> implements IFilterCon
     }
 
     @Override
-    @Deprecated(since = "0.0.3", forRemoval = true)
     public void checkConfig(Class<R> rootClazz) {
     }
 

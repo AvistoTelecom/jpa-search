@@ -49,7 +49,6 @@ public class FilterSorterConfig<R extends SearchableEntity, T> extends FilterCon
      * @param rootClazz Class to be analyzed
      */
     @Override
-    @Deprecated(since = "0.0.3", forRemoval = true)
     public void checkConfig(Class<R> rootClazz) {
         super.checkConfig(rootClazz);
         if (getSortPath().contains("[")) {
