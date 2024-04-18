@@ -14,10 +14,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import com.avisto.jpasearch.SearchableEntity;
-import com.avisto.jpasearch.config.IFilterConfig;
-import com.avisto.jpasearch.config.ISearchConfig;
-import com.avisto.jpasearch.config.ISearchCriteriaConfig;
-import com.avisto.jpasearch.config.ISorterConfig;
+import com.avisto.jpasearch.config.*;
 import com.avisto.jpasearch.exception.CannotSortException;
 import com.avisto.jpasearch.exception.EmptyCriteriaException;
 import com.avisto.jpasearch.exception.FieldNotInCriteriaException;
@@ -344,9 +341,13 @@ public final class SearchUtils {
 
     /**
      * Check if the configuration criteria is well declared
+     * @deprecated
+     * This method will be replaced by testCriteriaConfig in 1.0.0
+     * <p> Use {@link SearchUtils#testCriteriaConfig(Class)} instead.
      *
      * @param configClazz criteria config to check.
      */
+    @Deprecated(since = "0.1.0", forRemoval = true)
     public static <R extends SearchableEntity, E extends Enum<E> & ISearchCriteriaConfig<R>> void checkCriteriaConfig(Class<E> configClazz) {
         E[] configurations = configClazz.getEnumConstants();
         if (configurations.length == 0) {
@@ -371,5 +372,20 @@ public final class SearchUtils {
         if (!sorterKeys.contains(firstConfiguration.getDefaultOrderCriteria().getKey())){
             throw new CannotSortException("Default sort key is not defined as a sorter in ISearchCriteriaConfig");
         }
+    }
+
+    /**
+     * Test if the configuration criteria is well declared
+     *
+     * @param configClazz criteria config to test.
+     */
+    public static <R extends SearchableEntity, E extends Enum<E> & ISearchCriteriaConfig<R>> Boolean testCriteriaConfig(Class<E> configClazz) {
+        E[] configurations = configClazz.getEnumConstants();
+        if (configurations.length == 0) {
+            throw new EmptyCriteriaException("Criteria needs at least one configuration");
+        }
+        E firstConfiguration = configurations[0];
+        Class<R> rootClazz = firstConfiguration.getRootClass();
+        return Arrays.stream(configurations).allMatch(configuration -> configuration.getSearchConfig().testConfig(rootClazz));
     }
 }
