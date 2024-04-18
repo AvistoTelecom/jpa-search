@@ -3,14 +3,7 @@ package com.avisto.jpasearch.service;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.text.Normalizer;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import com.avisto.jpasearch.SearchableEntity;
@@ -386,6 +379,17 @@ public final class SearchUtils {
         }
         E firstConfiguration = configurations[0];
         Class<R> rootClazz = firstConfiguration.getRootClass();
+        Set<String> filterKeys = new HashSet<>();
+        Set<String> sorterKeys = new HashSet<>();
+        for (E e : configurations) {
+            ISearchConfig<R> searchConfig = e.getSearchConfig();
+            if (IFilterConfig.class.isAssignableFrom(searchConfig.getClass()) && (!filterKeys.add(searchConfig.getKey()))) {
+                return false;
+            }
+            if (ISorterConfig.class.isAssignableFrom(searchConfig.getClass()) && (!sorterKeys.add(searchConfig.getKey()))) {
+                return false;
+            }
+        }
         return Arrays.stream(configurations).allMatch(configuration -> configuration.getSearchConfig().testConfig(rootClazz));
     }
 }
