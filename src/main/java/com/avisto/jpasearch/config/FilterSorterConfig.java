@@ -40,7 +40,7 @@ public class FilterSorterConfig<R extends SearchableEntity, T> extends FilterCon
     /**
      * Check that you're not trying to sort on a collection, or two objects of different type, or a wrong operation for a field.
      * @deprecated
-     * This method will be replaced by testConfig in 1.0.0
+     * This method will be removed in 1.0.0
      * <p> Use {@link FilterSorterConfig#testConfig(Class)} instead.
      *
      * @param rootClazz Class to be analyzed

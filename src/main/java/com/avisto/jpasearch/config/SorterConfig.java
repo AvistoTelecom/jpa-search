@@ -42,7 +42,7 @@ public class SorterConfig<R extends SearchableEntity> implements ISorterConfig<R
     /**
      * Check that you not try to sort on a collection.
      * @deprecated
-     * This method will be replaced by testConfig in 1.0.0
+     * This method will be removed in 1.0.0
      * <p> Use {@link SorterConfig#testConfig(Class)} instead.
      *
      * @param rootClazz The entity class

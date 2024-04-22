@@ -62,7 +62,7 @@ public class FilterConfig<R extends SearchableEntity, T> implements IFilterConfi
     /**
      * Check that you're not trying to sort two objects of different type, or a wrong operation for a field.
      * @deprecated
-     * This method will be replaced by testConfig in 1.0.0
+     * This method will be removed in 1.0.0
      * <p> Use {@link FilterConfig#testConfig(Class)} instead.
      *
      * @param rootClazz Class to be analyzed
