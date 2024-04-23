@@ -101,4 +101,9 @@ public class MultiFilterConfig<R extends SearchableEntity, X> implements IFilter
     public void checkConfig(Class<R> rootClazz) {
         //TODO : check if we need to check
     }
+
+    @Override
+    public boolean testConfig(Class<R> rootClazz) {
+        return filter.testConfig(rootClazz);
+    }
 }

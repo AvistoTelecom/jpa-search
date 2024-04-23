@@ -4,7 +4,6 @@ import com.avisto.jpasearch.SearchableEntity;
 import com.avisto.jpasearch.exception.CannotSortException;
 import com.avisto.jpasearch.model.SortDirection;
 import com.avisto.jpasearch.service.SearchUtils;
-
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Order;
 import jakarta.persistence.criteria.Root;
@@ -38,6 +37,10 @@ public class SorterConfig<R extends SearchableEntity> implements ISorterConfig<R
 
     /**
      * Check that you not try to sort on a collection.
+     * @deprecated
+     * This method will be removed in 1.0.0
+     * <p> Use {@link SorterConfig#testConfig(Class)} instead.
+     *
      * @param rootClazz The entity class
      */
     @Override
@@ -45,6 +48,17 @@ public class SorterConfig<R extends SearchableEntity> implements ISorterConfig<R
         if (getSortPath().contains("[")) {
             throw new CannotSortException("Cannot sort on a Collection");
         }
+    }
+
+    /**
+     * Check that you're not trying to sort two objects of different type, or a wrong operation for a field.
+     *
+     * @return Boolean True if it's ok and false if not
+     * @param rootClazz Class to be analyzed
+     */
+    @Override
+    public boolean testConfig(Class<R> rootClazz) {
+        return !getSortPath().contains("[");
     }
 
     @Override

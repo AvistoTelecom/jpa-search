@@ -61,6 +61,10 @@ public class FilterConfig<R extends SearchableEntity, T> implements IFilterConfi
 
     /**
      * Check that you're not trying to sort two objects of different type, or a wrong operation for a field.
+     * @deprecated
+     * This method will be removed in 1.0.0
+     * <p> Use {@link FilterConfig#testConfig(Class)} instead.
+     *
      * @param rootClazz Class to be analyzed
      */
     @Override
@@ -77,6 +81,24 @@ public class FilterConfig<R extends SearchableEntity, T> implements IFilterConfi
         if (paths.stream().anyMatch(path -> SearchUtils.getEntityClass(rootClazz, path.split(REGEX_DOT)) != targetClazz)) {
             throw new WrongDataTypeException("Filter config cannot filter on 2 different object types");
         }
+    }
+
+    /**
+     * Check that you're not trying to sort two objects of different type, or a wrong operation for a field.
+     *
+     * @return boolean true if it's ok and false if not
+     * @param rootClazz Class to be analyzed
+     */
+    @Override
+    public boolean testConfig(Class<R> rootClazz) {
+        Class<T> entryClazz = getEntryClass(rootClazz);
+        Class<?> targetClazz = getTargetClass(rootClazz);
+        Class<?> sanitizeEntryClazz = entryClazz;
+        if (SearchUtils.isPrimitiveType(entryClazz)) {
+            sanitizeEntryClazz = SearchUtils.getObjectTypeFromPrimitiveType(entryClazz);
+        }
+        return (filterOperation.getOperationType() == Void.class || filterOperation.getOperationType().isAssignableFrom(sanitizeEntryClazz)) &&
+                paths.stream().allMatch(path -> SearchUtils.getEntityClass(rootClazz, path.split(REGEX_DOT)) == targetClazz);
     }
 
     private List<FieldPathObject> getDefaultFieldPath() {

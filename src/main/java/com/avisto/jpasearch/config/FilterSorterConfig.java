@@ -39,6 +39,10 @@ public class FilterSorterConfig<R extends SearchableEntity, T> extends FilterCon
 
     /**
      * Check that you're not trying to sort on a collection, or two objects of different type, or a wrong operation for a field.
+     * @deprecated
+     * This method will be removed in 1.0.0
+     * <p> Use {@link FilterSorterConfig#testConfig(Class)} instead.
+     *
      * @param rootClazz Class to be analyzed
      */
     @Override
@@ -47,6 +51,17 @@ public class FilterSorterConfig<R extends SearchableEntity, T> extends FilterCon
         if (getSortPath().contains("[")) {
             throw new CannotSortException("Cannot sort on a Collection");
         }
+    }
+
+    /**
+     * Check that you're not trying to sort two objects of different type, or a wrong operation for a field.
+     *
+     * @return Boolean True if it's ok and false if not
+     * @param rootClazz Class to be analyzed
+     */
+    @Override
+    public boolean testConfig(Class<R> rootClazz) {
+        return super.testConfig(rootClazz) && !getSortPath().contains("[");
     }
 
     @Override

@@ -105,6 +105,11 @@ public class GroupFilterConfig<R extends SearchableEntity> implements IFilterCon
     }
 
     @Override
+    public boolean testConfig(Class<R> rootClazz) {
+        return filters.stream().allMatch(iFilterConfig -> iFilterConfig.testConfig(rootClazz));
+    }
+
+    @Override
     public boolean needJoin() {
         return filters.stream().anyMatch(IFilterConfig::needJoin);
     }

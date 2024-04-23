@@ -1,5 +1,24 @@
 package com.avisto.jpasearch.service;
 
+import com.avisto.jpasearch.SearchableEntity;
+import com.avisto.jpasearch.config.IFilterConfig;
+import com.avisto.jpasearch.config.ISearchConfig;
+import com.avisto.jpasearch.config.ISearchCriteriaConfig;
+import com.avisto.jpasearch.config.ISorterConfig;
+import com.avisto.jpasearch.exception.CannotSortException;
+import com.avisto.jpasearch.exception.EmptyCriteriaException;
+import com.avisto.jpasearch.exception.FieldNotInCriteriaException;
+import com.avisto.jpasearch.exception.FieldPathNotFoundException;
+import com.avisto.jpasearch.exception.KeyDuplicateException;
+import com.avisto.jpasearch.exception.WrongDataTypeException;
+import static com.avisto.jpasearch.service.SearchConstants.Strings.EMPTY_STRING;
+import static com.avisto.jpasearch.service.SearchConstants.Strings.REGEX_DOT;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.Path;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.text.Normalizer;
@@ -12,28 +31,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Pattern;
-
-import com.avisto.jpasearch.SearchableEntity;
-import com.avisto.jpasearch.config.IFilterConfig;
-import com.avisto.jpasearch.config.ISearchConfig;
-import com.avisto.jpasearch.config.ISearchCriteriaConfig;
-import com.avisto.jpasearch.config.ISorterConfig;
-import com.avisto.jpasearch.exception.CannotSortException;
-import com.avisto.jpasearch.exception.EmptyCriteriaException;
-import com.avisto.jpasearch.exception.FieldNotInCriteriaException;
-import com.avisto.jpasearch.exception.FieldPathNotFoundException;
-import com.avisto.jpasearch.exception.KeyDuplicateException;
-import com.avisto.jpasearch.exception.WrongDataTypeException;
-
-import jakarta.persistence.EmbeddedId;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.MappedSuperclass;
-import jakarta.persistence.criteria.From;
-import jakarta.persistence.criteria.Path;
-
-import static com.avisto.jpasearch.service.SearchConstants.Strings.EMPTY_STRING;
-import static com.avisto.jpasearch.service.SearchConstants.Strings.REGEX_DOT;
 
 /**
  * Utility class containing helper methods for jpa search functionality.
@@ -344,9 +341,13 @@ public final class SearchUtils {
 
     /**
      * Check if the configuration criteria is well declared
+     * @deprecated
+     * This method will be removed in 1.0.0
+     * <p> Use {@link SearchUtils#testCriteriaConfig(Class)} instead.
      *
      * @param configClazz criteria config to check.
      */
+    @Deprecated(since = "0.1.0", forRemoval = true)
     public static <R extends SearchableEntity, E extends Enum<E> & ISearchCriteriaConfig<R>> void checkCriteriaConfig(Class<E> configClazz) {
         E[] configurations = configClazz.getEnumConstants();
         if (configurations.length == 0) {
@@ -371,5 +372,32 @@ public final class SearchUtils {
         if (!sorterKeys.contains(firstConfiguration.getDefaultOrderCriteria().getKey())){
             throw new CannotSortException("Default sort key is not defined as a sorter in ISearchCriteriaConfig");
         }
+    }
+
+    /**
+     * Test if the configuration criteria is well declared
+     *
+     * @param configClazz criteria config to test.
+     */
+    public static <R extends SearchableEntity, E extends Enum<E> & ISearchCriteriaConfig<R>> Boolean testCriteriaConfig(Class<E> configClazz) {
+        E[] configurations = configClazz.getEnumConstants();
+        if (configurations.length == 0) {
+            throw new EmptyCriteriaException("Criteria needs at least one configuration");
+        }
+        E firstConfiguration = configurations[0];
+        Class<R> rootClazz = firstConfiguration.getRootClass();
+        Set<String> filterKeys = new HashSet<>();
+        Set<String> sorterKeys = new HashSet<>();
+        for (E e : configurations) {
+            ISearchConfig<R> searchConfig = e.getSearchConfig();
+            if (IFilterConfig.class.isAssignableFrom(searchConfig.getClass()) && (!filterKeys.add(searchConfig.getKey())) ||
+                    ISorterConfig.class.isAssignableFrom(searchConfig.getClass()) && (!sorterKeys.add(searchConfig.getKey()))) {
+                return false;
+            }
+        }
+        if (!sorterKeys.contains(firstConfiguration.getDefaultOrderCriteria().getKey())){
+            return false;
+        }
+        return Arrays.stream(configurations).allMatch(configuration -> configuration.getSearchConfig().testConfig(rootClazz));
     }
 }
