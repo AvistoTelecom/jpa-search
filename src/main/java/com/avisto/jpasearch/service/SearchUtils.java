@@ -342,7 +342,7 @@ public final class SearchUtils {
     /**
      * Check if the configuration criteria is well declared
      * @deprecated
-     * This method will be removed by testCriteriaConfig in 1.0.0
+     * This method will be removed in 1.0.0
      * <p> Use {@link SearchUtils#testCriteriaConfig(Class)} instead.
      *
      * @param configClazz criteria config to check.
