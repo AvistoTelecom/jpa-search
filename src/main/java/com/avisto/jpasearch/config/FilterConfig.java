@@ -86,7 +86,7 @@ public class FilterConfig<R extends SearchableEntity, T> implements IFilterConfi
     /**
      * Check that you're not trying to sort two objects of different type, or a wrong operation for a field.
      *
-     * @return Boolean True if it's ok and false if not
+     * @return boolean true if it's ok and false if not
      * @param rootClazz Class to be analyzed
      */
     @Override
