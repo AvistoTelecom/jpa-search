@@ -4,13 +4,9 @@ import com.avisto.jpasearch.SearchableEntity;
 import com.avisto.jpasearch.exception.CannotSortException;
 import com.avisto.jpasearch.model.SortDirection;
 import com.avisto.jpasearch.service.SearchUtils;
-
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Order;
 import jakarta.persistence.criteria.Root;
-
-import static java.lang.Boolean.FALSE;
-import static java.lang.Boolean.TRUE;
 
 /**
  * SorterConfig allows you to sort the search response
@@ -62,7 +58,7 @@ public class SorterConfig<R extends SearchableEntity> implements ISorterConfig<R
      */
     @Override
     public boolean testConfig(Class<R> rootClazz) {
-        return (!getSortPath().contains("["));
+        return !getSortPath().contains("[");
     }
 
     @Override

@@ -16,7 +16,7 @@ public sealed interface ISearchConfig<R extends SearchableEntity> permits IFilte
     /**
      * @deprecated
      * This method will be removed in 1.0.0
-     * <p> Use {@link FilterConfig#testConfig(Class)} instead.
+     * <p> Use {@link ISearchConfig#testConfig(Class)} instead.
      *
      * @param rootClazz Class to be analyzed
      */
