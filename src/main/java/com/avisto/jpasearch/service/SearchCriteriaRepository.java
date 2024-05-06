@@ -1,26 +1,5 @@
 package com.avisto.jpasearch.service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Function;
-import jakarta.inject.Inject;
-import jakarta.inject.Named;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.Tuple;
-import jakarta.persistence.TypedQuery;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.Order;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
-import jakarta.persistence.criteria.Selection;
-
 import com.avisto.jpasearch.FilterCriteria;
 import com.avisto.jpasearch.OrderCriteria;
 import com.avisto.jpasearch.SearchCriteria;
@@ -35,10 +14,29 @@ import com.avisto.jpasearch.exception.WrongElementNumberException;
 import com.avisto.jpasearch.model.Page;
 import com.avisto.jpasearch.model.SortDirection;
 import com.avisto.jpasearch.operation.ListObjectFilterOperation;
-
 import static com.avisto.jpasearch.service.SearchConstants.KeyWords.PAGE;
 import static com.avisto.jpasearch.service.SearchConstants.KeyWords.SIZE;
 import static com.avisto.jpasearch.service.SearchConstants.KeyWords.SORTS;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Tuple;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Order;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Selection;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
 
 /**
  * This class provides a generic search criteria repository to perform search operations on JPA entities. It supports filtering,
@@ -176,7 +174,7 @@ public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum
         // Get the predicate for filtering the search results
         criteriaQuery.where(getPredicates(searchCriteria, rootClazz, filterMap, root, cb, joins));
 
-        int limit = searchCriteria.getSize();
+        Integer limit = searchCriteria.getSize();
 
         // Check if the "limit" is set to zero (size is zero)
         if (limit > 0) {
@@ -224,10 +222,10 @@ public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum
         // Get the predicate for filtering the search results
         criteriaQuery.where(getPredicates(searchCriteria, rootClazz, filterMap, root, cb, joins));
 
-        int limit = searchCriteria.getSize();
+        Integer limit = searchCriteria.getSize();
 
         // Check if the "limit" is set to zero (size is zero)
-        if (limit > 0) {
+        if (limit > 0 || limit == null) {
             List<Selection<?>> selections = new ArrayList<>();
             selections.add(root.get(stringIdPath));
 
@@ -251,8 +249,11 @@ public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum
             // Execute the query with pagination settings
             TypedQuery<Tuple> typedQuery = entityManager.createQuery(criteriaQuery);
             typedQuery.setHint("org.hibernate.readOnly", true);
-            typedQuery.setFirstResult(searchCriteria.getPageNumber() * limit);
-            typedQuery.setMaxResults(limit);
+            typedQuery.setFirstResult(0);
+            if (limit != null) {
+                typedQuery.setFirstResult(searchCriteria.getPageNumber() * limit);
+                typedQuery.setMaxResults(limit);
+            }
 
             List<Object> ids = typedQuery.getResultList().stream().map(tuple -> tuple.get(0)).toList();
 
@@ -309,6 +310,11 @@ public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum
      */
     private SearchCriteria format(Class<E> configClazz, Map<String, String> rawValues, List<String> sorts) {
         final SearchCriteria searchCriteria = new SearchCriteria();
+        if (rawValues == null) {
+            searchCriteria.setSorts(List.of(getDefaultOrderCriteria(configClazz)));
+            searchCriteria.setFilters(new HashSet<>());
+            return searchCriteria;
+        }
         if (rawValues.containsKey(PAGE)) {
             searchCriteria.setPageNumber(getOneElement(PAGE, Integer.class, rawValues.remove(PAGE)));
         }
@@ -380,6 +386,9 @@ public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum
     }
 
     private Long getCount(CriteriaBuilder cb, Class<R> rootClazz, Map<String, IFilterConfig<R, ?>> filterMap, SearchCriteria searchCriteria, String idPath) {
+        if (searchCriteria.getSize() == Integer.MAX_VALUE && searchCriteria.getPageNumber() == 0) {
+            return 0L;
+        }
         CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
         Root<R> root = countQuery.from(rootClazz);
         countQuery.select(cb.countDistinct(root.get(idPath))).where(getPredicates(searchCriteria, rootClazz, filterMap, root, cb, new HashMap<>()));
