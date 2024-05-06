@@ -1,6 +1,5 @@
 package com.avisto.jpasearch.operation;
 
-import static com.avisto.jpasearch.operation.ObjectFilterOperation.EQUAL;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Predicate;
@@ -21,7 +20,7 @@ public enum ListObjectFilterOperation implements IFilterOperation<List<Object>> 
         @Override
         public Predicate calculate(CriteriaBuilder cb, Expression<?> expression, List<Object> value) {
             if (value.size() == 1) {
-                return EQUAL.calculate(cb, expression, value.get(0));
+                return ObjectFilterOperation.EQUAL.calculate(cb, expression, value.get(0));
             }
             CriteriaBuilder.In<Object> inClause = cb.in(expression);
             value.forEach(inClause::value);
