@@ -19,6 +19,9 @@ public enum ListObjectFilterOperation implements IFilterOperation<List<Object>> 
     IN_EQUAL {
         @Override
         public Predicate calculate(CriteriaBuilder cb, Expression<?> expression, List<Object> value) {
+            if (value.size() == 1) {
+                return ObjectFilterOperation.EQUAL.calculate(cb, expression, value.get(0));
+            }
             CriteriaBuilder.In<Object> inClause = cb.in(expression);
             value.forEach(inClause::value);
             return inClause;
