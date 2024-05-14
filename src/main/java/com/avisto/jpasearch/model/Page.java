@@ -37,6 +37,10 @@ public record Page<T>(List<T> elements, int pageNumber, int pageSize, long total
         return elements.stream();
     }
 
+    public boolean isEmpty() {
+        return elements.isEmpty();
+    }
+
     /**
      * Performs a search operation based on the provided search criteria and returns the results as a pageable list.
      *
