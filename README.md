@@ -265,7 +265,7 @@ Parameters:
 
 Example:
 ```java
-PEOPLE(GroupFilterConfig.of("searchpeople", FIRSTNAME.getFilterConfig(), LASTNAME.getFilterConfig()));
+PEOPLE(MultiFilterConfig.of("searchpeople", FIRSTNAME.getFilterConfig(), "employees"));
 ```
 
 Parameters example:
