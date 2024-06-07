@@ -1,7 +1,6 @@
 package com.avisto.jpasearch;
 
 import com.avisto.jpasearch.config.AbstractCriteria;
-
 import java.util.List;
 import java.util.Set;
 
@@ -16,6 +15,7 @@ public class SearchCriteria {
     private int size = Integer.MAX_VALUE;
     private Set<FilterCriteria> filters;
     private List<OrderCriteria> sorts;
+    private int multiThreadingTriggers = 0;
 
     public List<String> getFilterKeys() {
         return filters.stream().map(AbstractCriteria::getKey).toList();
@@ -51,6 +51,10 @@ public class SearchCriteria {
         return size;
     }
 
+    public int getMultiThreadingTriggers() {
+        return multiThreadingTriggers;
+    }
+
     public Set<FilterCriteria> getFilters() {
         return filters;
     }
@@ -73,5 +77,9 @@ public class SearchCriteria {
 
     public void setSorts(List<OrderCriteria> sorts) {
         this.sorts = sorts;
+    }
+
+    public void setMultiThreadingTriggers(int multiThreadingTriggers) {
+        this.multiThreadingTriggers = multiThreadingTriggers;
     }
 }

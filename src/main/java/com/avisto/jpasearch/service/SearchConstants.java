@@ -66,5 +66,6 @@ public final class SearchConstants {
         public static final String PAGE = "page";
         public static final String SIZE = "size";
         public static final String SORTS = "sorts";
+        public static final String MULTI_THREADING_TRIGGER = "multiThreadingTrigger";
     }
 }

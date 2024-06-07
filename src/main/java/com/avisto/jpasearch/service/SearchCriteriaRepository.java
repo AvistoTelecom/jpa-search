@@ -1,26 +1,5 @@
 package com.avisto.jpasearch.service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Function;
-import jakarta.inject.Inject;
-import jakarta.inject.Named;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.Tuple;
-import jakarta.persistence.TypedQuery;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.Order;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
-import jakarta.persistence.criteria.Selection;
-
 import com.avisto.jpasearch.FilterCriteria;
 import com.avisto.jpasearch.OrderCriteria;
 import com.avisto.jpasearch.SearchCriteria;
@@ -35,7 +14,28 @@ import com.avisto.jpasearch.exception.WrongElementNumberException;
 import com.avisto.jpasearch.model.Page;
 import com.avisto.jpasearch.model.SortDirection;
 import com.avisto.jpasearch.operation.ListObjectFilterOperation;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Tuple;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Order;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Selection;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
 
+import static com.avisto.jpasearch.service.SearchConstants.KeyWords.MULTI_THREADING_TRIGGER;
 import static com.avisto.jpasearch.service.SearchConstants.KeyWords.PAGE;
 import static com.avisto.jpasearch.service.SearchConstants.KeyWords.SIZE;
 import static com.avisto.jpasearch.service.SearchConstants.KeyWords.SORTS;
@@ -146,7 +146,10 @@ public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum
         Long count = getCount(cb, rootClazz, filterMap, searchCriteria, stringIdPath);
 
         Page<R> page;
-        if (entityGraphName != null || filterMap.values().stream().anyMatch(IFilterConfig::needJoin)) {
+        if (searchCriteria.getMultiThreadingTriggers() != 0) {
+            page = multiThreadingRequest(cb, rootClazz, searchCriteria, filterMap, sorterMap, count, stringIdPath, entityGraphName);
+        }
+        else if (entityGraphName != null || filterMap.values().stream().anyMatch(IFilterConfig::needJoin)) {
             page = doubleRequest(cb, rootClazz, searchCriteria, filterMap, sorterMap, count, stringIdPath, entityGraphName);
         } else {
             page = simpleRequest(cb, rootClazz, searchCriteria, filterMap, sorterMap, count);
@@ -204,6 +207,99 @@ public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum
             throw new WrongDataTypeException("Limit cannot be negative");
         }
 
+    }
+
+    private Page<R> multiThreadingRequest( // NOSONAR
+           CriteriaBuilder cb,
+           Class<R> rootClazz,
+           SearchCriteria searchCriteria,
+           Map<String, IFilterConfig<R, ?>> filterMap,
+           Map<String, ISorterConfig<R>> sorterMap,
+           long count,
+           String stringIdPath,
+           String entityGraphName
+    ) {
+        CriteriaQuery<Tuple> criteriaQuery = cb.createTupleQuery();
+        criteriaQuery.distinct(true);
+        Root<R> root = criteriaQuery.from(rootClazz);
+        Map<String, Join<R, ?>> joins = new HashMap<>();
+
+        // Get the predicate for filtering the search results
+        criteriaQuery.where(getPredicates(searchCriteria, rootClazz, filterMap, root, cb, joins));
+
+        int limit = searchCriteria.getSize();
+
+        // Check if the "limit" is set to zero (size is zero)
+        if (limit > 0) {
+            List<Selection<?>> selections = new ArrayList<>();
+            selections.add(root.get(stringIdPath));
+
+            // Set sorting and select elements in the CriteriaQuery
+            List<Order> orders = searchCriteria.getSorts()
+                    .stream().map(
+                            sort -> {
+                                ISorterConfig<R> sorterConfig = sorterMap.get(sort.getKey());
+                                String sorterStringPath = sorterConfig.getSortPath();
+                                if (!stringIdPath.equals(sorterStringPath)) {
+                                    selections.add(SearchUtils.getPath(root, sorterStringPath));
+                                }
+                                return sorterConfig.getOrder(root, cb, sort.getSortDirection());
+                            }
+                    )
+                    .toList();
+
+            criteriaQuery.multiselect(selections);
+            criteriaQuery.orderBy(orders);
+
+            int firstResult = searchCriteria.getPageNumber() * limit;
+            //hard coded change this /!\ number """""4""""" is the number of thread allocated
+            int requestLimit = (int) ((count - firstResult) / 4);
+            Map<Thread, MultiThreadingSearchTask>  threads = new HashMap<>();
+
+            //hard coded change this /!\
+            for (int i = 1; i < 5; i++) {
+                TypedQuery<Tuple> typedQuery = entityManager.createQuery(criteriaQuery);
+                typedQuery.setHint("org.hibernate.readOnly", true);
+                typedQuery.setFirstResult(firstResult);
+                typedQuery.setMaxResults(requestLimit);
+
+                MultiThreadingSearchTask multiThreadingSearchTask = new MultiThreadingSearchTask(typedQuery, cb, rootClazz, searchCriteria, sorterMap, entityGraphName, entityManager);
+
+                Thread t = new Thread(multiThreadingSearchTask);
+                t.start();
+                threads.put(t, multiThreadingSearchTask);
+
+                firstResult += limit * i;
+            }
+
+            List<R> results = new ArrayList<>();
+            threads.forEach((thread, multiThreadingSearchTask) -> {
+                try {
+                    thread.join();
+                    results.add((R) multiThreadingSearchTask.getResults());
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+
+//            // Execute the query with pagination settings
+//            TypedQuery<Tuple> typedQuery = entityManager.createQuery(criteriaQuery);
+//            typedQuery.setHint("org.hibernate.readOnly", true);
+//            typedQuery.setFirstResult(searchCriteria.getPageNumber() * limit);
+//            typedQuery.setMaxResults(limit);
+//
+//            List<Object> ids = typedQuery.getResultList().stream().map(tuple -> tuple.get(0)).toList();
+//
+//            List<R> results = getResult(cb, rootClazz, ids, searchCriteria.getSorts(), sorterMap, entityGraphName);
+
+            // Return the Page object with the search results and pagination information
+            return new Page<>(results, searchCriteria.getPageNumber(), limit, count);
+        } else if (limit == 0) {
+            // Return the Page object with the search results and pagination information
+            return new Page<>(Collections.emptyList(), searchCriteria.getPageNumber(), limit, count);
+        } else {
+            throw new WrongDataTypeException("Limit cannot be negative");
+        }
     }
 
     private Page<R> doubleRequest( // NOSONAR
@@ -315,6 +411,9 @@ public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum
         if (rawValues.containsKey(SIZE)) {
             searchCriteria.setSize(getOneElement(SIZE, Integer.class, rawValues.remove(SIZE)));
         }
+        if (rawValues.containsKey(MULTI_THREADING_TRIGGER)) {
+            searchCriteria.setMultiThreadingTriggers(getOneElement(MULTI_THREADING_TRIGGER, Integer.class, rawValues.remove(MULTI_THREADING_TRIGGER)));
+        }
         rawValues.remove(SORTS);
         if (sorts == null || sorts.isEmpty()) {
             searchCriteria.setSorts(List.of(getDefaultOrderCriteria(configClazz)));
@@ -384,5 +483,9 @@ public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum
         Root<R> root = countQuery.from(rootClazz);
         countQuery.select(cb.countDistinct(root.get(idPath))).where(getPredicates(searchCriteria, rootClazz, filterMap, root, cb, new HashMap<>()));
         return entityManager.createQuery(countQuery).getSingleResult();
+    }
+
+    private static String getNumberOfThreadAllocated() {
+        return System.getProperty("NUMBER_OF_THREAD_ALLOCATED") != null ? System.getProperty("NUMBER_OF_THREAD_ALLOCATED") : "2";
     }
 }
