@@ -40,6 +40,7 @@ public final class SearchConstants {
         public static final String LOCAL_DATE = "LocalDate";
         public static final String LOCAL_DATE_TIME = "LocalDateTime";
         public static final String ZONED_DATE_TIME = "ZonedDateTime";
+        public static final String INSTANT = "Instant";
         public static final String BOOLEAN = "Boolean";
         public static final String PRIMITIVE_BOOLEAN = "boolean";
         public static final String DOUBLE = "Double";
