@@ -13,6 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -57,6 +58,14 @@ public class CastServiceTest {
         String value = "INVALID_VALUE";
 
         assertThrows(ValueNotFoundInEnumException.class, () -> CastService.cast(value, TestEnum.class));
+    }
+
+    @Test
+    public void testCastToCustomClass_Instant() {
+        Instant instant = Instant.now();
+        String value = instant.toString();
+        Instant castedValue = CastService.cast(value, Instant.class);
+        assertEquals(instant, castedValue);
     }
 
     @Test

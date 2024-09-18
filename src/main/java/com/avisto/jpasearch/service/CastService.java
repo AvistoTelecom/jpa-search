@@ -158,7 +158,7 @@ public class CastService {
         } else if (clazz == ZonedDateTime.class) {
             return ZonedDateTime.of(year, month, day, hours, minutes, seconds, nanoSeconds, offset);
         } else if(clazz == Instant.class){
-            return Instant.from(LocalDateTime.of(year, month, day, hours, minutes, seconds, nanoSeconds));
+            return LocalDateTime.of(year, month, day, hours, minutes, seconds, nanoSeconds).toInstant(offset);
         }
         throw new TypeNotHandledException(String.format("Cannot cast String to type %s : Type not handled", clazz.getSimpleName()));
     }
