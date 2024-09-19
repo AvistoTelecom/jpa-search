@@ -1,6 +1,7 @@
 package com.avisto.jpasearch.service;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -23,6 +24,7 @@ import static com.avisto.jpasearch.service.SearchConstants.ClassNames.BIG_DECIMA
 import static com.avisto.jpasearch.service.SearchConstants.ClassNames.BOOLEAN;
 import static com.avisto.jpasearch.service.SearchConstants.ClassNames.DOUBLE;
 import static com.avisto.jpasearch.service.SearchConstants.ClassNames.FLOAT;
+import static com.avisto.jpasearch.service.SearchConstants.ClassNames.INSTANT;
 import static com.avisto.jpasearch.service.SearchConstants.ClassNames.INTEGER;
 import static com.avisto.jpasearch.service.SearchConstants.ClassNames.LIST;
 import static com.avisto.jpasearch.service.SearchConstants.ClassNames.LOCAL_DATE;
@@ -115,6 +117,7 @@ public class CastService {
             case LOCAL_DATE -> formatter == null ? convertTo(value, LocalDate.class) : LocalDate.parse(value, formatter);
             case LOCAL_DATE_TIME -> formatter == null ? convertTo(value, LocalDateTime.class) : LocalDate.parse(value, formatter).atStartOfDay();
             case ZONED_DATE_TIME -> formatter == null ? convertTo(value, ZonedDateTime.class) : LocalDate.parse(value, formatter).atStartOfDay().atZone(ZoneOffset.UTC);
+            case INSTANT -> convertTo(value, Instant.class);
             case MAP -> parseJsonToMap(value);
             case LIST -> parseJsonToList(value);
             default -> throw new TypeNotHandledException(String.format("Cannot cast String to type %s : Type not handled", clazz.getSimpleName()));
@@ -154,6 +157,8 @@ public class CastService {
             return LocalDate.of(year, month, day);
         } else if (clazz == ZonedDateTime.class) {
             return ZonedDateTime.of(year, month, day, hours, minutes, seconds, nanoSeconds, offset);
+        } else if(clazz == Instant.class){
+            return LocalDateTime.of(year, month, day, hours, minutes, seconds, nanoSeconds).toInstant(offset);
         }
         throw new TypeNotHandledException(String.format("Cannot cast String to type %s : Type not handled", clazz.getSimpleName()));
     }
