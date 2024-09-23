@@ -1,26 +1,5 @@
 package com.avisto.jpasearch.service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Function;
-import jakarta.inject.Inject;
-import jakarta.inject.Named;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.Tuple;
-import jakarta.persistence.TypedQuery;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.Order;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
-import jakarta.persistence.criteria.Selection;
-
 import com.avisto.jpasearch.FilterCriteria;
 import com.avisto.jpasearch.OrderCriteria;
 import com.avisto.jpasearch.SearchCriteria;
@@ -35,10 +14,29 @@ import com.avisto.jpasearch.exception.WrongElementNumberException;
 import com.avisto.jpasearch.model.Page;
 import com.avisto.jpasearch.model.SortDirection;
 import com.avisto.jpasearch.operation.ListObjectFilterOperation;
-
 import static com.avisto.jpasearch.service.SearchConstants.KeyWords.PAGE;
 import static com.avisto.jpasearch.service.SearchConstants.KeyWords.SIZE;
 import static com.avisto.jpasearch.service.SearchConstants.KeyWords.SORTS;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Tuple;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Order;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Selection;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
 
 /**
  * This class provides a generic search criteria repository to perform search operations on JPA entities. It supports filtering,
@@ -116,6 +114,56 @@ public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum
      */
     public <D> Page<D> search(Class<E> configClazz, Map<String, String> rawValues, List<String> sorts, Function<R, D> mapper, String entityGraphName) {
         return search(configClazz, format(configClazz, rawValues, sorts), mapper, entityGraphName);
+    }
+
+    /**
+     * Performs a search operation based on the provided search criteria and returns the results as a pageable list.
+     *
+     * @param configClazz Criteria Class
+     * @param rawValues Search parameters
+     * @return A Page object containing the search results with pagination information.
+     */
+    public Page<R> search(Class<E> configClazz, Map<String, String> rawValues) {
+        return search(configClazz, format(configClazz, rawValues, null), null, null);
+    }
+
+    /**
+     * Performs a search operation based on the provided search criteria and returns the results as a pageable list.
+     *
+     * @param configClazz Criteria Class
+     * @param rawValues Search parameters
+     * @param mapper The entity mapper
+     * @return A Page object containing the search results with pagination information.
+     * @param <D> The type of the object that will be returned in the Page object.
+     */
+    public <D> Page<D> search(Class<E> configClazz, Map<String, String> rawValues, Function<R, D> mapper) {
+        return search(configClazz, format(configClazz, rawValues, null), mapper, null);
+    }
+
+    /**
+     * Performs a search operation based on the provided search criteria and returns the results as a pageable list.
+     *
+     * @param configClazz Criteria Class
+     * @param rawValues Search parameters
+     * @param entityGraphName Name of the entityGraph
+     * @return A Page object containing the search results with pagination information.
+     */
+    public Page<R> search(Class<E> configClazz, Map<String, String> rawValues, String entityGraphName) {
+        return search(configClazz, format(configClazz, rawValues, null), null, entityGraphName);
+    }
+
+    /**
+     * Performs a search operation based on the provided search criteria and returns the results as a pageable list.
+     *
+     * @param configClazz Criteria Class
+     * @param rawValues Search parameters
+     * @param mapper The entity mapper
+     * @param entityGraphName Name of the entityGraph
+     * @return A Page object containing the search results with pagination information.
+     * @param <D> The type of the object that will be returned in the Page object.
+     */
+    public <D> Page<D> search(Class<E> configClazz, Map<String, String> rawValues, Function<R, D> mapper, String entityGraphName) {
+        return search(configClazz, format(configClazz, rawValues, null), mapper, entityGraphName);
     }
 
     /**
