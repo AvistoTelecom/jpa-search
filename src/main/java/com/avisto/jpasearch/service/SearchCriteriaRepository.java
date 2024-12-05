@@ -146,7 +146,7 @@ public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum
         Long count = getCount(cb, rootClazz, filterMap, searchCriteria, stringIdPath);
 
         Page<R> page;
-        if (entityGraphName != null || filterMap.values().stream().anyMatch(IFilterConfig::needJoin)) {
+        if (entityGraphName != null && filterMap.values().stream().anyMatch(IFilterConfig::needJoin)) {
             page = doubleRequest(cb, rootClazz, searchCriteria, filterMap, sorterMap, count, stringIdPath, entityGraphName);
         } else {
             page = simpleRequest(cb, rootClazz, searchCriteria, filterMap, sorterMap, count);
