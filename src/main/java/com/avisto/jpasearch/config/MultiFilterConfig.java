@@ -1,6 +1,7 @@
 package com.avisto.jpasearch.config;
 
 import com.avisto.jpasearch.SearchableEntity;
+import com.avisto.jpasearch.model.ConditionOperator;
 import com.avisto.jpasearch.service.CastService;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -23,19 +24,29 @@ public class MultiFilterConfig<R extends SearchableEntity, X> implements IFilter
     private final String key;
     private final IFilterConfig<R, X> filter;
     private final String joinPath;
+    private final ConditionOperator condition;
 
-    private MultiFilterConfig(String key, IFilterConfig filter, String joinPath) {
+    private MultiFilterConfig(String key, ConditionOperator conditionOperator, IFilterConfig filter, String joinPath) {
         this.key = key;
         this.filter = filter;
         this.joinPath = joinPath;
+        this.condition= conditionOperator;
     }
 
     public static <R extends SearchableEntity, X> MultiFilterConfig<R, X> of(String key, IFilterConfig<R, X> filter, String joinPath) {
-        return new MultiFilterConfig<>(key, filter, joinPath);
+        return new MultiFilterConfig<>(key, ConditionOperator.AND, filter, joinPath);
     }
 
     public static <R extends SearchableEntity, X> MultiFilterConfig<R, X> of(String key, IFilterConfig<R, X> filter) {
-        return new MultiFilterConfig<>(key, filter, null);
+        return new MultiFilterConfig<>(key, ConditionOperator.AND, filter, null);
+    }
+
+    public static <R extends SearchableEntity, X> MultiFilterConfig<R, X> of(String key, ConditionOperator conditionOperator, IFilterConfig<R, X> filter, String joinPath) {
+        return new MultiFilterConfig<>(key, conditionOperator, filter, joinPath);
+    }
+
+    public static <R extends SearchableEntity, X> MultiFilterConfig<R, X> of(String key, ConditionOperator conditionOperator, IFilterConfig<R, X> filter) {
+        return new MultiFilterConfig<>(key, conditionOperator, filter, null);
     }
 
     /**
@@ -51,7 +62,7 @@ public class MultiFilterConfig<R extends SearchableEntity, X> implements IFilter
     @Override
     public Predicate getPredicate(Class<R> rootClazz, Root<R> root, CriteriaBuilder cb, Map<String, Join<R, ?>> joins, List<String> value) {
         Class<X> filterClazz = filter.getEntryClass(rootClazz);
-        return cb.and(value
+        return this.condition.applyCondition(cb, value
                 .stream()
                 .map(v -> {
                     if (joinPath != null) {
@@ -60,7 +71,6 @@ public class MultiFilterConfig<R extends SearchableEntity, X> implements IFilter
                     return filter.getPredicate(rootClazz, root, cb, joins, CastService.cast(v, filterClazz));
                 })
                 .toArray(Predicate[]::new));
-
     }
 
     /**
