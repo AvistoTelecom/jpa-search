@@ -208,7 +208,6 @@ public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum
     /*
         PRIVATE
      */
-
     private Page<R> simpleRequest(
             CriteriaBuilder cb,
             Class<R> rootClazz,
@@ -238,8 +237,10 @@ public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum
             // Execute the query with pagination settings
             TypedQuery<R> typedQuery = entityManager.createQuery(criteriaQuery);
             typedQuery.setHint("org.hibernate.readOnly", true);
-            typedQuery.setFirstResult(searchCriteria.getPageNumber() * limit);
-            typedQuery.setMaxResults(limit);
+            if (limit != Integer.MAX_VALUE) {
+                typedQuery.setFirstResult(searchCriteria.getPageNumber() * limit);
+                typedQuery.setMaxResults(limit);
+            }
 
             List<R> results = typedQuery.getResultList();
 
@@ -299,8 +300,10 @@ public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum
             // Execute the query with pagination settings
             TypedQuery<Tuple> typedQuery = entityManager.createQuery(criteriaQuery);
             typedQuery.setHint("org.hibernate.readOnly", true);
-            typedQuery.setFirstResult(searchCriteria.getPageNumber() * limit);
-            typedQuery.setMaxResults(limit);
+            if (limit != Integer.MAX_VALUE) {
+                typedQuery.setFirstResult(searchCriteria.getPageNumber() * limit);
+                typedQuery.setMaxResults(limit);
+            }
 
             List<Object> ids = typedQuery.getResultList().stream().map(tuple -> tuple.get(0)).toList();
 
@@ -357,6 +360,11 @@ public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum
      */
     private SearchCriteria format(Class<E> configClazz, Map<String, String> rawValues, List<String> sorts) {
         final SearchCriteria searchCriteria = new SearchCriteria();
+        if (rawValues == null) {
+            searchCriteria.setSorts(List.of(getDefaultOrderCriteria(configClazz)));
+            searchCriteria.setFilters(new HashSet<>());
+            return searchCriteria;
+        }
         if (rawValues.containsKey(PAGE)) {
             searchCriteria.setPageNumber(getOneElement(PAGE, Integer.class, rawValues.remove(PAGE)));
         }
@@ -428,6 +436,9 @@ public class SearchCriteriaRepository<R extends SearchableEntity, E extends Enum
     }
 
     private Long getCount(CriteriaBuilder cb, Class<R> rootClazz, Map<String, IFilterConfig<R, ?>> filterMap, SearchCriteria searchCriteria, String idPath) {
+        if (searchCriteria.getSize() == Integer.MAX_VALUE && searchCriteria.getPageNumber() == 0) {
+            return 0L;
+        }
         CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
         Root<R> root = countQuery.from(rootClazz);
         countQuery.select(cb.countDistinct(root.get(idPath))).where(getPredicates(searchCriteria, rootClazz, filterMap, root, cb, new HashMap<>()));
